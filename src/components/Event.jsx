@@ -53,7 +53,7 @@ const Event = () => {
   }
 
   return (
-    <div>
+    <div className="event-page">
       <div className="event">
         <img src={HeaderImg} alt="HeaderImg" />
         <div className="event-header-words" data-activeview={activeView}>

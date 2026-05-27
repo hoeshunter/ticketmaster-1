@@ -16,9 +16,8 @@ html, body, #root {
   left: 0;
   width: 100%;
   z-index: 100;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  background: #000;
   line-height: 0;
+  font-size: 0;
 }
 
 .nav-image {
@@ -47,11 +46,12 @@ html, body, #root {
   left: 0;
   width: 100%;
   height: 100%;
-  padding-top: 0;
-  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: 80px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   transition: opacity 0.2s ease;
+  background: #131313;
 }
 .homepage img {
   height: 100%;
@@ -60,6 +60,21 @@ html, body, #root {
 .homepage img:not(:nth-child(1)) {
   margin-top: -5px;
 }
+.buy,
+.sell {
+  background: #fff;
+  min-height: 100%;
+}
+.event-page {
+  background: #fff;
+  min-height: 100%;
+}
+
+.event {
+  background: #fff;
+  min-height: 100%;
+}
+
 .event img {
   width: 100%;
 }
@@ -113,7 +128,7 @@ html, body, #root {
 
 .tickets-cards .timedetails {
   background-color: #131313;
-  color: white;
+  color: #fff;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -122,10 +137,12 @@ html, body, #root {
   letter-spacing: 0.04em;
   width: fit-content;
   padding: 12px 15px 6px;
+  margin-top: -2.2rem;
+  position: relative;
 }
 .tickets-cards .eventdetails {
   background-color: #131313;
-  color: white;
+  color: #fff;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
   padding: 12px 15px 20px;
   display: flex;
@@ -141,7 +158,7 @@ html, body, #root {
 }
 .tickets-cards .eventdetails hr {
   height: 2px;
-  background-color: rgba(255, 255, 255, 0.82);
+  background-color: #fff;
   width: 50%;
   border: none;
   border-radius: 1px;
@@ -150,7 +167,6 @@ html, body, #root {
 .tickets-cards .eventdetails p:nth-child(3) {
   font-size: 13.5px;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.72);
   letter-spacing: 0.01em;
 } 
 /* each card wrapper */
@@ -161,7 +177,7 @@ html, body, #root {
 }
 .card-items {
   margin: 0;
-  background: #131313;
+  background: #fff;
 }
 .tickets-cards img {
   width: 100%;

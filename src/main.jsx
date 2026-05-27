@@ -6,7 +6,7 @@ import App from './App.jsx'
 // Register service worker for offline capability
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/ticketmaster/sw.js', { scope: '/ticketmaster/' })
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
       .then(registration => {
         console.log('ServiceWorker registration successful with scope: ', registration.scope);
       })

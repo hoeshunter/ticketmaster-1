@@ -9,7 +9,17 @@ lerna-debug.log*
 
 node_modules
 dist-ssr
+dist
 *.local
+
+# Environment variables (keep .env.example committed)
+.env
+.env.local
+backend/.env
+backend/.env.local
+
+# Locally stored uploaded images
+backend/uploads/
 
 # Editor directories and files
 .vscode/*

@@ -1,34 +1,68 @@
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
+
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
-const { createClient } = require('@supabase/supabase-js');
+const mysql = require('mysql2/promise');
+const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET;
 
-console.log(`=== STARTUP DEBUG ===`);
-console.log(`process.env.PORT = ${process.env.PORT}`);
+console.log('=== STARTUP DEBUG ===');
 console.log(`Using PORT = ${PORT}`);
 console.log(`JWT_SECRET set: ${!!JWT_SECRET}`);
-console.log(`SUPABASE_URL set: ${!!process.env.SUPABASE_URL}`);
-console.log(`SUPABASE_SERVICE_ROLE_KEY set: ${!!process.env.SUPABASE_SERVICE_ROLE_KEY}`);
-console.log(`====================`);
+console.log(`MYSQL_HOST set: ${!!process.env.MYSQL_HOST}`);
+console.log(`MYSQL_DATABASE set: ${!!process.env.MYSQL_DATABASE}`);
+console.log('=====================');
 
 if (!JWT_SECRET) { console.error('FATAL: JWT_SECRET not set.'); process.exit(1); }
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  console.error('FATAL: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set.'); process.exit(1);
+if (!process.env.MYSQL_HOST || !process.env.MYSQL_USER || !process.env.MYSQL_DATABASE) {
+  console.error('FATAL: MySQL env vars not set (MYSQL_HOST, MYSQL_USER, MYSQL_DATABASE).');
+  process.exit(1);
 }
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+const pool = mysql.createPool({
+  host: process.env.MYSQL_HOST,
+  port: Number(process.env.MYSQL_PORT) || 3306,
+  user: process.env.MYSQL_USER,
+  password: process.env.MYSQL_PASSWORD || '',
+  database: process.env.MYSQL_DATABASE,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
+
+// Verify DB connectivity at startup
+pool.getConnection()
+  .then(conn => { console.log('MySQL connected'); conn.release(); })
+  .catch(err => {
+    console.error('FATAL: cannot connect to MySQL');
+    console.error('  code:', err.code);
+    console.error('  errno:', err.errno);
+    console.error('  sqlMessage:', err.sqlMessage);
+    console.error('  message:', err.message);
+    console.error('  address:', err.address, 'port:', err.port);
+    process.exit(1);
+  });
+
+// Local image storage (replaces Supabase Storage)
+const UPLOAD_DIR = path.join(__dirname, 'uploads');
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 app.use(cors({
   origin: ['https://ticketmaster-twlj.vercel.app', 'https://ticketmaster-tau-tawny.vercel.app', 'http://localhost:5173', 'https://jimcooks211.github.io'],
   credentials: true
 }));
 app.use(express.json());
+
+// Serve uploaded images at /uploads/<file>
+app.use('/uploads', express.static(UPLOAD_DIR));
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
@@ -38,33 +72,6 @@ const auth = (req, res, next) => {
   try { req.admin = jwt.verify(header.slice(7), JWT_SECRET); next(); }
   catch { res.status(401).json({ error: 'Invalid or expired token' }); }
 };
-
-const ensureBucket = async () => {
-  const { data: buckets } = await supabase.storage.listBuckets();
-  const exists = buckets?.some(b => b.name === 'event-images');
-  if (!exists) {
-    await supabase.storage.createBucket('event-images', { public: true });
-    console.log('Created event-images bucket');
-  }
-};
-ensureBucket().catch(console.error);
-
-app.post('/api/admin/upload-image', auth, upload.single('image'), async (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No image file provided' });
-  const mimeToExt = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif', 'image/heic': 'heic' };
-  const ext = mimeToExt[req.file.mimetype] || 'jpg';
-  const adminId = req.admin.id.replace(/-/g, '');
-  const fileName = `${adminId}_${Date.now()}.${ext}`;
-  const { error } = await supabase.storage
-    .from('event-images')
-    .upload(fileName, req.file.buffer, { contentType: req.file.mimetype, upsert: true });
-  if (error) {
-    console.error('Upload error:', error);
-    return res.status(500).json({ error: 'Image upload failed: ' + error.message });
-  }
-  const { data: { publicUrl } } = supabase.storage.from('event-images').getPublicUrl(fileName);
-  res.json({ url: publicUrl });
-});
 
 const formatEvent = (ev) => ({
   id: ev.id,
@@ -76,124 +83,172 @@ const formatEvent = (ev) => ({
   date: ev.date,
   day: ev.day,
   orderNum: ev.order_num,
-  tickets: ev.tickets || [],
+  tickets: typeof ev.tickets === 'string' ? JSON.parse(ev.tickets || '[]') : (ev.tickets || []),
   image_url: ev.image_url || null,
   createdAt: ev.created_at,
   admin_id: ev.admin_id,
-  createdBy: ev.admins?.username || null
+  createdBy: ev.createdBy || null
 });
 
+// ── Image upload ──────────────────────────────────────────────────────────────
+app.post('/api/admin/upload-image', auth, upload.single('image'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No image file provided' });
+  const mimeToExt = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif', 'image/heic': 'heic' };
+  const ext = mimeToExt[req.file.mimetype] || 'jpg';
+  const adminId = String(req.admin.id).replace(/-/g, '');
+  const fileName = `${adminId}_${Date.now()}.${ext}`;
+  try {
+    fs.writeFileSync(path.join(UPLOAD_DIR, fileName), req.file.buffer);
+  } catch (e) {
+    console.error('Upload error:', e);
+    return res.status(500).json({ error: 'Image upload failed: ' + e.message });
+  }
+  res.json({ url: `/uploads/${fileName}` });
+});
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
 app.post('/api/admin/register', async (req, res) => {
   const { username, password } = req.body || {};
   if (!username || !password) return res.status(400).json({ error: 'Username and password are required' });
   if (username.length < 3) return res.status(400).json({ error: 'Username must be at least 3 characters' });
   if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
-  const { data: existing } = await supabase.from('admins').select('id').eq('username', username).maybeSingle();
-  if (existing) return res.status(409).json({ error: 'Username already exists' });
-  const hash = bcrypt.hashSync(password, 10);
-  const { data, error } = await supabase.from('admins').insert([{ username, password: hash }]).select().single();
-  if (error) { console.error('Register error:', error); return res.status(500).json({ error: 'Server error during registration' }); }
-  res.json({ success: true, id: data.id });
+  try {
+    const [existing] = await pool.query('SELECT id FROM admins WHERE username = ? LIMIT 1', [username]);
+    if (existing.length) return res.status(409).json({ error: 'Username already exists' });
+    const id = crypto.randomUUID();
+    const hash = bcrypt.hashSync(password, 10);
+    await pool.query('INSERT INTO admins (id, username, password) VALUES (?, ?, ?)', [id, username, hash]);
+    res.json({ success: true, id });
+  } catch (err) {
+    console.error('Register error:', err);
+    res.status(500).json({ error: 'Server error during registration' });
+  }
 });
 
 app.post('/api/admin/login', async (req, res) => {
   const { username, password } = req.body || {};
-  const { data: admin } = await supabase.from('admins').select('*').eq('username', username).maybeSingle();
-  if (!admin || !bcrypt.compareSync(password, admin.password))
-    return res.status(401).json({ error: 'Invalid username or password' });
-  const token = jwt.sign({ id: admin.id, username: admin.username }, JWT_SECRET, { expiresIn: '7d' });
-  res.json({ token, id: admin.id, username: admin.username });
+  try {
+    const [rows] = await pool.query('SELECT * FROM admins WHERE username = ? LIMIT 1', [username]);
+    const admin = rows[0];
+    if (!admin || !bcrypt.compareSync(password, admin.password))
+      return res.status(401).json({ error: 'Invalid username or password' });
+    const token = jwt.sign({ id: admin.id, username: admin.username }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, id: admin.id, username: admin.username });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ error: 'Server error during login' });
+  }
 });
 
-
-// -- Change password (authenticated) ------------------------------------------
 app.post('/api/admin/change-password', auth, async (req, res) => {
   const { currentPassword, newPassword } = req.body || {};
   if (!currentPassword || !newPassword) return res.status(400).json({ error: 'currentPassword and newPassword are required' });
   if (newPassword.length < 6) return res.status(400).json({ error: 'New password must be at least 6 characters' });
-  const { data: admin } = await supabase.from('admins').select('*').eq('id', req.admin.id).maybeSingle();
-  if (!admin || !bcrypt.compareSync(currentPassword, admin.password))
-    return res.status(401).json({ error: 'Current password is incorrect' });
-  const hash = bcrypt.hashSync(newPassword, 10);
-  const { error } = await supabase.from('admins').update({ password: hash }).eq('id', req.admin.id);
-  if (error) return res.status(500).json({ error: 'Failed to update password' });
-  res.json({ success: true, message: 'Password updated successfully' });
+  try {
+    const [rows] = await pool.query('SELECT * FROM admins WHERE id = ? LIMIT 1', [req.admin.id]);
+    const admin = rows[0];
+    if (!admin || !bcrypt.compareSync(currentPassword, admin.password))
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    const hash = bcrypt.hashSync(newPassword, 10);
+    await pool.query('UPDATE admins SET password = ? WHERE id = ?', [hash, req.admin.id]);
+    res.json({ success: true, message: 'Password updated successfully' });
+  } catch (err) {
+    console.error('Change password error:', err);
+    res.status(500).json({ error: 'Failed to update password' });
+  }
 });
 
-// -- Delete own account (authenticated) ---------------------------------------
 app.delete('/api/admin/account', auth, async (req, res) => {
   const { password } = req.body || {};
   if (!password) return res.status(400).json({ error: 'Password required to delete account' });
-  const { data: admin } = await supabase.from('admins').select('*').eq('id', req.admin.id).maybeSingle();
-  if (!admin || !bcrypt.compareSync(password, admin.password))
-    return res.status(401).json({ error: 'Incorrect password' });
-  // Delete admin's events first
-  await supabase.from('events').delete().eq('admin_id', req.admin.id);
-  const { error } = await supabase.from('admins').delete().eq('id', req.admin.id);
-  if (error) return res.status(500).json({ error: 'Failed to delete account' });
-  res.json({ success: true, message: 'Account deleted' });
+  try {
+    const [rows] = await pool.query('SELECT * FROM admins WHERE id = ? LIMIT 1', [req.admin.id]);
+    const admin = rows[0];
+    if (!admin || !bcrypt.compareSync(password, admin.password))
+      return res.status(401).json({ error: 'Incorrect password' });
+    await pool.query('DELETE FROM events WHERE admin_id = ?', [req.admin.id]);
+    await pool.query('DELETE FROM admins WHERE id = ?', [req.admin.id]);
+    res.json({ success: true, message: 'Account deleted' });
+  } catch (err) {
+    console.error('Delete account error:', err);
+    res.status(500).json({ error: 'Failed to delete account' });
+  }
 });
+
+// ── Events (admin) ────────────────────────────────────────────────────────────
 app.get('/api/admin/events', auth, async (req, res) => {
-  const { data, error } = await supabase.from('events').select('*').eq('admin_id', req.admin.id).order('created_at', { ascending: false });
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data.map(formatEvent));
+  try {
+    const [rows] = await pool.query('SELECT * FROM events WHERE admin_id = ? ORDER BY created_at DESC', [req.admin.id]);
+    res.json(rows.map(formatEvent));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.post('/api/admin/events', auth, async (req, res) => {
   const { name, state, city, stadium, time, date, day, orderNum, tickets = [], image_url } = req.body || {};
-  const { data, error } = await supabase.from('events')
-    .insert([{ admin_id: req.admin.id, name, state, city, stadium, time, date, day, order_num: orderNum, tickets, image_url: image_url || null }])
-    .select().single();
-  if (error) { console.error('Create event error:', error); return res.status(500).json({ error: 'Failed to create event' }); }
-  res.status(201).json(formatEvent(data));
+  try {
+    const id = crypto.randomUUID();
+    await pool.query(
+      'INSERT INTO events (id, admin_id, name, state, city, stadium, `time`, `date`, `day`, order_num, tickets, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [id, req.admin.id, name, state, city, stadium, time, date, day, orderNum, JSON.stringify(tickets), image_url || null]
+    );
+    const [rows] = await pool.query('SELECT * FROM events WHERE id = ? LIMIT 1', [id]);
+    res.status(201).json(formatEvent(rows[0]));
+  } catch (err) {
+    console.error('Create event error:', err);
+    res.status(500).json({ error: 'Failed to create event' });
+  }
 });
 
 app.put('/api/admin/events/:id', auth, async (req, res) => {
   const { name, state, city, stadium, time, date, day, orderNum, tickets = [], image_url } = req.body || {};
-  const { data: existing } = await supabase.from('events').select('id').eq('id', req.params.id).eq('admin_id', req.admin.id).maybeSingle();
-  if (!existing) return res.status(404).json({ error: 'Event not found' });
-  const updateData = { name, state, city, stadium, time, date, day, order_num: orderNum, tickets };
-  if (image_url !== undefined) updateData.image_url = image_url;
-  const { data, error } = await supabase.from('events').update(updateData).eq('id', req.params.id).select().single();
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(formatEvent(data));
+  try {
+    const [existing] = await pool.query('SELECT id FROM events WHERE id = ? AND admin_id = ? LIMIT 1', [req.params.id, req.admin.id]);
+    if (!existing.length) return res.status(404).json({ error: 'Event not found' });
+    const fields = ['name = ?', 'state = ?', 'city = ?', 'stadium = ?', '`time` = ?', '`date` = ?', '`day` = ?', 'order_num = ?', 'tickets = ?'];
+    const values = [name, state, city, stadium, time, date, day, orderNum, JSON.stringify(tickets)];
+    if (image_url !== undefined) { fields.push('image_url = ?'); values.push(image_url); }
+    values.push(req.params.id);
+    await pool.query(`UPDATE events SET ${fields.join(', ')} WHERE id = ?`, values);
+    const [rows] = await pool.query('SELECT * FROM events WHERE id = ? LIMIT 1', [req.params.id]);
+    res.json(formatEvent(rows[0]));
+  } catch (err) {
+    console.error('Update event error:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.delete('/api/admin/events/:id', auth, async (req, res) => {
-  const { data: existing } = await supabase.from('events').select('id').eq('id', req.params.id).eq('admin_id', req.admin.id).maybeSingle();
-  if (!existing) return res.status(404).json({ error: 'Event not found' });
-  const { error } = await supabase.from('events').delete().eq('id', req.params.id);
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ success: true });
+  try {
+    const [existing] = await pool.query('SELECT id FROM events WHERE id = ? AND admin_id = ? LIMIT 1', [req.params.id, req.admin.id]);
+    if (!existing.length) return res.status(404).json({ error: 'Event not found' });
+    await pool.query('DELETE FROM events WHERE id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
+// ── Public events ─────────────────────────────────────────────────────────────
 app.get('/api/events', async (req, res) => {
-  const { data, error } = await supabase.from('events').select('*, admins(username)').order('created_at', { ascending: false });
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data.map(formatEvent));
+  try {
+    const [rows] = await pool.query(
+      'SELECT e.*, a.username AS createdBy FROM events e LEFT JOIN admins a ON a.id = e.admin_id ORDER BY e.created_at DESC'
+    );
+    res.json(rows.map(formatEvent));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.get('/', (req, res) => res.json({ status: 'ok' }));
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Ticketmaster backend running on port ${PORT}`);
-  console.log(`ENV PORT value: ${process.env.PORT}`);
+  console.log(`Ticketmaster backend (MySQL) running on port ${PORT}`);
 });
 
-// Keep process alive — prevent Railway from killing idle Node process
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
-  });
-});
-
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught exception:', err);
-});
-
-process.on('unhandledRejection', (reason) => {
-  console.error('Unhandled rejection:', reason);
-});
+process.on('SIGTERM', () => { server.close(() => process.exit(0)); });
+process.on('uncaughtException', (err) => console.error('Uncaught exception:', err));
+process.on('unhandledRejection', (reason) => console.error('Unhandled rejection:', reason));

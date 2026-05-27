@@ -7,67 +7,67 @@
     {
       "purpose": "any maskable",
       "sizes": "20x20",
-      "src": "/ticketmaster/icons/icon-20x20.png",
+      "src": "/icons/icon-20x20.png",
       "type": "image/png"
     },
     {
       "purpose": "any maskable",
       "sizes": "40x40",
-      "src": "/ticketmaster/icons/icon-40x40.png",
+      "src": "/icons/icon-40x40.png",
       "type": "image/png"
     },
     {
       "purpose": "any maskable",
       "sizes": "60x60",
-      "src": "/ticketmaster/icons/icon-60x60.png",
+      "src": "/icons/icon-60x60.png",
       "type": "image/png"
     },
     {
       "purpose": "any maskable",
       "sizes": "76x76",
-      "src": "/ticketmaster/icons/icon-76x76.png",
+      "src": "/icons/icon-76x76.png",
       "type": "image/png"
     },
     {
       "purpose": "any maskable",
       "sizes": "120x120",
-      "src": "/ticketmaster/icons/icon-120x120.png",
+      "src": "/icons/icon-120x120.png",
       "type": "image/png"
     },
     {
       "purpose": "any maskable",
       "sizes": "152x152",
-      "src": "/ticketmaster/icons/icon-152x152.png",
+      "src": "/icons/icon-152x152.png",
       "type": "image/png"
     },
     {
       "purpose": "any maskable",
       "sizes": "167x167",
-      "src": "/ticketmaster/icons/icon-167x167.png",
+      "src": "/icons/icon-167x167.png",
       "type": "image/png"
     },
     {
       "purpose": "any maskable",
       "sizes": "180x180",
-      "src": "/ticketmaster/icons/icon-180x180.png",
+      "src": "/icons/icon-180x180.png",
       "type": "image/png"
     },
     {
       "purpose": "any maskable",
       "sizes": "192x192",
-      "src": "/ticketmaster/icons/icon-192x192.png",
+      "src": "/icons/icon-192x192.png",
       "type": "image/png"
     },
     {
       "purpose": "any maskable",
       "sizes": "512x512",
-      "src": "/ticketmaster/icons/icon-512x512.png",
+      "src": "/icons/icon-512x512.png",
       "type": "image/png"
     }
   ],
   "name": "Ticketmaster",
   "orientation": "portrait",
-  "scope": "/ticketmaster/",
+  "scope": "/",
   "short_name": "Ticketmaster",
   "shortcuts": [
     {
@@ -75,12 +75,12 @@
       "icons": [
         {
           "sizes": "180x180",
-          "src": "/ticketmaster/icons/icon-180x180.png"
+          "src": "/icons/icon-180x180.png"
         }
       ],
       "name": "Find Events",
       "short_name": "Events",
-      "url": "/ticketmaster/events"
+      "url": "/events"
     }
   ],
   "splash_pages": {
@@ -88,116 +88,116 @@
     "images": [
       {
         "sizes": "1172x2665",
-        "src": "/ticketmaster/splash/iphone-17-pro-max-splash.png",
+        "src": "/splash/iphone-17-pro-max-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "1027x2383",
-        "src": "/ticketmaster/splash/iphone-17-pro-splash.png",
+        "src": "/splash/iphone-17-pro-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "1138x2611",
-        "src": "/ticketmaster/splash/iphone-15-pro-max-splash.png",
+        "src": "/splash/iphone-15-pro-max-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "1027x2383",
-        "src": "/ticketmaster/splash/iphone-15-pro-splash.png",
+        "src": "/splash/iphone-15-pro-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "1115x2589",
-        "src": "/ticketmaster/splash/iphone-15-plus-splash.png",
+        "src": "/splash/iphone-15-plus-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "949x2174",
-        "src": "/ticketmaster/splash/iphone-15-mini-splash.png",
+        "src": "/splash/iphone-15-mini-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "726x1645",
-        "src": "/ticketmaster/splash/iphone-15-splash.png",
+        "src": "/splash/iphone-15-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "1172x2665",
-        "src": "/ticketmaster/splash/iphone-14-pro-max-splash.png",
+        "src": "/splash/iphone-14-pro-max-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "1027x2383",
-        "src": "/ticketmaster/splash/iphone-14-pro-splash.png",
+        "src": "/splash/iphone-14-pro-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "1115x2589",
-        "src": "/ticketmaster/splash/iphone-14-pro-max-legacy-splash.png",
+        "src": "/splash/iphone-14-pro-max-legacy-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "1027x2383",
-        "src": "/ticketmaster/splash/iphone-14-pro-legacy-splash.png",
+        "src": "/splash/iphone-14-pro-legacy-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "949x2174",
-        "src": "/ticketmaster/splash/iphone-14-mini-splash.png",
+        "src": "/splash/iphone-14-mini-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "726x1645",
-        "src": "/ticketmaster/splash/iphone-14-splash.png",
+        "src": "/splash/iphone-14-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "1092x2476",
-        "src": "/ticketmaster/splash/iphone-11-pro-max-splash.png",
+        "src": "/splash/iphone-11-pro-max-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "980x2228",
-        "src": "/ticketmaster/splash/iphone-x-splash.png",
+        "src": "/splash/iphone-x-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "726x1645",
-        "src": "/ticketmaster/splash/iphone-11-splash.png",
+        "src": "/splash/iphone-11-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "1092x2040",
-        "src": "/ticketmaster/splash/iphone-plus-splash.png",
+        "src": "/splash/iphone-plus-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "646x1204",
-        "src": "/ticketmaster/splash/iphone-8-splash.png",
+        "src": "/splash/iphone-8-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "559x1028",
-        "src": "/ticketmaster/splash/iphone-se-splash.png",
+        "src": "/splash/iphone-se-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "1805x2535",
-        "src": "/ticketmaster/splash/ipad-pro-129-splash.png",
+        "src": "/splash/ipad-pro-129-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "1471x2212",
-        "src": "/ticketmaster/splash/ipad-pro-11-splash.png",
+        "src": "/splash/ipad-pro-11-splash.png",
         "type": "image/png"
       },
       {
         "sizes": "1359x1908",
-        "src": "/ticketmaster/splash/ipad-mini-splash.png",
+        "src": "/splash/ipad-mini-splash.png",
         "type": "image/png"
       }
     ]
   },
-  "start_url": "/ticketmaster/",
+  "start_url": "/",
   "theme_color": "#121212"
 }

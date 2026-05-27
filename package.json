@@ -4,7 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently -n server,web -c green,cyan \"npm run server:dev\" \"vite --host\"",
+    "dev:web": "vite --host",
+    "server": "node backend/server.js",
+    "server:dev": "npm --prefix backend run dev",
     "build": "vite build",
     "deploy": "vite build && npx gh-pages -d dist",
     "lint": "eslint .",
@@ -22,6 +25,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "concurrently": "^9.1.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",

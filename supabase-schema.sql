@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS events (
     time VARCHAR(20) NOT NULL, -- 7:00 PM format
     order_num VARCHAR(50) NOT NULL,
     tickets JSONB NOT NULL DEFAULT '[]'::jsonb,
+    image_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -106,11 +107,12 @@ CREATE TRIGGER update_events_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
--- Insert sample admin for testing (remove in production)
--- Password: admin123 (in production, use hashed password)
-INSERT INTO admins (username, password)
-VALUES ('admin', 'admin123')
-ON CONFLICT (username) DO NOTHING;
+-- NOTE: Do NOT seed admin accounts directly here.
+-- The backend stores bcrypt-hashed passwords, so a plaintext INSERT would
+-- create an admin that can never log in (bcrypt.compareSync would always fail).
+-- Create the first admin via the registration endpoint instead, which hashes
+-- the password correctly:
+--   POST /api/admin/register  { "username": "...", "password": "..." }
 
 -- Grant necessary permissions
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
