@@ -13,9 +13,11 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET;
+const IS_DEV = process.env.NODE_ENV !== 'production';
 
 console.log('=== STARTUP DEBUG ===');
 console.log(`Using PORT = ${PORT}`);
+console.log(`Mode = ${IS_DEV ? 'development' : 'production'}`);
 console.log(`JWT_SECRET set: ${!!JWT_SECRET}`);
 console.log(`MYSQL_HOST set: ${!!process.env.MYSQL_HOST}`);
 console.log(`MYSQL_DATABASE set: ${!!process.env.MYSQL_DATABASE}`);
@@ -55,8 +57,25 @@ pool.getConnection()
 const UPLOAD_DIR = path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
+// CORS: allow production domains + any local network origin in dev
+const ALLOWED_ORIGINS = [
+  'https://ticketmaster-twlj.vercel.app',
+  'https://ticketmaster-tau-tawny.vercel.app',
+  'https://jimcooks211.github.io',
+  'http://localhost:5173',
+  'http://localhost:5174',
+];
+
 app.use(cors({
-  origin: ['https://ticketmaster-twlj.vercel.app', 'https://ticketmaster-tau-tawny.vercel.app', 'http://localhost:5173', 'https://jimcooks211.github.io'],
+  origin: (origin, cb) => {
+    // Allow requests with no origin (mobile apps, Postman, curl)
+    if (!origin) return cb(null, true);
+    // Always allow production domains
+    if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    // In dev: allow any device on a local network (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
+    if (IS_DEV && /^http:\/\/(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/.test(origin)) return cb(null, true);
+    cb(new Error(`CORS: origin ${origin} not allowed`));
+  },
   credentials: true
 }));
 app.use(express.json());

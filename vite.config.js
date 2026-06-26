@@ -6,6 +6,10 @@ export default defineConfig({
   plugins: [react()],
   base: '/',
   server: {
+    host: true,
+    hmr: {
+      host: '192.168.100.36',
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:3001',

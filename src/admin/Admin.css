@@ -117,7 +117,9 @@
 
 /* Admin Dashboard Styles */
 .admin-dashboard {
-  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background: #f5f7fa;
 }
 

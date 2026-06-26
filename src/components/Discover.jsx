@@ -12,11 +12,58 @@ import { useState, useEffect } from 'react'
 import { fetchAllEvents } from '../api'
 import '../App.css'
 
+const DiscoverSkeleton = () => (
+  <div className="disc-skel">
+    {/* ── Dark nav skeleton ── */}
+    <div className="disc-skel-hdr">
+      {/* Row 1: centered title + flag avatar */}
+      <div className="disc-skel-r1">
+        <div className="disc-skel-title-bar"></div>
+        <div className="disc-skel-avatar-circle"></div>
+      </div>
+      {/* Row 2: two filter chips */}
+      <div className="disc-skel-r2">
+        <div className="disc-skel-chip"></div>
+        <div className="disc-skel-chip"></div>
+      </div>
+      {/* Row 3: search / filter bar */}
+      <div className="disc-skel-r3">
+        <div className="disc-skel-searchbar"></div>
+      </div>
+    </div>
+
+    {/* ── Light content skeleton ── */}
+    <div className="disc-skel-body">
+      {/* Hero banner placeholder */}
+      <div className="disc-skel-hero">
+        <div className="disc-skel-shimmer-stripe"></div>
+        <div className="disc-skel-hero-texts">
+          <div className="disc-skel-ht disc-skel-ht--wide"></div>
+          <div className="disc-skel-ht disc-skel-ht--narrow"></div>
+        </div>
+      </div>
+
+      {/* White separator */}
+      <div className="disc-skel-sep"></div>
+
+      {/* Event card image placeholder */}
+      <div className="disc-skel-card-wrap">
+        <div className="disc-skel-card-img">
+          <div className="disc-skel-shimmer-stripe disc-skel-shimmer-stripe--delay"></div>
+        </div>
+        <div className="disc-skel-card-meta">
+          <div className="disc-skel-ml disc-skel-ml--s"></div>
+          <div className="disc-skel-ml disc-skel-ml--l"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+)
+
 const Homepage = () => {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // Load events from Supabase on mount
   useEffect(() => {
     const loadEvents = async () => {
       try {
@@ -24,7 +71,6 @@ const Homepage = () => {
         setEvents(data);
       } catch (error) {
         console.error('Error loading events:', error);
-        // If backend not available, show no events
       } finally {
         setLoading(false);
       }
@@ -32,6 +78,8 @@ const Homepage = () => {
 
     loadEvents();
   }, []);
+
+  if (loading) return <DiscoverSkeleton />
 
   return (
     <div className="homepage">
@@ -47,7 +95,7 @@ const Homepage = () => {
       <img src={img10} alt="" />
 
       {/* Display admin-created events */}
-      {!loading && events.length > 0 && (
+      {events.length > 0 && (
         <div className="admin-events-section">
           <h2 className="admin-events-title">Available Events</h2>
           <div className="admin-events-grid">

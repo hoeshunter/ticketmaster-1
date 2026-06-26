@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently -n server,web -c green,cyan \"npm run server:dev\" \"vite --host\"",
+    "start": "concurrently -n server,web -c green,cyan \"npm run server:dev\" \"vite preview --host\"",
     "dev:web": "vite --host",
     "server": "node backend/server.js",
     "server:dev": "npm --prefix backend run dev",
@@ -25,10 +26,10 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "concurrently": "^9.1.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "concurrently": "^9.1.0",
     "eslint": "^10.2.1",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",

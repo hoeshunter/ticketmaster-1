@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IoAdd, IoLogOut, IoTrash, IoPencil, IoPerson, IoImage } from 'react-icons/io5';
 import { fetchAdminEvents, createEvent, updateEvent, deleteEvent, logout, getAdminInfo, uploadImage } from '../api';
@@ -142,18 +142,63 @@ const AdminDashboard = () => {
 
 // ── Event Form ────────────────────────────────────────────────────────────────
 
+const DRAFT_KEY = 'tm_event_form_draft';
+
+const EMPTY_FORM = {
+  name: '', state: '', city: '', stadium: '',
+  time: '', date: '', day: '', orderNum: '',
+  tickets: [{ label: 'ARTIST PRESALE', section: '', row: '', seat: '' }],
+  image_url: ''
+};
+
 const EventForm = ({ onSubmit, onCancel, initialData }) => {
-  const [formData, setFormData] = useState(initialData || {
-    name: '', state: '', city: '', stadium: '',
-    time: '', date: '', day: '', orderNum: '',
-    tickets: [{ section: '', row: '', seat: '' }],
-    image_url: ''
+  const isCreate = !initialData;
+
+  const normalizeTickets = (data) => ({
+    ...data,
+    tickets: (data.tickets || []).map(t => ({ label: '', ...t }))
   });
+
+  const [formData, setFormData] = useState(() => {
+    if (!isCreate) return normalizeTickets(initialData);
+    try {
+      const saved = sessionStorage.getItem(DRAFT_KEY);
+      return saved ? JSON.parse(saved) : EMPTY_FORM;
+    } catch { return EMPTY_FORM; }
+  });
+
   const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(initialData?.image_url || null);
+  const [imagePreview, setImagePreview] = useState(() => {
+    if (!isCreate) return initialData?.image_url || null;
+    // Only restore preview if it's a real URL (not a blob:// which won't survive)
+    try {
+      const saved = sessionStorage.getItem(DRAFT_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const url = parsed.image_url || '';
+        return url.startsWith('http') ? url : null;
+      }
+    } catch {}
+    return null;
+  });
+
   const [saving, setSaving] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
   const fileInputRef = useRef(null);
+
+  // Persist form state to sessionStorage on every change (create mode only)
+  useEffect(() => {
+    if (!isCreate) return;
+    try {
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify(formData));
+    } catch {}
+  }, [formData, isCreate]);
+
+  const clearDraft = () => {
+    try { sessionStorage.removeItem(DRAFT_KEY); } catch {}
+  };
+
+  const handleCancel = () => { clearDraft(); onCancel(); };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -189,7 +234,7 @@ const EventForm = ({ onSubmit, onCancel, initialData }) => {
   };
 
   const addTicket = () =>
-    setFormData({ ...formData, tickets: [...formData.tickets, { section: '', row: '', seat: '' }] });
+    setFormData({ ...formData, tickets: [...formData.tickets, { label: 'ARTIST PRESALE', section: '', row: '', seat: '' }] });
 
   const removeTicket = (index) => {
     if (formData.tickets.length > 1)
@@ -209,6 +254,7 @@ const EventForm = ({ onSubmit, onCancel, initialData }) => {
       }
 
       await onSubmit({ ...formData, image_url: imageUrl || null });
+      clearDraft();
     } catch (err) {
       alert('Failed to save: ' + err.message);
     } finally {
@@ -222,7 +268,7 @@ const EventForm = ({ onSubmit, onCancel, initialData }) => {
       <div className="event-form-container">
         <div className="form-header">
           <h2>{initialData ? 'Edit Event' : 'Create New Event'}</h2>
-          <button className="close-btn" onClick={onCancel}>×</button>
+          <button className="close-btn" onClick={handleCancel}>×</button>
         </div>
 
         <form onSubmit={handleSubmit} className="event-form">
@@ -334,6 +380,14 @@ const EventForm = ({ onSubmit, onCancel, initialData }) => {
                   )}
                 </div>
                 <div className="form-row">
+                  <div className="form-group form-group--full">
+                    <label>Label</label>
+                    <input type="text" value={ticket.label ?? ''}
+                      onChange={(e) => handleTicketChange(index, 'label', e.target.value)}
+                      placeholder="e.g., ARTIST PRESALE" />
+                  </div>
+                </div>
+                <div className="form-row">
                   <div className="form-group">
                     <label>Section *</label>
                     <input type="text" value={ticket.section}
@@ -362,7 +416,7 @@ const EventForm = ({ onSubmit, onCancel, initialData }) => {
 
           <div className="form-actions">
             {uploadProgress && <span className="upload-status">{uploadProgress}</span>}
-            <button type="button" className="cancel-btn" onClick={onCancel}>Cancel</button>
+            <button type="button" className="cancel-btn" onClick={handleCancel}>Cancel</button>
             <button type="submit" className="submit-btn" disabled={saving}>
               {saving ? (uploadProgress || 'Saving...') : initialData ? 'Update Event' : 'Create Event'}
             </button>
