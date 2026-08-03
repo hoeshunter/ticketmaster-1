@@ -26,6 +26,11 @@ export default defineConfig({
       'Cross-Origin-Opener-Policy': 'same-origin',
     },
   },
+  preview: {
+    host: true,
+    port: 5173,
+    strictPort: true,
+  },
   build: {
     rollupOptions: {
       output: {

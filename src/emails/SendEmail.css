@@ -1,0 +1,158 @@
+.se-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  background: #f7f7f8;
+  z-index: 999999999;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  padding: 24px 18px calc(40px + env(safe-area-inset-bottom, 0px));
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+}
+.se-header {
+  max-width: 960px;
+  margin: 0 auto 20px;
+}
+.se-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #111;
+}
+.se-subtitle {
+  font-size: 13px;
+  color: #777;
+  margin-top: 4px;
+}
+
+.se-layout {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.se-form,
+.se-preview {
+  flex: 1 1 0;
+  min-width: 0;
+  background: #fff;
+  border: 1px solid #ececec;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+@media (max-width: 700px) {
+  .se-layout {
+    flex-wrap: wrap;
+  }
+  .se-form,
+  .se-preview {
+    flex-basis: 100%;
+  }
+}
+
+.se-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #555;
+  margin-bottom: 14px;
+}
+
+.se-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.se-field label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #333;
+}
+.se-field input,
+.se-field select {
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #111;
+  background: #fff;
+}
+.se-field input:focus,
+.se-field select:focus {
+  outline: none;
+  border-color: #026CDF;
+}
+.se-field input:disabled,
+.se-field select:disabled {
+  background: #f5f5f5;
+  color: #999;
+}
+.se-row {
+  display: flex;
+  gap: 12px;
+}
+.se-row .se-field { flex: 1; }
+
+.se-field--checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.se-field--checkbox input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: #026CDF;
+}
+.se-field-hint {
+  font-size: 11.5px;
+  color: #888;
+  line-height: 1.5;
+  margin: 4px 0 0;
+}
+
+.se-send-btn {
+  width: 100%;
+  margin-top: 4px;
+  background: #026CDF;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 13px 26px;
+  font-size: 14.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.se-send-btn:disabled {
+  background: #9dc4ee;
+  cursor: default;
+}
+
+.se-status {
+  margin-top: 12px;
+  font-size: 13px;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.se-status--success { background: #e4f7ec; color: #1a8a4c; }
+.se-status--error { background: #fdeaea; color: #b3261e; }
+
+.se-preview-frame {
+  width: 100%;
+  height: 520px;
+  border: 1px solid #ececec;
+  border-radius: 8px;
+  background: #f0f0f0;
+}

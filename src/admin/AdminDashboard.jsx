@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IoAdd, IoLogOut, IoTrash, IoPencil, IoPerson, IoImage } from 'react-icons/io5';
-import { fetchAdminEvents, createEvent, updateEvent, deleteEvent, logout, getAdminInfo, uploadImage } from '../api';
+import { IoAdd, IoLogOut, IoTrash, IoPencil, IoPerson, IoImage, IoCash, IoPaperPlane, IoCheckmarkCircle } from 'react-icons/io5';
+import { fetchAdminEvents, createEvent, updateEvent, deleteEvent, logout, getAdminInfo, uploadImage, getFeeAmount, setFeeAmount } from '../api';
 import './Admin.css';
 
 const AdminDashboard = () => {
@@ -60,6 +60,27 @@ const AdminDashboard = () => {
 
   const handleFormCancel = () => { setShowForm(false); setEditingEvent(null); };
 
+  // ── Mark a single ticket sent/unsent ──────────────────────────────────────
+  // Tickets are stored as a JSON array on the event row, so this just flips
+  // one entry's `sent` flag and re-saves the whole event via the existing
+  // update endpoint — no schema change needed.
+  const handleToggleTicketSent = async (eventId, ticketIndex) => {
+    const event = events.find(e => e.id === eventId);
+    if (!event) return;
+    const newTickets = event.tickets.map((t, i) => {
+      if (i !== ticketIndex) return t
+      return t.sent
+        ? { ...t, sent: false, sentAt: undefined }
+        : { ...t, sent: true, sentAt: new Date().toISOString() }
+    });
+    try {
+      const updated = await updateEvent(eventId, { ...event, tickets: newTickets });
+      setEvents(prev => prev.map(e => e.id === eventId ? updated : e));
+    } catch (err) {
+      alert('Failed to update ticket status: ' + err.message);
+    }
+  };
+
   return (
     <div className="admin-dashboard">
       <div className="dashboard-header">
@@ -79,6 +100,10 @@ const AdminDashboard = () => {
       </div>
 
       <div className="dashboard-content">
+        <FeeSection />
+
+        <TicketStatusSection events={events} onToggleSent={handleToggleTicketSent} />
+
         <div className="events-section">
           <div className="section-header">
             <h2>My Events ({events.length})</h2>
@@ -136,6 +161,107 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
+    </div>
+  );
+};
+
+// ── Transfer Fee Section ──────────────────────────────────────────────────────
+// Sets the per-ticket fee shown on the /firstfee page when users transfer tickets.
+
+const FeeSection = () => {
+  const [feeInput, setFeeInput] = useState(() => getFeeAmount().toFixed(2));
+  const [savedFee, setSavedFee] = useState(() => getFeeAmount());
+  const [feeSaved, setFeeSaved] = useState(false);
+
+  const handleSaveFee = (e) => {
+    e.preventDefault();
+    const value = setFeeAmount(feeInput);
+    setSavedFee(value);
+    setFeeInput(value.toFixed(2));
+    setFeeSaved(true);
+    setTimeout(() => setFeeSaved(false), 2000);
+  };
+
+  return (
+    <div className="events-section fee-section">
+      <div className="section-header">
+        <h2><IoCash size={20} style={{ verticalAlign: 'text-bottom', marginRight: 8 }} />Transfer Fee</h2>
+        <span className="fee-current">
+          Current: <strong>${savedFee.toFixed(2)}</strong> per ticket
+        </span>
+      </div>
+      <p className="fee-description">
+        This fee is charged per ticket when a user transfers tickets. It appears on the
+        fee page shown after they fill in the recipient's details.
+      </p>
+      <form className="fee-form" onSubmit={handleSaveFee}>
+        <div className="fee-input-wrap">
+          <span className="fee-dollar">$</span>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            className="fee-input"
+            value={feeInput}
+            onChange={(e) => setFeeInput(e.target.value)}
+            placeholder="0.00"
+          />
+        </div>
+        <button type="submit" className="submit-btn">
+          {feeSaved ? '✓ Saved' : 'Save Fee'}
+        </button>
+      </form>
+    </div>
+  );
+};
+
+// ── Ticket Status Section ─────────────────────────────────────────────────────
+// Lets the admin mark individual tickets as sent (transferred to their
+// recipient) without opening the full edit form. Read by the consumer-facing
+// ticket component to switch to a "Sent" design once flagged.
+
+const TicketStatusSection = ({ events, onToggleSent }) => {
+  const eventsWithTickets = events.filter(e => e.tickets?.length);
+
+  return (
+    <div className="events-section ticket-status-section">
+      <div className="section-header">
+        <h2><IoPaperPlane size={20} style={{ verticalAlign: 'text-bottom', marginRight: 8 }} />Ticket Status</h2>
+      </div>
+      <p className="fee-description">
+        Mark a ticket as sent once it's been transferred to its recipient. Sent tickets show a
+        distinct "Sent" design in the ticket view instead of their live barcode.
+      </p>
+
+      {eventsWithTickets.length === 0 ? (
+        <div className="no-events"><p>No tickets to manage yet</p></div>
+      ) : (
+        <div className="ts-event-list">
+          {eventsWithTickets.map(event => (
+            <div key={event.id} className="ts-event-group">
+              <p className="ts-event-name">{event.name}</p>
+              <div className="ts-ticket-rows">
+                {event.tickets.map((ticket, idx) => (
+                  <div key={idx} className={`ts-ticket-row ${ticket.sent ? 'ts-ticket-row--sent' : ''}`}>
+                    <div className="ts-ticket-info">
+                      {ticket.label && <span className="ts-ticket-label">{ticket.label}</span>}
+                      <span className="ts-ticket-seat">
+                        Sec {ticket.section} &middot; Row {ticket.row} &middot; Seat {ticket.seat}
+                      </span>
+                    </div>
+                    <button
+                      className={`ts-toggle-btn ${ticket.sent ? 'ts-toggle-btn--sent' : ''}`}
+                      onClick={() => onToggleSent(event.id, idx)}
+                    >
+                      {ticket.sent ? (<><IoCheckmarkCircle size={15} /> Sent</>) : 'Mark Sent'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

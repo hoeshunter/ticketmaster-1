@@ -1,0 +1,246 @@
+/* ══════════════════════════════════════════════
+   GATE LOADER — stadium turnstile provisioning
+   A ratcheting turnstile + a green scanner beam
+   sweeping a barcode that flips grey → turf-green,
+   settling into a GATE OPEN state. Own ldgate-
+   prefix, own stadium-at-night color system.
+══════════════════════════════════════════════ */
+
+.ldgate-screen {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 999999999;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding:
+    env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+  background:
+    radial-gradient(64% 42% at 22% -8%, rgba(234, 247, 239, 0.16), transparent 60%),
+    radial-gradient(64% 42% at 78% -8%, rgba(234, 247, 239, 0.16), transparent 60%),
+    radial-gradient(96% 58% at 50% 120%, rgba(22, 163, 74, 0.20), transparent 62%),
+    linear-gradient(180deg, #0B0F0D 0%, #080A09 55%, #050605 100%);
+  background-color: #080A09;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  color: #E6EBE8;
+  overscroll-behavior: contain;
+  animation: ldgate-fade 0.35s ease both;
+}
+@keyframes ldgate-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Floodlight blooms ── */
+.ldgate-flood {
+  position: absolute;
+  top: -100px;
+  width: 260px;
+  height: 320px;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 0%, rgba(234, 247, 239, 0.22), rgba(234, 247, 239, 0) 62%);
+  filter: blur(6px);
+  animation: ldgate-bloom 2.4s ease-in-out infinite alternate;
+}
+.ldgate-flood--l { left: -44px; }
+.ldgate-flood--r { right: -44px; animation-delay: 0.5s; }
+@keyframes ldgate-bloom {
+  from { opacity: 0.5; }
+  to   { opacity: 0.95; }
+}
+
+.ldgate-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+/* ── Turnstile ── */
+.ldgate-turnstile {
+  width: 132px;
+  height: 132px;
+  overflow: visible;
+  filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.55));
+}
+.ldgate-ring {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.10);
+  stroke-width: 2.5;
+}
+.ldgate-ring--inner {
+  stroke: rgba(34, 197, 94, 0.32);
+  stroke-width: 2.5;
+  stroke-dasharray: 5 10;
+  stroke-linecap: round;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ldgate-ringspin 9s linear infinite;
+}
+@keyframes ldgate-ringspin {
+  to { transform: rotate(-360deg); }
+}
+/* Three spokes ratcheting round in discrete clicks (steps) */
+.ldgate-arms {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ldgate-ratchet 2.7s steps(9) infinite;
+}
+.ldgate-arms line {
+  stroke: #D7DED9;
+  stroke-width: 7;
+  stroke-linecap: round;
+  transition: stroke 0.4s ease;
+}
+@keyframes ldgate-ratchet {
+  to { transform: rotate(360deg); }
+}
+.ldgate-hub {
+  fill: #0E1310;
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 2;
+  transition: stroke 0.4s ease, fill 0.4s ease;
+}
+.ldgate-hub-dot {
+  fill: #22C55E;
+  filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.85));
+}
+
+/* ── Barcode + scanner beam ── */
+.ldgate-scan {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.ldgate-barcode {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 62px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+.ldgate-bar {
+  width: calc(var(--w) * 1px);
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 1px;
+  background: #3A413C;
+  animation: ldgate-flip 0.34s ease forwards;
+  animation-delay: calc(var(--p) * 1.4s);
+}
+@keyframes ldgate-flip {
+  to {
+    background: #22C55E;
+    box-shadow: 0 0 7px rgba(34, 197, 94, 0.55);
+  }
+}
+.ldgate-beam {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  left: -3%;
+  width: 10px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(74, 222, 128, 0), #4ADE80 45%, #22C55E 55%, rgba(74, 222, 128, 0));
+  box-shadow: 0 0 16px 5px rgba(34, 197, 94, 0.75);
+  animation: ldgate-sweep 1.4s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+@keyframes ldgate-sweep {
+  0%   { left: -3%; }
+  100% { left: 101%; }
+}
+
+/* ── SCANNING / GATE OPEN tag (crossfades) ── */
+.ldgate-scan-tag {
+  position: relative;
+  height: 18px;
+  width: 140px;
+}
+.ldgate-scan-tag > span {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  transition: opacity 0.3s ease;
+}
+.ldgate-scan-tag__scanning { color: #7BE6A2; opacity: 1; }
+.ldgate-scan-tag__open     { color: #22C55E; opacity: 0; }
+
+/* ── Messages ── */
+.ldgate-msg {
+  margin-top: 30px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #F1F5F2;
+  text-align: center;
+  padding: 0 24px;
+}
+.ldgate-sub {
+  margin-top: 5px;
+  font-size: 12.5px;
+  color: #8B958E;
+  letter-spacing: 0.01em;
+  text-align: center;
+  padding: 0 28px;
+}
+
+/* ── GATE OPEN state ── */
+.ldgate-screen--open .ldgate-beam { opacity: 0; }
+.ldgate-screen--open .ldgate-bar {
+  background: #22C55E;
+  box-shadow: 0 0 7px rgba(34, 197, 94, 0.5);
+}
+.ldgate-screen--open .ldgate-arms { animation-play-state: paused; }
+.ldgate-screen--open .ldgate-arms line { stroke: #22C55E; }
+.ldgate-screen--open .ldgate-hub {
+  fill: #0D1F14;
+  stroke: rgba(34, 197, 94, 0.7);
+}
+.ldgate-screen--open .ldgate-barcode {
+  border-color: rgba(34, 197, 94, 0.5);
+  box-shadow: 0 0 22px rgba(34, 197, 94, 0.25);
+}
+.ldgate-screen--open .ldgate-scan-tag__scanning { opacity: 0; }
+.ldgate-screen--open .ldgate-scan-tag__open {
+  opacity: 1;
+  animation: ldgate-pop 0.4s cubic-bezier(0.2, 0.9, 0.25, 1.3) both;
+}
+@keyframes ldgate-pop {
+  from { transform: translateX(-50%) scale(0.6); opacity: 0; }
+  to   { transform: translateX(-50%) scale(1);   opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ldgate-screen,
+  .ldgate-flood,
+  .ldgate-ring--inner,
+  .ldgate-arms,
+  .ldgate-beam,
+  .ldgate-bar,
+  .ldgate-scan-tag__open { animation: none !important; }
+  .ldgate-bar { background: #22C55E; }
+  .ldgate-beam { display: none; }
+}

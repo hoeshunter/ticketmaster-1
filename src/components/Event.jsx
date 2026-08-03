@@ -8,6 +8,7 @@ import { TbArrowUpRight, TbRefresh } from 'react-icons/tb'
 import { fetchAdminEvents, isLoggedIn } from '../api'
 import Transfer from './Transfer'
 import MapEmbed from './MapEmbed'
+import TicketBarcodeViewer from './TicketBarcodeViewer'
 
 // Parse "JUN 28, 2026" or "JUN 28" (year optional) reliably across all browsers.
 // If the year is missing, assume current year; if that date has already passed
@@ -109,6 +110,7 @@ const Event = () => {
   const [activeTab, setActiveTab]     = useState('tickets')
   const [activeView, setActiveView]   = useState('upcoming')
   const [showTransfer, setShowTransfer] = useState(false)
+  const [showBarcodes, setShowBarcodes] = useState(false)
   const [skelLoading, setSkelLoading] = useState(false)
   const [vtLoading, setVtLoading]     = useState(false)
   const [scrolled, setScrolled]       = useState(false)
@@ -167,13 +169,16 @@ const Event = () => {
     setTimeout(() => setSkelLoading(false), 520)
   }
 
-  const closePopup = () => { setDisplay(false); setShowTransfer(false); setMoreOptsVisible(false) }
+  const closePopup = () => { setDisplay(false); setShowTransfer(false); setShowBarcodes(false); setMoreOptsVisible(false) }
 
-  // ── View Tickets tap ─────────────────────────────────────────────
+  // ── View Tickets tap — briefly "loads" then opens the barcode viewer ──
   const handleViewTickets = () => {
     if (vtLoading) return
     setVtLoading(true)
-    setTimeout(() => setVtLoading(false), 2200)
+    setTimeout(() => {
+      setVtLoading(false)
+      setShowBarcodes(true)
+    }, 2200)
   }
 
   // ── Filter + sort by event date ───────────────────────────────────
@@ -267,7 +272,7 @@ const Event = () => {
             <p className="tp-scroll-name">{selectedEvent.name}</p>
             <p className="tp-scroll-venue">{selectedEvent.stadium} · {selectedEvent.city}, {selectedEvent.state}</p>
           </div>
-          <button className="tp-scroll-qr">
+          <button className="tp-scroll-qr" onClick={handleViewTickets}>
             <BsUpcScan size={18} color="#fff" />
           </button>
         </div>,
@@ -276,7 +281,7 @@ const Event = () => {
 
       {/* ── Ticket detail popup ── */}
       {display && selectedEvent && createPortal(
-        <div className="ticketpopup" ref={popupRef}>
+        <div className={`ticketpopup${showTransfer ? ' ticketpopup--locked' : ''}`} ref={popupRef}>
 
           <div className="tp-notch-cap" />
 
@@ -466,6 +471,12 @@ const Event = () => {
             <Transfer event={selectedEvent} onClose={() => setShowTransfer(false)} />
           )}
         </div>,
+        document.getElementById('popup-container')
+      )}
+
+      {/* ── Barcode viewer ── */}
+      {showBarcodes && selectedEvent && createPortal(
+        <TicketBarcodeViewer event={selectedEvent} onClose={() => setShowBarcodes(false)} />,
         document.getElementById('popup-container')
       )}
     </div>

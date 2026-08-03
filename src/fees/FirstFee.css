@@ -1,0 +1,305 @@
+/* ══════════════════════════════════════════════
+   FIRST FEE PAGE — Transfer fee summary
+   Matches the ticket popup (tp-*) visual language
+══════════════════════════════════════════════ */
+
+.ff-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  background: #fff;
+  z-index: 999999999;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  /* Independent scroll container — never chains into any page behind it */
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+}
+
+/* ── Hero ── */
+.ff-hero-wrapper {
+  position: relative;
+  width: 100%;
+  flex-shrink: 0;
+}
+.ff-hero-img {
+  width: 100%;
+  height: calc(220px + env(safe-area-inset-top, 0px));
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+.ff-hero-overlay {
+  position: absolute;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  left: 14px;
+  right: 14px;
+  display: flex;
+  justify-content: space-between;
+}
+.ff-back-btn {
+  background: rgba(19, 19, 19, 0.78);
+  color: #fff;
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ff-hero-caption {
+  background: #131313;
+  padding: 12px 15px 16px;
+}
+.ff-hero-datetime {
+  color: #fff;
+  font-size: 11.5px;
+  letter-spacing: 0.03em;
+}
+.ff-hero-name {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+.ff-hero-venue {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* ── Body ── */
+.ff-body {
+  padding: 18px 16px 24px;
+  flex: 1;
+}
+.ff-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #026CDF;
+  margin-bottom: 14px;
+}
+.ff-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #555;
+  margin-bottom: 10px;
+}
+.ff-divider {
+  height: 1px;
+  background: #ececec;
+  margin: 18px 0;
+}
+
+/* ── Ticket cards (mirrors tp-ticket-card) ── */
+.ff-ticket-card {
+  border: 1px solid #d0d0d0;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.ff-ticket-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #222;
+  padding: 10px 16px 8px;
+}
+.ff-ticket-details {
+  display: flex;
+  align-items: flex-start;
+  padding: 14px 16px 18px;
+  background: #f0f0f0;
+}
+.ff-ticket-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ff-ticket-field:nth-child(2) { align-items: center; }
+.ff-ticket-field:nth-child(3) { align-items: flex-end; }
+.ff-field-label {
+  font-size: 9px;
+  color: #999;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+.ff-field-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.ff-no-tickets {
+  font-size: 13px;
+  color: #888;
+}
+
+/* ── Recipient ── */
+.ff-recipient-card {
+  border: 1px solid #ececec;
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: #fafafa;
+}
+.ff-recipient-name {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #111;
+}
+.ff-recipient-contact {
+  font-size: 13px;
+  color: #666;
+  margin-top: 3px;
+}
+
+/* ── Fee rows ── */
+.ff-fee-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ff-fee-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #444;
+}
+.ff-fee-row--total {
+  border-top: 1px solid #ececec;
+  padding-top: 12px;
+  margin-top: 2px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #111;
+}
+
+/* ── Footer / pay button ── */
+.ff-footer {
+  padding: 14px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid #ececec;
+  background: #fff;
+  position: sticky;
+  bottom: 0;
+  flex-shrink: 0;
+}
+.ff-pay-btn {
+  width: 100%;
+  background: #026CDF;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 15px 26px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  letter-spacing: 0.01em;
+  transition: background 0.15s;
+}
+.ff-pay-btn:active { background: #0257b3; }
+.ff-pay-btn--loading {
+  background: #4da0e8;
+  pointer-events: none;
+}
+
+/* ── Empty state ── */
+.ff-page--empty,
+.ff-page--done {
+  align-items: center;
+  justify-content: center;
+}
+.ff-empty-inner,
+.ff-done-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 0 36px;
+  text-align: center;
+}
+.ff-empty-title,
+.ff-done-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #111;
+}
+.ff-empty-sub,
+.ff-done-sub {
+  font-size: 13.5px;
+  color: #888;
+  line-height: 1.5;
+}
+.ff-empty-btn,
+.ff-done-btn {
+  margin-top: 14px;
+  background: #026CDF;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 13px 32px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ff-empty-btn:active,
+.ff-done-btn:active { background: #0257b3; }
+
+/* -- Why this fee? info card -- */
+.ff-why-card {
+  margin-top: 22px;
+  background: #f0f6ff;
+  border: 1px solid #d3e5fb;
+  border-radius: 10px;
+  padding: 14px 16px 6px;
+}
+.ff-why-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #026CDF;
+  font-size: 13.5px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.ff-why-text {
+  font-size: 12.5px;
+  color: #4a5a6d;
+  line-height: 1.55;
+  margin-bottom: 10px;
+}
+.ff-why-text strong {
+  color: #1c2b3a;
+  font-weight: 700;
+}
+.ff-refund-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #e4f7ec;
+  color: #1a8a4c;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 4px 9px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}

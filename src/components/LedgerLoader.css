@@ -1,0 +1,225 @@
+/* ══════════════════════════════════════════════
+   LEDGER SYNC LOADER — Fee #5
+   Datacenter terminal: near-black canvas, thin data
+   grid, cyan/teal neon, monospace hash. A server mesh
+   syncs node→node while a token hash resolves.
+   Own ldledger- prefix, own color system.
+══════════════════════════════════════════════ */
+
+.ldledger-root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 999999999;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(24px + env(safe-area-inset-top, 0px))
+    calc(24px + env(safe-area-inset-right, 0px))
+    calc(24px + env(safe-area-inset-bottom, 0px))
+    calc(24px + env(safe-area-inset-left, 0px));
+  background:
+    radial-gradient(80% 55% at 50% 42%, rgba(34, 211, 238, 0.12) 0%, rgba(34, 211, 238, 0) 60%),
+    linear-gradient(180deg, #0A0E14 0%, #070A0F 100%);
+  background-color: #0A0E14;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  color: #E4F5FA;
+  animation: ldledger-fade 0.3s ease both;
+}
+@keyframes ldledger-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* thin data grid backdrop */
+.ldledger-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(34, 211, 238, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.055) 1px, transparent 1px);
+  background-size: 30px 30px;
+  -webkit-mask-image: radial-gradient(70% 60% at 50% 45%, #000 0%, transparent 78%);
+  mask-image: radial-gradient(70% 60% at 50% 45%, #000 0%, transparent 78%);
+}
+
+.ldledger-stage {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.ldledger-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  color: #6DE7F5;
+  margin-bottom: 22px;
+}
+.ldledger-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22D3EE;
+  box-shadow: 0 0 8px #22D3EE;
+  animation: ldledger-blink 1.1s steps(1, end) infinite;
+}
+@keyframes ldledger-blink {
+  0%, 55% { opacity: 1; }
+  56%, 100% { opacity: 0.2; }
+}
+
+/* ── Server mesh ── */
+.ldledger-mesh {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  overflow: visible;
+}
+.ldledger-wire {
+  stroke: rgba(120, 170, 185, 0.22);
+  stroke-width: 1.2;
+}
+.ldledger-wire-live {
+  stroke: #22D3EE;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 3px rgba(34, 211, 238, 0.85));
+  animation: ldledger-wire-in 0.35s ease both;
+}
+@keyframes ldledger-wire-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/* travelling pulse along the currently-syncing wire */
+.ldledger-wire-live--pulse {
+  stroke: #67E8F9;
+  stroke-dasharray: 10 26;
+  animation: ldledger-pulse-run 0.7s linear infinite;
+}
+@keyframes ldledger-pulse-run {
+  from { stroke-dashoffset: 36; }
+  to { stroke-dashoffset: 0; }
+}
+
+.ldledger-node {
+  fill: #0E1622;
+  stroke: rgba(120, 170, 185, 0.4);
+  stroke-width: 1.4;
+  transition: fill 0.25s ease, stroke 0.25s ease;
+}
+.ldledger-node--on {
+  fill: #06232B;
+  stroke: #22D3EE;
+  filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.7));
+}
+.ldledger-check {
+  fill: none;
+  stroke: #6DF0FB;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  animation: ldledger-check-draw 0.3s ease both;
+}
+@keyframes ldledger-check-draw {
+  from { stroke-dasharray: 0 14; }
+  to { stroke-dasharray: 14 0; }
+}
+.ldledger-node-ping {
+  fill: none;
+  stroke: #22D3EE;
+  stroke-width: 1.4;
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: ldledger-ping 1s ease-out infinite;
+}
+@keyframes ldledger-ping {
+  0% { transform: scale(0.7); opacity: 0.9; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+
+/* ── Token hash ── */
+.ldledger-hash-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 26px;
+  padding: 9px 12px;
+  border-radius: 9px;
+  background: rgba(6, 20, 26, 0.7);
+  border: 1px solid rgba(34, 211, 238, 0.22);
+  max-width: 100%;
+}
+.ldledger-hash-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #0A0E14;
+  background: #22D3EE;
+  border-radius: 4px;
+  padding: 2px 5px;
+  flex-shrink: 0;
+}
+.ldledger-hash {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.ldledger-hash-lock {
+  color: #6DF0FB;
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.55);
+}
+.ldledger-hash-scramble {
+  color: #3f6570;
+}
+
+/* ── Block counter ── */
+.ldledger-blocks {
+  margin-top: 16px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: #7f97a0;
+  font-variant-numeric: tabular-nums;
+}
+.ldledger-blocks b {
+  color: #22D3EE;
+  font-weight: 700;
+}
+
+.ldledger-msg {
+  margin-top: 10px;
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  color: #aecdd4;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ldledger-root,
+  .ldledger-dot,
+  .ldledger-wire-live,
+  .ldledger-wire-live--pulse,
+  .ldledger-check,
+  .ldledger-node-ping {
+    animation: none;
+  }
+  .ldledger-node-ping { display: none; }
+}

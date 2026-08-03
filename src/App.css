@@ -1475,6 +1475,9 @@ body {
   z-index: 9999999999;
   display: flex;
   align-items: flex-end;
+  /* Swipes on the dimmed backdrop must not scroll the ticket page behind */
+  touch-action: none;
+  overscroll-behavior: contain;
 }
 
 /* The white sheet */
@@ -1489,6 +1492,15 @@ body {
   max-height: 92vh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  /* Own scroll container — never chain scroll into the ticket page */
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+/* Ticket page is frozen while a sheet (transfer) is open on top of it */
+.ticketpopup--locked {
+  overflow: hidden !important;
+  touch-action: none;
 }
 
 .tr-sheet--short { min-height: 42vh; }
@@ -1815,6 +1827,11 @@ body {
   letter-spacing: 0.01em;
 }
 .tr-submit-btn:active { background: #333; }
+.tr-submit-btn--off {
+  background: #ccc;
+  cursor: default;
+  pointer-events: none;
+}
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    DISCOVER PAGE â€” SKELETON LOADING SCREEN

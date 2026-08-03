@@ -1,0 +1,240 @@
+/* ══════════════════════════════════════════════
+   BOND LOADER — Verified Fan™ biometric check
+   A full-screen dark-blue "identity verification" loader.
+   An SVG fingerprint strokes its ridges in progressively,
+   a blue scan-sweep passes over it, concentric radar rings
+   pulse outward, the print flips BLUE → GREEN as "human
+   verified", and a shield-check pops on at the end.
+   Own ldbond- prefix, pure CSS/SVG, no dependencies.
+══════════════════════════════════════════════ */
+
+.ldbond-screen {
+  position: fixed;
+  top: 0; left: 0;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 999999999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding:
+    env(safe-area-inset-top, 0px)
+    env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px)
+    env(safe-area-inset-left, 0px);
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background:
+    radial-gradient(120% 70% at 50% 22%, rgba(47, 139, 255, 0.18) 0%, rgba(47, 139, 255, 0) 55%),
+    radial-gradient(100% 60% at 50% 120%, rgba(2, 108, 223, 0.16) 0%, rgba(2, 108, 223, 0) 60%),
+    linear-gradient(180deg, #0A1E3F 0%, #08264A 55%, #06294F 100%);
+  background-color: #06294F;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  color: #EAF2FF;
+}
+
+/* ── Stage that holds print + radar (unclipped) ── */
+.ldbond-stage {
+  position: relative;
+  width: 268px;
+  height: 268px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+/* soft breathing blue aura behind everything */
+.ldbond-glow {
+  position: absolute;
+  width: 210px;
+  height: 210px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(47, 139, 255, 0.35) 0%, rgba(47, 139, 255, 0) 68%);
+  filter: blur(6px);
+  animation: ldbond-breathe 2.2s ease-in-out infinite;
+}
+@keyframes ldbond-breathe {
+  0%, 100% { opacity: 0.55; transform: scale(0.94); }
+  50%      { opacity: 0.9;  transform: scale(1.04); }
+}
+
+/* ── Expanding radar rings ── */
+.ldbond-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 120px;
+  height: 120px;
+  margin: -60px 0 0 -60px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(47, 139, 255, 0.55);
+  opacity: 0;
+  animation: ldbond-radar 2.2s cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
+}
+.ldbond-ring--2 { animation-delay: 0.73s; }
+.ldbond-ring--3 { animation-delay: 1.46s; }
+@keyframes ldbond-radar {
+  0%   { opacity: 0.7;  transform: scale(0.35); }
+  70%  { opacity: 0.12; }
+  100% { opacity: 0;    transform: scale(2.25); }
+}
+
+/* ── Fingerprint holder (clips the scan sweep to a disc) ── */
+.ldbond-fp {
+  position: relative;
+  width: 176px;
+  height: 176px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.015) 60%, rgba(255, 255, 255, 0) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 18px 44px rgba(0, 0, 0, 0.42);
+  animation: ldbond-verify-pulse 2.05s cubic-bezier(0.3, 0.8, 0.25, 1) forwards;
+}
+/* blue → green confirmation pulse of the whole disc near the end */
+@keyframes ldbond-verify-pulse {
+  0%, 62%  { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 18px 44px rgba(0, 0, 0, 0.42); }
+  74%      { transform: scale(1.05); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 0 34px rgba(52, 211, 153, 0.6), 0 18px 44px rgba(0, 0, 0, 0.42); }
+  100%     { transform: scale(1);    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 0 20px rgba(52, 211, 153, 0.42), 0 18px 44px rgba(0, 0, 0, 0.42); }
+}
+
+.ldbond-svg {
+  width: 132px;
+  height: 132px;
+  overflow: visible;
+}
+
+/* the ridge group carries the colour + drop-shadow that flips to green */
+.ldbond-ridges {
+  color: #2F8BFF;
+  animation: ldbond-verify 2.05s cubic-bezier(0.3, 0.8, 0.25, 1) forwards;
+}
+@keyframes ldbond-verify {
+  0%, 60%  { color: #2F8BFF; filter: drop-shadow(0 0 3px rgba(47, 139, 255, 0.55)); }
+  74%      { color: #34D399; filter: drop-shadow(0 0 9px rgba(52, 211, 153, 0.8)); }
+  100%     { color: #34D399; filter: drop-shadow(0 0 5px rgba(52, 211, 153, 0.6)); }
+}
+
+/* each ridge is normalised to pathLength 100 so one rule draws them all */
+.ldbond-ridge {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: ldbond-draw 0.72s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+@keyframes ldbond-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* ── Scan sweep bar (one downward pass) ── */
+.ldbond-scan {
+  position: absolute;
+  left: -10%;
+  width: 120%;
+  height: 26px;
+  top: -26px;
+  background: linear-gradient(180deg,
+    rgba(47, 139, 255, 0) 0%,
+    rgba(47, 139, 255, 0.28) 45%,
+    rgba(120, 190, 255, 0.55) 50%,
+    rgba(47, 139, 255, 0.28) 55%,
+    rgba(47, 139, 255, 0) 100%);
+  box-shadow: 0 0 14px rgba(47, 139, 255, 0.6);
+  opacity: 0;
+  animation: ldbond-sweep 1.05s cubic-bezier(0.45, 0, 0.55, 1) 0.55s forwards;
+}
+@keyframes ldbond-sweep {
+  0%   { transform: translateY(0);    opacity: 0; }
+  10%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateY(200px); opacity: 0; }
+}
+
+/* ── Shield-check badge that pops on at the end ── */
+.ldbond-shield {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  width: 46px;
+  height: 46px;
+  margin-left: -23px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #06294F;
+  background: linear-gradient(180deg, #7BE0B4 0%, #34D399 100%);
+  box-shadow: 0 8px 22px rgba(52, 211, 153, 0.5), 0 0 0 4px rgba(6, 41, 79, 0.9);
+  opacity: 0;
+  transform: scale(0.4);
+  animation: ldbond-pop 0.5s cubic-bezier(0.2, 0.9, 0.25, 1.4) 1.62s forwards;
+}
+@keyframes ldbond-pop {
+  0%   { opacity: 0; transform: scale(0.4); }
+  60%  { opacity: 1; transform: scale(1.14); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* ── Text ── */
+.ldbond-title {
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #EAF2FF;
+  text-align: center;
+}
+.ldbond-sub {
+  position: relative;
+  height: 18px;
+  width: 260px;
+  margin-top: 4px;
+}
+.ldbond-sub span {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 12.5px;
+  line-height: 18px;
+  letter-spacing: 0.01em;
+}
+.ldbond-sub-scan {
+  color: #8FB6E8;
+  animation: ldbond-fade-out 0.4s ease 1.55s forwards;
+}
+.ldbond-sub-done {
+  color: #7BE0B4;
+  font-weight: 600;
+  opacity: 0;
+  animation: ldbond-fade-in 0.45s ease 1.62s forwards;
+}
+@keyframes ldbond-fade-out { to { opacity: 0; } }
+@keyframes ldbond-fade-in  { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── Reduced motion — show the verified end-state, no motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .ldbond-glow,
+  .ldbond-ring,
+  .ldbond-scan { animation: none; }
+  .ldbond-ring { display: none; }
+  .ldbond-scan { display: none; }
+  .ldbond-fp { animation: none; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 0 20px rgba(52, 211, 153, 0.42), 0 18px 44px rgba(0, 0, 0, 0.42); }
+  .ldbond-ridges { animation: none; color: #34D399; filter: drop-shadow(0 0 5px rgba(52, 211, 153, 0.6)); }
+  .ldbond-ridge { animation: none; stroke-dashoffset: 0; }
+  .ldbond-shield { animation: none; opacity: 1; transform: scale(1); }
+  .ldbond-sub-scan { animation: none; opacity: 0; }
+  .ldbond-sub-done { animation: none; opacity: 1; }
+}

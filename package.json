@@ -4,12 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -n server,web -c green,cyan \"npm run server:dev\" \"vite --host\"",
-    "start": "concurrently -n server,web -c green,cyan \"npm run server:dev\" \"vite preview --host\"",
-    "dev:web": "vite --host",
+    "dev": "concurrently -n server,web -c green,cyan \"npm run server:dev\" \"npm run dev:web\"",
+    "start": "concurrently -n server,web -c green,cyan \"npm run server:dev\" \"wait-on tcp:3001 && vite preview --host\"",
+    "dev:web": "wait-on tcp:3001 && vite --host",
     "server": "node backend/server.js",
     "server:dev": "npm --prefix backend run dev",
     "build": "vite build",
+    "postinstall": "npm install --prefix backend",
     "deploy": "vite build && npx gh-pages -d dist",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -35,6 +36,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
     "sharp": "^0.34.5",
-    "vite": "^8.0.10"
+    "vite": "^8.0.10",
+    "wait-on": "^9.0.10"
   }
 }

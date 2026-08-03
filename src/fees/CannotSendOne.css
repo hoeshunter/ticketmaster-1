@@ -1,0 +1,355 @@
+/* ══════════════════════════════════════════════
+   CANNOT SEND ONE TICKET — Single-ticket transfer block
+   Reached from Transfer.jsx when exactly one ticket is
+   selected. Shares the fee-page (ff-*) visual language
+   but reads as a formal venue policy notice.
+══════════════════════════════════════════════ */
+
+.cso-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  background: #fff;
+  z-index: 999999999;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  /* Independent scroll container — never chains into any page behind it */
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+}
+
+/* iOS present transition — the result screen cross-fades in and settles from a
+   whisper of scale, the way an app hands off from its launch screen. */
+.cso-page--enter {
+  animation: cso-ios-present 0.5s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
+@keyframes cso-ios-present {
+  0%   { opacity: 0; transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cso-page--enter { animation: cso-ios-fade 0.3s ease both; }
+  @keyframes cso-ios-fade { from { opacity: 0; } to { opacity: 1; } }
+}
+
+/* ── Hero ── */
+.cso-hero-wrapper {
+  position: relative;
+  width: 100%;
+  flex-shrink: 0;
+}
+.cso-hero-img {
+  width: 100%;
+  height: calc(200px + env(safe-area-inset-top, 0px));
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+.cso-hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(19, 19, 19, 0.05) 0%, rgba(19, 19, 19, 0.55) 100%);
+}
+.cso-hero-overlay {
+  position: absolute;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  left: 14px;
+  right: 14px;
+  display: flex;
+  justify-content: space-between;
+}
+.cso-back-btn {
+  background: rgba(19, 19, 19, 0.78);
+  color: #fff;
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.cso-hero-caption {
+  background: #131313;
+  padding: 12px 15px 16px;
+}
+.cso-hero-datetime {
+  color: #fff;
+  font-size: 11.5px;
+  letter-spacing: 0.03em;
+}
+.cso-hero-name {
+  color: #fff;
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+.cso-hero-venue {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* ── Notice header ── */
+.cso-body {
+  padding: 24px 18px 20px;
+  flex: 1;
+}
+.cso-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fdeceb;
+  color: #c0362c;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  padding: 5px 11px;
+  border-radius: 30px;
+  margin-bottom: 16px;
+}
+.cso-icon-halo {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #fdeceb 0%, #fbe1df 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d13b30;
+  margin-bottom: 16px;
+  box-shadow: 0 6px 18px rgba(193, 54, 44, 0.14);
+}
+.cso-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #131313;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+.cso-lede {
+  font-size: 14px;
+  color: #55606d;
+  line-height: 1.6;
+}
+.cso-lede strong {
+  color: #1c2b3a;
+  font-weight: 700;
+}
+
+/* ── The stranded seat ── */
+.cso-seat-callout {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+  padding: 13px 15px;
+  background: #fafafa;
+}
+.cso-seat-chip {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #131313;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.cso-seat-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.cso-seat-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  color: #9aa1a9;
+  text-transform: uppercase;
+}
+.cso-seat-value {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #131313;
+  letter-spacing: -0.01em;
+}
+
+/* ── Divider ── */
+.cso-divider {
+  height: 1px;
+  background: #ececec;
+  margin: 22px 0 18px;
+}
+
+/* ── Why section ── */
+.cso-why-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #555;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.cso-reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.cso-reason {
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+}
+.cso-reason-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #f0f6ff;
+  color: #026CDF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.cso-reason-text h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1c2b3a;
+  margin-bottom: 3px;
+  letter-spacing: -0.01em;
+}
+.cso-reason-text p {
+  font-size: 12.5px;
+  color: #6a7480;
+  line-height: 1.5;
+}
+
+/* ── Guidance card ── */
+.cso-guide-card {
+  margin-top: 22px;
+  background: #f0f6ff;
+  border: 1px solid #d3e5fb;
+  border-radius: 12px;
+  padding: 15px 16px;
+}
+.cso-guide-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #026CDF;
+  font-size: 13.5px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.cso-guide-text {
+  font-size: 12.5px;
+  color: #4a5a6d;
+  line-height: 1.6;
+}
+.cso-guide-text strong {
+  color: #1c2b3a;
+  font-weight: 700;
+}
+
+/* ── Footer / actions ── */
+.cso-footer {
+  padding: 14px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid #ececec;
+  background: #fff;
+  position: sticky;
+  bottom: 0;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cso-primary-btn {
+  width: 100%;
+  background: #026CDF;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 15px 26px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s;
+}
+.cso-primary-btn:active { background: #0257b3; }
+.cso-secondary-btn {
+  width: 100%;
+  background: transparent;
+  color: #55606d;
+  border: none;
+  padding: 4px;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.cso-secondary-btn:active { color: #131313; }
+
+/* ── Empty state (direct load / refresh) ── */
+.cso-page--empty {
+  align-items: center;
+  justify-content: center;
+}
+.cso-empty-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 0 36px;
+  text-align: center;
+}
+.cso-empty-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #111;
+}
+.cso-empty-sub {
+  font-size: 13.5px;
+  color: #888;
+  line-height: 1.5;
+}
+.cso-empty-btn {
+  margin-top: 14px;
+  background: #026CDF;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 13px 32px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.cso-empty-btn:active { background: #0257b3; }

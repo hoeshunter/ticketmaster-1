@@ -1,0 +1,62 @@
+/* ══════════════════════════════════════════════
+   iOS SUCCESS CONFIRMATION
+   Circle strokes in, checkmark draws inside it,
+   caption fades in — the Apple Pay / system pattern.
+══════════════════════════════════════════════ */
+
+.ios-confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 999999999;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+}
+
+.ios-confirm-check {
+  width: 88px;
+  height: 88px;
+}
+
+.ios-confirm-circle {
+  stroke: #34C759;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 226.2;
+  stroke-dashoffset: 226.2;
+  animation: ios-confirm-circle-draw 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.ios-confirm-tick {
+  stroke: #34C759;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 46;
+  stroke-dashoffset: 46;
+  animation: ios-confirm-tick-draw 0.35s ease 0.45s forwards;
+}
+
+@keyframes ios-confirm-circle-draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes ios-confirm-tick-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+.ios-confirm-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: #111111;
+  opacity: 0;
+  animation: ios-confirm-text-fade 0.4s ease 0.75s forwards;
+}
+
+@keyframes ios-confirm-text-fade {
+  to { opacity: 1; }
+}

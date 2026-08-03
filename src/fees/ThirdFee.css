@@ -1,0 +1,463 @@
+/* ══════════════════════════════════════════════
+   THIRD FEE PAGE — Transfer Security Hold
+   A premium dark "escrow vault" surface: deep navy,
+   champagne-gold, emerald accents, glass cards and a
+   step timeline. Deliberately the most elevated screen
+   in the flow — a tier above the cream sf- invoice.
+   Own tf- prefix, own color system.
+══════════════════════════════════════════════ */
+
+.tf-page {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  background:
+    radial-gradient(120% 60% at 50% -10%, rgba(201, 162, 75, 0.16) 0%, rgba(201, 162, 75, 0) 55%),
+    radial-gradient(90% 50% at 100% 0%, rgba(52, 211, 153, 0.10) 0%, rgba(52, 211, 153, 0) 60%),
+    linear-gradient(180deg, #0B1424 0%, #0A101E 60%, #090E1A 100%);
+  background-color: #0A101E;
+  z-index: 999999999;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  color: #E8ECF3;
+  animation: tf-page-in 0.55s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+/* UIKit-native sheet presentation curve — fast start, eased settle. */
+@keyframes tf-page-in {
+  from { opacity: 0; transform: translateY(26px) scale(0.975); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Header ── */
+.tf-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 14px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.tf-back-btn {
+  background: rgba(255, 255, 255, 0.07);
+  color: #E8ECF3;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+.tf-back-btn:active { background: rgba(255, 255, 255, 0.14); }
+.tf-brand {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #cdd5e2;
+}
+.tf-brand svg { color: #E7C778; flex-shrink: 0; }
+.tf-secured-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #7BE0B4;
+  background: rgba(52, 211, 153, 0.10);
+  border: 1px solid rgba(52, 211, 153, 0.28);
+  border-radius: 30px;
+  padding: 4px 9px;
+  white-space: nowrap;
+}
+
+/* ── Body ── */
+.tf-body {
+  padding: 20px 16px 24px;
+  flex: 1;
+}
+
+/* ── Hero hold card ── */
+.tf-hold-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  padding: 24px 20px 22px;
+  text-align: center;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid rgba(231, 199, 120, 0.22);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  animation: tf-rise 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.05s both;
+}
+/* gold top hairline glow */
+.tf-hold-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #E7C778, transparent);
+}
+.tf-hold-glow {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 240px;
+  height: 160px;
+  background: radial-gradient(circle, rgba(231, 199, 120, 0.25) 0%, rgba(231, 199, 120, 0) 70%);
+  pointer-events: none;
+}
+.tf-hold-eyebrow {
+  position: relative;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9aa4b5;
+  margin-bottom: 10px;
+}
+.tf-hold-amount {
+  position: relative;
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  background: linear-gradient(180deg, #F6E3AE 0%, #E7C778 45%, #C9A24B 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 20px rgba(201, 162, 75, 0.25);
+}
+.tf-refund-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 14px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #7BE0B4;
+  background: rgba(52, 211, 153, 0.10);
+  border: 1px solid rgba(52, 211, 153, 0.30);
+  border-radius: 30px;
+  padding: 5px 12px;
+}
+.tf-hold-heldby {
+  position: relative;
+  font-size: 12.5px;
+  color: #98a2b4;
+  line-height: 1.55;
+  margin-top: 14px;
+}
+.tf-hold-heldby strong { color: #E7C778; font-weight: 700; }
+
+/* ── Reason card ── */
+.tf-reason-card {
+  display: flex;
+  gap: 13px;
+  margin-top: 16px;
+  padding: 15px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  animation: tf-rise 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.12s both;
+}
+.tf-reason-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #E7C778;
+  background: rgba(231, 199, 120, 0.12);
+  border: 1px solid rgba(231, 199, 120, 0.22);
+}
+.tf-reason-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #F1F4F9;
+  letter-spacing: -0.01em;
+  margin-bottom: 5px;
+}
+.tf-reason-body {
+  font-size: 12.5px;
+  color: #9aa4b5;
+  line-height: 1.6;
+}
+
+/* ── Section titles ── */
+.tf-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7f8a9c;
+  margin: 26px 0 14px;
+}
+
+/* ── Timeline ── */
+.tf-timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: tf-rise 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.18s both;
+}
+.tf-step {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+/* connector line between dots */
+.tf-step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 28px;
+  bottom: -20px;
+  width: 2px;
+  background: linear-gradient(180deg, rgba(231, 199, 120, 0.5), rgba(255, 255, 255, 0.08));
+}
+.tf-step-dot {
+  position: relative;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9aa4b5;
+  background: #131d31;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.tf-step-dot--active {
+  color: #0A101E;
+  background: linear-gradient(180deg, #F6E3AE, #C9A24B);
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(201, 162, 75, 0.4);
+}
+.tf-step-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #E8ECF3;
+  letter-spacing: -0.01em;
+  padding-top: 4px;
+}
+.tf-step-sub {
+  font-size: 12px;
+  color: #8a94a6;
+  line-height: 1.5;
+  margin-top: 3px;
+}
+
+/* ── Recipient card ── */
+.tf-recipient-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  animation: tf-rise 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.24s both;
+}
+.tf-recipient-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #cdd5e2;
+  background: linear-gradient(150deg, #1a2740, #131d31);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.tf-recipient-main { flex: 1; min-width: 0; }
+.tf-recipient-name {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #F1F4F9;
+  letter-spacing: -0.01em;
+}
+.tf-recipient-contact {
+  font-size: 12.5px;
+  color: #8a94a6;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tf-recipient-tag {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #E7C778;
+  background: rgba(231, 199, 120, 0.10);
+  border: 1px solid rgba(231, 199, 120, 0.24);
+  border-radius: 30px;
+  padding: 4px 9px;
+}
+
+/* ── Footer / CTA ── */
+.tf-footer {
+  padding: 14px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(10, 16, 30, 0.86);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  position: sticky;
+  bottom: 0;
+  flex-shrink: 0;
+}
+.tf-pay-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  background: linear-gradient(180deg, #F6E3AE 0%, #E7C778 45%, #C9A24B 100%);
+  color: #2A1F05;
+  border: none;
+  border-radius: 50px;
+  padding: 16px 26px;
+  font-size: 15px;
+  font-weight: 800;
+  font-family: inherit;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 10px 26px rgba(201, 162, 75, 0.32);
+  transition: transform 0.12s, box-shadow 0.15s;
+}
+.tf-pay-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 6px 16px rgba(201, 162, 75, 0.28);
+}
+.tf-fineprint {
+  font-size: 11px;
+  color: #7f8a9c;
+  line-height: 1.5;
+  margin-top: 11px;
+  text-align: center;
+}
+
+/* ── Empty / done states ── */
+.tf-page--empty,
+.tf-page--done {
+  align-items: center;
+  justify-content: center;
+}
+.tf-empty-inner,
+.tf-done-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 0 36px;
+  text-align: center;
+}
+/* No separate success screen — this fade/scale-in IS the transition from the
+   loading screen (see ThirdFee.jsx). */
+.tf-done-inner {
+  animation: tf-done-in 0.55s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
+@keyframes tf-done-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.tf-done-badge {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0A101E;
+  background: linear-gradient(180deg, #7BE0B4, #34D399);
+  box-shadow: 0 14px 34px rgba(52, 211, 153, 0.4);
+  margin-bottom: 8px;
+  animation: tf-badge-pop 0.5s cubic-bezier(0.2, 0.9, 0.25, 1.25) 0.1s both;
+}
+@keyframes tf-badge-pop {
+  0%   { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.tf-empty-title,
+.tf-done-title {
+  font-size: 19px;
+  font-weight: 800;
+  color: #F1F4F9;
+  letter-spacing: -0.015em;
+}
+.tf-empty-sub,
+.tf-done-sub {
+  font-size: 13.5px;
+  color: #98a2b4;
+  line-height: 1.55;
+  max-width: 300px;
+}
+.tf-done-sub strong { color: #E7C778; font-weight: 700; }
+.tf-empty-btn,
+.tf-done-btn {
+  margin-top: 16px;
+  background: linear-gradient(180deg, #F6E3AE 0%, #E7C778 45%, #C9A24B 100%);
+  color: #2A1F05;
+  border: none;
+  border-radius: 50px;
+  padding: 13px 34px;
+  font-size: 14px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 10px 26px rgba(201, 162, 75, 0.3);
+}
+.tf-empty-btn:active,
+.tf-done-btn:active { transform: translateY(1px); }
+
+/* Shared rise-in for body cards */
+@keyframes tf-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tf-page,
+  .tf-hold-card,
+  .tf-reason-card,
+  .tf-timeline,
+  .tf-recipient-card,
+  .tf-done-inner,
+  .tf-done-badge { animation: none; }
+}

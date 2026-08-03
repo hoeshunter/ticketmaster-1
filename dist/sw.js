@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ticketmaster-v9';
+const CACHE_NAME = 'ticketmaster-v10';
 
 // Static assets that never change between sessions — cache them aggressively.
 // Vite fingerprints JS/CSS bundles, so a new deploy = new filename = new cache entry.

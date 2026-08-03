@@ -1,0 +1,455 @@
+/* ══════════════════════════════════════════════
+   SIXTH FEE PAGE — Fan Registry Clearance Fee
+   Heritage supporters-club aesthetic: deep club MAROON
+   page, PARCHMENT membership cards, aged GOLD crest
+   accents and Georgia serif headings — an embossed
+   season-ticket registry, not an invoice or a tech
+   screen. Own frc- prefix, own club colour system.
+══════════════════════════════════════════════ */
+
+.frc-page {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 999999999;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  background:
+    radial-gradient(120% 55% at 50% -8%, rgba(201, 162, 75, 0.22) 0%, rgba(201, 162, 75, 0) 55%),
+    radial-gradient(90% 40% at 50% 108%, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0) 60%),
+    linear-gradient(180deg, #7F1D2E 0%, #6C1727 52%, #52101E 100%);
+  background-color: #6C1727;
+  color: #F3ECDD;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  animation: frc-page-in 0.55s cubic-bezier(0.22, 0.85, 0.24, 1) both;
+}
+
+/* Unique entrance — a heritage "ledger settling open" curve */
+@keyframes frc-page-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Header ── */
+.frc-header {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 14px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(201, 162, 75, 0.24);
+}
+.frc-back-btn {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #F3ECDD;
+  background: rgba(251, 243, 221, 0.10);
+  border: 1px solid rgba(201, 162, 75, 0.35);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+.frc-back-btn:active { background: rgba(251, 243, 221, 0.2); }
+.frc-brand { flex: 1; display: flex; align-items: center; gap: 9px; min-width: 0; }
+.frc-brand-crest {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #E9C877;
+  background: rgba(201, 162, 75, 0.14);
+  border: 1px solid rgba(201, 162, 75, 0.34);
+}
+.frc-brand-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 10px;
+  line-height: 1.35;
+  color: rgba(243, 236, 221, 0.66);
+  letter-spacing: 0.02em;
+}
+.frc-brand-text strong {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #FBF3DD;
+  letter-spacing: 0.01em;
+}
+.frc-header-badge {
+  flex-shrink: 0;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #F1DFa9;
+  color: #F1DFA9;
+  background: rgba(201, 162, 75, 0.16);
+  border: 1px solid rgba(201, 162, 75, 0.45);
+  border-radius: 30px;
+  padding: 4px 9px;
+  white-space: nowrap;
+}
+
+/* ── Body ── */
+.frc-body {
+  flex: 1;
+  padding: 20px 16px 26px;
+}
+
+/* Shared parchment card surface */
+.frc-hero,
+.frc-reason,
+.frc-check,
+.frc-recipient {
+  background: linear-gradient(158deg, #FBF6EA 0%, #F3ECDD 55%, #EADDC3 100%);
+  border: 1px solid rgba(201, 162, 75, 0.5);
+  box-shadow:
+    0 16px 34px rgba(30, 5, 10, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+/* ── Hero crest + amount ── */
+.frc-hero {
+  position: relative;
+  border-radius: 20px;
+  padding: 22px 20px 20px;
+  text-align: center;
+  overflow: hidden;
+  animation: frc-rise 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.05s both;
+}
+.frc-hero::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 15px;
+  border: 1px solid rgba(127, 29, 46, 0.14);
+  pointer-events: none;
+}
+.frc-hero-emboss {
+  width: 74px;
+  height: 74px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9F1239;
+  background: radial-gradient(circle at 50% 34%, #FBF3DD 0%, #EAD9B2 78%, #DCC79A 100%);
+  border: 1.5px solid rgba(201, 162, 75, 0.7);
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.85),
+    inset 0 -3px 6px rgba(127, 29, 46, 0.14),
+    0 6px 16px rgba(78, 15, 28, 0.22);
+  animation: frc-emboss 0.7s cubic-bezier(0.2, 0.9, 0.25, 1.2) 0.15s both;
+}
+@keyframes frc-emboss {
+  from { opacity: 0; transform: scale(0.6) rotate(-8deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0); }
+}
+.frc-hero-kicker {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #B0863A;
+}
+.frc-hero-title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 25px;
+  font-weight: 700;
+  color: #7F1D2E;
+  letter-spacing: 0.005em;
+  margin: 6px 0 8px;
+}
+.frc-hero-sub {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #7A5C38;
+  max-width: 280px;
+  margin: 0 auto;
+}
+.frc-hero-sub strong { color: #7F1D2E; font-weight: 700; }
+
+.frc-amount-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 18px;
+  padding-top: 15px;
+  border-top: 1.5px dashed rgba(127, 29, 46, 0.2);
+}
+.frc-amount-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #6E5230;
+  white-space: nowrap;
+}
+.frc-amount-dots {
+  flex: 1;
+  height: 0;
+  border-bottom: 1.5px dotted rgba(127, 29, 46, 0.32);
+  transform: translateY(-3px);
+}
+.frc-amount-value {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 30px;
+  font-weight: 700;
+  color: #7F1D2E;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.frc-amount-tag {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8A6A2E;
+  background: rgba(201, 162, 75, 0.16);
+  border: 1px solid rgba(201, 162, 75, 0.5);
+  border-radius: 30px;
+  padding: 4px 12px;
+}
+
+/* ── Reason card ── */
+.frc-reason {
+  border-radius: 16px;
+  padding: 15px 16px;
+  margin-top: 16px;
+  animation: frc-rise 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.12s both;
+}
+.frc-reason-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #9F1239;
+  margin-bottom: 8px;
+}
+.frc-reason-head span {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #7F1D2E;
+}
+.frc-reason-body {
+  font-size: 12.5px;
+  line-height: 1.62;
+  color: #6E5230;
+}
+.frc-reason-body strong { color: #7F1D2E; font-weight: 700; }
+
+/* ── Section titles (on the maroon page) ── */
+.frc-section-title {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(241, 223, 169, 0.85);
+  margin: 24px 0 12px;
+}
+
+/* ── Checklist ── */
+.frc-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: frc-rise 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.18s both;
+}
+.frc-check {
+  display: flex;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 14px;
+}
+.frc-check-mark {
+  flex-shrink: 0;
+  color: #1E7A47;
+  margin-top: 1px;
+}
+.frc-check-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #5C1522;
+  letter-spacing: -0.005em;
+}
+.frc-check-body {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #7A5C38;
+  margin-top: 3px;
+}
+
+/* ── Recipient ── */
+.frc-recipient {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 16px;
+  animation: frc-rise 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.24s both;
+}
+.frc-recipient-avatar {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9F1239;
+  background: radial-gradient(circle at 50% 35%, #FBF3DD, #E7D6B4);
+  border: 1px solid rgba(201, 162, 75, 0.5);
+}
+.frc-recipient-main { flex: 1; min-width: 0; }
+.frc-recipient-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #5C1522;
+  letter-spacing: -0.01em;
+}
+.frc-recipient-contact {
+  font-size: 12px;
+  color: #8A6A3E;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.frc-recipient-tag {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9F1239;
+  background: rgba(159, 18, 57, 0.08);
+  border: 1px solid rgba(159, 18, 57, 0.28);
+  border-radius: 30px;
+  padding: 4px 9px;
+}
+
+/* ── Footer / CTA ── */
+.frc-footer {
+  position: sticky;
+  bottom: 0;
+  flex-shrink: 0;
+  padding: 14px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(201, 162, 75, 0.26);
+  background: rgba(82, 16, 30, 0.9);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+.frc-cta {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 16px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 800;
+  font-family: inherit;
+  letter-spacing: 0.01em;
+  color: #FBF3DD;
+  background: linear-gradient(180deg, #B0243C 0%, #9F1239 48%, #7F1D2E 100%);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow:
+    0 12px 26px rgba(30, 5, 10, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  transition: transform 0.12s, box-shadow 0.15s;
+}
+.frc-cta svg { color: #F1DFA9; }
+.frc-cta:active {
+  transform: translateY(1px);
+  box-shadow: 0 7px 16px rgba(30, 5, 10, 0.42);
+}
+.frc-fineprint {
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: rgba(243, 236, 221, 0.6);
+  text-align: center;
+  margin-top: 11px;
+}
+
+/* ── Empty state ── */
+.frc-page--empty {
+  align-items: center;
+  justify-content: center;
+}
+.frc-empty-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 0 36px;
+  text-align: center;
+}
+.frc-empty-title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #FBF3DD;
+  letter-spacing: 0.01em;
+  margin-top: 4px;
+}
+.frc-empty-sub {
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(243, 236, 221, 0.72);
+  max-width: 290px;
+}
+.frc-empty-btn {
+  margin-top: 16px;
+  padding: 13px 30px;
+  border: 1px solid rgba(201, 162, 75, 0.55);
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 800;
+  font-family: inherit;
+  color: #FBF3DD;
+  background: linear-gradient(180deg, #9F1239, #7F1D2E);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 10px 22px rgba(30, 5, 10, 0.42);
+}
+.frc-empty-btn:active { transform: translateY(1px); }
+
+/* Shared rise-in for body cards */
+@keyframes frc-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frc-page,
+  .frc-hero,
+  .frc-hero-emboss,
+  .frc-reason,
+  .frc-checklist,
+  .frc-recipient {
+    animation: none;
+  }
+}

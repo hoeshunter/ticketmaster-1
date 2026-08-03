@@ -1,0 +1,278 @@
+/* ══════════════════════════════════════════════
+   SECOND FEE PAGE — Management Review Fee notice
+   Deliberately distinct from FirstFee.css: this page
+   represents a different party (artist management,
+   not the venue/Ticketmaster) billing the sender, so
+   it reads as a formal authorization notice/invoice
+   rather than a consumer checkout screen.
+══════════════════════════════════════════════ */
+
+.sf-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  background: #faf9f6;
+  z-index: 999999999;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  color: #2a2a2a;
+  animation: sf-page-in 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+/* cubic-bezier(0.32, 0.72, 0, 1) is the widely-documented approximation of
+   UIKit's native sheet/modal presentation curve — a fast start that eases
+   into place without overshoot, distinct from a generic ease-out. */
+@keyframes sf-page-in {
+  from { opacity: 0; transform: translateY(28px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Letterhead ── */
+.sf-letterhead {
+  background: #141414;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 18px 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.sf-letterhead-left { display: flex; align-items: center; gap: 10px; }
+.sf-back-btn {
+  background: transparent;
+  color: #e9e4d6;
+  border: 1px solid rgba(233, 228, 214, 0.3);
+  width: 32px;
+  height: 32px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+.sf-brand {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 13.5px;
+  letter-spacing: 0.06em;
+  color: #f3ead2;
+  line-height: 1.3;
+}
+.sf-brand strong { display: block; font-size: 14.5px; }
+.sf-notice-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #b8963e;
+  border: 1px solid #b8963e;
+  border-radius: 2px;
+  padding: 4px 8px;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+/* ── Reference strip ── */
+.sf-refline {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 18px;
+  border-bottom: 1px solid #e4e0d6;
+  background: #f3f1ea;
+  font-size: 11px;
+  color: #6b6b63;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+/* ── Body ── */
+.sf-body {
+  padding: 20px 18px 24px;
+  flex: 1;
+}
+.sf-re-line {
+  font-size: 13px;
+  color: #4a4a44;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+.sf-re-line strong { color: #141414; }
+
+.sf-section-title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #6b6b63;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.sf-recipient-card {
+  border: 1px solid #e4e0d6;
+  padding: 12px 14px;
+  background: #fff;
+}
+.sf-recipient-name { font-size: 14.5px; font-weight: 700; color: #141414; }
+.sf-recipient-contact { font-size: 13px; color: #6b6b63; margin-top: 3px; }
+
+.sf-divider {
+  height: 1px;
+  background: #e4e0d6;
+  margin: 20px 0;
+}
+
+/* ── Itemized fee block (invoice style) ── */
+.sf-fee-block { display: flex; flex-direction: column; }
+.sf-fee-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #4a4a44;
+  padding: 10px 0;
+  border-bottom: 1px solid #ebe7dc;
+}
+.sf-fee-row--total {
+  border-bottom: none;
+  border-top: 1px solid #b8963e;
+  margin-top: 2px;
+  padding-top: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #141414;
+}
+
+/* ── Authorization card ── */
+.sf-auth-card {
+  margin-top: 24px;
+  background: #fff;
+  border: 1px solid #e4e0d6;
+  padding: 16px 18px 14px;
+}
+.sf-auth-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #141414;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.sf-auth-header svg { color: #b8963e; flex-shrink: 0; }
+.sf-refund-seal {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #b8963e;
+  color: #8a6d1f;
+  background: #f3ead2;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 4px 9px;
+  border-radius: 2px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+.sf-auth-text {
+  font-size: 12.5px;
+  color: #4a4a44;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+.sf-auth-text strong { color: #141414; font-weight: 700; }
+
+/* ── Footer / authorize button ── */
+.sf-footer {
+  padding: 16px 18px calc(14px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid #e4e0d6;
+  background: #faf9f6;
+  position: sticky;
+  bottom: 0;
+  flex-shrink: 0;
+}
+.sf-authorize-btn {
+  width: 100%;
+  background: #141414;
+  color: #f3ead2;
+  border: 1px solid #b8963e;
+  border-radius: 2px;
+  padding: 15px 26px;
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+.sf-authorize-btn:active { background: #262626; }
+.sf-authorize-btn--loading {
+  background: #3a3a3a;
+  color: #cfc4a3;
+  pointer-events: none;
+}
+.sf-fineprint {
+  font-size: 10.5px;
+  color: #8a887e;
+  line-height: 1.5;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* ── Empty / done states ── */
+.sf-page--empty,
+.sf-page--done {
+  align-items: center;
+  justify-content: center;
+}
+.sf-empty-inner,
+.sf-done-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 0 36px;
+  text-align: center;
+}
+.sf-empty-title,
+.sf-done-title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #141414;
+}
+.sf-empty-sub,
+.sf-done-sub {
+  font-size: 13.5px;
+  color: #6b6b63;
+  line-height: 1.55;
+}
+.sf-empty-btn,
+.sf-done-btn {
+  margin-top: 16px;
+  background: #141414;
+  color: #f3ead2;
+  border: 1px solid #b8963e;
+  border-radius: 2px;
+  padding: 13px 30px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.sf-empty-btn:active,
+.sf-done-btn:active { background: #262626; }

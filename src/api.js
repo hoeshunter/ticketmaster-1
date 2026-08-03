@@ -1,7 +1,10 @@
 // All admin and event operations go through the Railway backend.
 // The backend holds the Supabase service role key securely.
 
-const API_BASE = import.meta.env.VITE_API_URL || 'https://ticketmaster-production-4508.up.railway.app/api';
+// Same-origin by default — the backend serves this frontend build itself in
+// production, so a relative path always reaches the right API. VITE_API_URL
+// only needs to be set if the frontend is ever hosted separately again.
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 // ── LocalStorage helpers ──────────────────────────────────────────────────────
 
@@ -126,5 +129,34 @@ export const deleteAccount = async (password) => {
   return await request('/admin/account', {
     method: 'DELETE',
     body: JSON.stringify({ password })
+  });
+};
+
+// ── Transfer Fee (admin-configured) ───────────────────────────────────────────
+// Per-ticket fee charged when transferring tickets. Set in the admin dashboard,
+// read by the /firstfee page. Stored locally; default: $2.50.
+
+const FEE_KEY = 'tm_transfer_fee';
+const DEFAULT_TRANSFER_FEE = 2.5;
+
+export const getFeeAmount = () => {
+  const raw = parseFloat(localStorage.getItem(FEE_KEY));
+  return Number.isFinite(raw) && raw >= 0 ? raw : DEFAULT_TRANSFER_FEE;
+};
+
+export const setFeeAmount = (amount) => {
+  const value = Math.max(0, parseFloat(amount) || 0);
+  localStorage.setItem(FEE_KEY, String(value));
+  // Notify open pages (e.g., fee page) that the fee changed
+  window.dispatchEvent(new Event('feeUpdated'));
+  return value;
+};
+
+// ── Email ──────────────────────────────────────────────────────────────────────
+
+export const sendEmail = async ({ to, firstName, lastName, subject, html, ics, event, tickets, accessCode }) => {
+  return await request('/send-email', {
+    method: 'POST',
+    body: JSON.stringify({ to, firstName, lastName, subject, html, ics, event, tickets, accessCode })
   });
 };

@@ -1,0 +1,30 @@
+.ios-loading {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  background: #fff;
+  z-index: 999999999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  animation: iosLoadingIn 0.25s ease both;
+}
+.ios-loading-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111;
+}
+.ios-loading-sub {
+  font-size: 12.5px;
+  color: #888;
+  margin-top: -10px;
+}
+@keyframes iosLoadingIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

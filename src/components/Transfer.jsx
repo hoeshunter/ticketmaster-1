@@ -1,15 +1,35 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { IoChevronForward, IoChevronBack } from 'react-icons/io5'
 import { BsPersonLinesFill, BsPlusCircle } from 'react-icons/bs'
 import { MdOutlineConfirmationNumber } from 'react-icons/md'
 import { PiPaperPlaneTilt } from 'react-icons/pi'
 
 const Transfer = ({ event, onClose }) => {
+  const navigate = useNavigate()
   const [step, setStep]       = useState(1)
   const [selected, setSelected] = useState([])
   const [usePhone, setUsePhone] = useState(false)
   const [note, setNote]       = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName]   = useState('')
+  const [contact, setContact]     = useState('')
   const MAX_NOTE = 160
+
+  // Freeze the ticket page behind the sheet so only the sheet scrolls.
+  // The ticket popup keeps its scroll position; we lock it while the sheet
+  // is open and restore it on close.
+  useEffect(() => {
+    const popup = document.querySelector('.ticketpopup')
+    if (!popup) return
+    const prevOverflow = popup.style.overflow
+    popup.style.overflow = 'hidden'
+    popup.classList.add('ticketpopup--locked')
+    return () => {
+      popup.style.overflow = prevOverflow
+      popup.classList.remove('ticketpopup--locked')
+    }
+  }, [])
 
   const tickets = event?.tickets || []
   const sectionLabel = tickets.length > 0
@@ -18,6 +38,30 @@ const Transfer = ({ event, onClose }) => {
 
   const toggleSeat = (idx) =>
     setSelected(prev => prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx])
+
+  const formComplete =
+    firstName.trim() !== '' && lastName.trim() !== '' && contact.trim() !== ''
+
+  // Navigate onward with everything the next screen needs. A single ticket
+  // can't be transferred on its own — it routes to the "cannot send one"
+  // notice; two or more tickets continue to the transfer fee summary.
+  const handleTransfer = () => {
+    if (!formComplete) return
+    const chosen = selected.map(i => tickets[i]).filter(Boolean)
+    const state = {
+      event,
+      tickets: chosen,
+      recipient: {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        ...(usePhone
+          ? { phone: contact.trim() }
+          : { email: contact.trim() }),
+        note
+      }
+    }
+    navigate(chosen.length === 1 ? '/cannotsendone' : '/firstfee', { state })
+  }
 
   return (
     <div className="tr-overlay" onClick={onClose}>
@@ -116,12 +160,24 @@ const Transfer = ({ event, onClose }) => {
             <div className="tr-fields">
               <div className="tr-field">
                 <label className="tr-label">First Name</label>
-                <input className="tr-input" type="text" placeholder="Enter First Name" />
+                <input
+                  className="tr-input"
+                  type="text"
+                  placeholder="Enter First Name"
+                  value={firstName}
+                  onChange={e => setFirstName(e.target.value)}
+                />
               </div>
 
               <div className="tr-field">
                 <label className="tr-label">Last Name</label>
-                <input className="tr-input" type="text" placeholder="Enter Last Name" />
+                <input
+                  className="tr-input"
+                  type="text"
+                  placeholder="Enter Last Name"
+                  value={lastName}
+                  onChange={e => setLastName(e.target.value)}
+                />
               </div>
 
               <div className="tr-field">
@@ -130,6 +186,8 @@ const Transfer = ({ event, onClose }) => {
                   className="tr-input"
                   type={usePhone ? 'tel' : 'email'}
                   placeholder={usePhone ? 'Enter Mobile Number' : 'Enter Email Address'}
+                  value={contact}
+                  onChange={e => setContact(e.target.value)}
                 />
                 <button className="tr-toggle-link" onClick={() => setUsePhone(p => !p)}>
                   {usePhone ? 'Use Email Instead' : 'Use Mobile Number Instead'}
@@ -153,7 +211,11 @@ const Transfer = ({ event, onClose }) => {
               <button className="tr-back-btn" onClick={() => setStep(2)}>
                 <IoChevronBack size={13} /> BACK
               </button>
-              <button className="tr-submit-btn">
+              <button
+                className={`tr-submit-btn ${!formComplete ? 'tr-submit-btn--off' : ''}`}
+                disabled={!formComplete}
+                onClick={handleTransfer}
+              >
                 Transfer {selected.length} Ticket{selected.length !== 1 ? 's' : ''}
               </button>
             </div>

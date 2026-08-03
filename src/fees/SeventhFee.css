@@ -1,0 +1,507 @@
+/* ══════════════════════════════════════════════
+   SEVENTH FEE — Verified Fan™ Identity Assurance Bond
+   The one official-platform screen: deep navy glass with
+   Ticketmaster electric blue. Reads like a secure biometric
+   identity-verification surface (NOT a checkout): a shield /
+   fingerprint motif, a refundable $88 bond, and an anti-bot
+   explanation. Own vfb- prefix, own blue glass system.
+══════════════════════════════════════════════ */
+
+.vfb-page {
+  position: fixed;
+  top: 0; left: 0;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 999999999;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  color: #EAF2FF;
+  background:
+    radial-gradient(130% 60% at 50% -8%, rgba(47, 139, 255, 0.22) 0%, rgba(47, 139, 255, 0) 52%),
+    radial-gradient(90% 46% at 100% 4%, rgba(2, 108, 223, 0.16) 0%, rgba(2, 108, 223, 0) 60%),
+    linear-gradient(180deg, #0A1E3F 0%, #082548 58%, #06294F 100%);
+  background-color: #06294F;
+  animation: vfb-page-in 0.6s cubic-bezier(0.22, 0.85, 0.24, 1) both;
+}
+
+/* UNIQUE entrance — a de-blurring "secure channel opening" reveal */
+@keyframes vfb-page-in {
+  from { opacity: 0; transform: translateY(20px) scale(0.985); filter: blur(10px); }
+  to   { opacity: 1; transform: translateY(0) scale(1);        filter: blur(0); }
+}
+
+/* ── Header ── */
+.vfb-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 14px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(120, 175, 255, 0.14);
+}
+.vfb-back-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: #EAF2FF;
+  border: 1px solid rgba(120, 175, 255, 0.2);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+.vfb-back-btn:active { background: rgba(120, 175, 255, 0.2); }
+.vfb-brand {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #DCE9FF;
+}
+.vfb-brand svg { color: #2F8BFF; flex-shrink: 0; }
+.vfb-official-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #9CC6FF;
+  background: rgba(47, 139, 255, 0.14);
+  border: 1px solid rgba(47, 139, 255, 0.4);
+  border-radius: 30px;
+  padding: 4px 9px;
+  white-space: nowrap;
+}
+
+/* ── Body ── */
+.vfb-body {
+  padding: 22px 16px 24px;
+  flex: 1;
+}
+
+/* ── Hero identity card ── */
+.vfb-id-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  padding: 26px 20px 22px;
+  text-align: center;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid rgba(120, 175, 255, 0.28);
+  box-shadow:
+    0 22px 52px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  animation: vfb-rise 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.05s both;
+}
+.vfb-id-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 14%; right: 14%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #2F8BFF, transparent);
+}
+.vfb-id-glow {
+  position: absolute;
+  top: -70px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 260px;
+  height: 170px;
+  background: radial-gradient(circle, rgba(47, 139, 255, 0.32) 0%, rgba(47, 139, 255, 0) 70%);
+  pointer-events: none;
+}
+
+/* shield emblem at the top of the hero */
+.vfb-shield {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 14px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  background: linear-gradient(160deg, #2F8BFF 0%, #026CDF 100%);
+  box-shadow: 0 10px 26px rgba(2, 108, 223, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.vfb-shield::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 22px;
+  border: 1px solid rgba(47, 139, 255, 0.4);
+  animation: vfb-shield-halo 2.6s ease-in-out infinite;
+}
+@keyframes vfb-shield-halo {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50%      { opacity: 0.8;  transform: scale(1.08); }
+}
+
+.vfb-id-eyebrow {
+  position: relative;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9CC6FF;
+  margin-bottom: 8px;
+}
+.vfb-id-title {
+  position: relative;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: #F3F8FF;
+  line-height: 1.25;
+  margin-bottom: 16px;
+}
+.vfb-id-amount {
+  position: relative;
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  background: linear-gradient(180deg, #BFDCFF 0%, #2F8BFF 55%, #026CDF 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 22px rgba(47, 139, 255, 0.28);
+}
+.vfb-refund-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 14px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #7BE0B4;
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.32);
+  border-radius: 30px;
+  padding: 5px 12px;
+}
+.vfb-id-note {
+  position: relative;
+  font-size: 12.5px;
+  color: #A9C3E6;
+  line-height: 1.55;
+  margin-top: 14px;
+}
+.vfb-id-note strong { color: #9CC6FF; font-weight: 700; }
+
+/* ── Reason card ── */
+.vfb-reason-card {
+  display: flex;
+  gap: 13px;
+  margin-top: 16px;
+  padding: 15px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(120, 175, 255, 0.16);
+  animation: vfb-rise 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.12s both;
+}
+.vfb-reason-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2F8BFF;
+  background: rgba(47, 139, 255, 0.14);
+  border: 1px solid rgba(47, 139, 255, 0.28);
+}
+.vfb-reason-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #F3F8FF;
+  letter-spacing: -0.01em;
+  margin-bottom: 5px;
+}
+.vfb-reason-body {
+  font-size: 12.5px;
+  color: #A9C3E6;
+  line-height: 1.6;
+}
+.vfb-reason-body strong { color: #DCE9FF; font-weight: 700; }
+
+/* ── Section title ── */
+.vfb-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7FA3D0;
+  margin: 26px 0 12px;
+}
+
+/* ── Assurance feature grid ── */
+.vfb-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  animation: vfb-rise 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.18s both;
+}
+.vfb-feature {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 13px 13px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(120, 175, 255, 0.14);
+}
+.vfb-feature-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9CC6FF;
+  background: rgba(47, 139, 255, 0.12);
+}
+.vfb-feature-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #EAF2FF;
+  letter-spacing: -0.01em;
+}
+.vfb-feature-sub {
+  font-size: 11px;
+  color: #8FB0D8;
+  line-height: 1.45;
+}
+
+/* ── Verification flow steps ── */
+.vfb-flow {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: vfb-rise 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.24s both;
+}
+.vfb-step {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.vfb-step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 28px;
+  bottom: -18px;
+  width: 2px;
+  background: linear-gradient(180deg, rgba(47, 139, 255, 0.55), rgba(120, 175, 255, 0.1));
+}
+.vfb-step-dot {
+  position: relative;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9CC6FF;
+  background: rgba(10, 30, 63, 0.9);
+  border: 1px solid rgba(120, 175, 255, 0.22);
+}
+.vfb-step-dot--active {
+  color: #FFFFFF;
+  background: linear-gradient(180deg, #2F8BFF, #026CDF);
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(2, 108, 223, 0.5);
+}
+.vfb-step-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #EAF2FF;
+  letter-spacing: -0.01em;
+  padding-top: 4px;
+}
+.vfb-step-sub {
+  font-size: 12px;
+  color: #8FB0D8;
+  line-height: 1.5;
+  margin-top: 3px;
+}
+
+/* ── Recipient / verified subject card ── */
+.vfb-recipient-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(120, 175, 255, 0.16);
+  animation: vfb-rise 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.3s both;
+}
+.vfb-recipient-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #DCE9FF;
+  background: linear-gradient(150deg, #123a6e, #0c2c56);
+  border: 1px solid rgba(120, 175, 255, 0.2);
+}
+.vfb-recipient-main { flex: 1; min-width: 0; }
+.vfb-recipient-name {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #F3F8FF;
+  letter-spacing: -0.01em;
+}
+.vfb-recipient-contact {
+  font-size: 12.5px;
+  color: #8FB0D8;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vfb-recipient-tag {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #9CC6FF;
+  background: rgba(47, 139, 255, 0.12);
+  border: 1px solid rgba(47, 139, 255, 0.3);
+  border-radius: 30px;
+  padding: 4px 9px;
+}
+
+/* ── Footer / CTA ── */
+.vfb-footer {
+  padding: 14px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(120, 175, 255, 0.16);
+  background: rgba(6, 34, 66, 0.86);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  position: sticky;
+  bottom: 0;
+  flex-shrink: 0;
+}
+.vfb-cta-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  background: linear-gradient(180deg, #3D97FF 0%, #026CDF 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 50px;
+  padding: 16px 26px;
+  font-size: 15px;
+  font-weight: 800;
+  font-family: inherit;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 10px 28px rgba(2, 108, 223, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  transition: transform 0.12s, box-shadow 0.15s;
+}
+.vfb-cta-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 6px 16px rgba(2, 108, 223, 0.36);
+}
+.vfb-fineprint {
+  font-size: 11px;
+  color: #7FA3D0;
+  line-height: 1.5;
+  margin-top: 11px;
+  text-align: center;
+}
+.vfb-fineprint strong { color: #9CC6FF; font-weight: 700; }
+
+/* ── Empty state ── */
+.vfb-page--empty {
+  align-items: center;
+  justify-content: center;
+}
+.vfb-empty-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 0 36px;
+  text-align: center;
+}
+.vfb-empty-title {
+  font-size: 19px;
+  font-weight: 800;
+  color: #F3F8FF;
+  letter-spacing: -0.015em;
+}
+.vfb-empty-sub {
+  font-size: 13.5px;
+  color: #A9C3E6;
+  line-height: 1.55;
+  max-width: 300px;
+}
+.vfb-empty-btn {
+  margin-top: 16px;
+  background: linear-gradient(180deg, #3D97FF 0%, #026CDF 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 50px;
+  padding: 13px 34px;
+  font-size: 14px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 10px 26px rgba(2, 108, 223, 0.4);
+}
+.vfb-empty-btn:active { transform: translateY(1px); }
+
+/* shared rise-in for body cards */
+@keyframes vfb-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vfb-page,
+  .vfb-id-card,
+  .vfb-reason-card,
+  .vfb-features,
+  .vfb-flow,
+  .vfb-recipient-card { animation: none; }
+  .vfb-shield::after { animation: none; }
+}

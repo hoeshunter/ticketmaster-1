@@ -1,0 +1,118 @@
+/* ══════════════════════════════════════════════
+   TICKET BARCODE VIEWER — traditional SafeTix screen
+   Dark letterhead page (matches the app's tp-hero dark
+   sections, #131313) with the platform wordmark, event
+   header, and a list of perforated ticket stubs.
+   Own bcv- prefix.
+══════════════════════════════════════════════ */
+
+.bcv-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  background: #131313;
+  z-index: 999999999;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  animation: bcv-page-in 0.32s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+@keyframes bcv-page-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Header: back button + platform wordmark ── */
+.bcv-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(14px + env(safe-area-inset-top, 0px)) 14px 10px;
+  flex-shrink: 0;
+}
+.bcv-back-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.bcv-wordmark {
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-transform: lowercase;
+}
+.bcv-header-spacer { width: 34px; flex-shrink: 0; }
+
+/* ── Event header block ── */
+.bcv-event-block {
+  padding: 4px 18px 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.bcv-event-name {
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  line-height: 1.25;
+}
+.bcv-event-venue {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12.5px;
+  margin-top: 4px;
+}
+.bcv-event-datetime {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 11.5px;
+  margin-top: 4px;
+}
+
+/* ── Persistent warning banner ── */
+.bcv-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(242, 184, 75, 0.12);
+  border-top: 1px solid rgba(242, 184, 75, 0.25);
+  border-bottom: 1px solid rgba(242, 184, 75, 0.25);
+  flex-shrink: 0;
+}
+.bcv-banner-icon { color: #f2b84b; flex-shrink: 0; }
+.bcv-banner-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #f2b84b;
+  line-height: 1.4;
+}
+
+/* ── Body ── */
+.bcv-body {
+  padding: 20px 16px calc(24px + env(safe-area-inset-bottom, 0px));
+  flex: 1;
+}
+.bcv-empty {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13.5px;
+  margin-top: 40px;
+}

@@ -1,0 +1,98 @@
+/* ══════════════════════════════════════════════
+   iOS 26 "LIQUID GLASS" CONFIRMATION ALERT
+   Confirmed specs: 28px continuous corner radius,
+   systemThinMaterial blur, layered glass surfaces.
+   Width (270pt) and separator color are long-standing
+   iOS HIG constants used here as faithful defaults.
+══════════════════════════════════════════════ */
+
+.ios-alert-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999999999;
+  background: rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: ios-alert-backdrop-in 0.2s ease both;
+}
+.ios-alert-backdrop--out {
+  animation: ios-alert-backdrop-out 0.18s ease both;
+}
+@keyframes ios-alert-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes ios-alert-backdrop-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+.ios-alert-card {
+  width: 270px;
+  border-radius: 28px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  /* Apple's actual Liquid Glass preset for this kind of presentation is
+     SwiftUI's `.bouncy(duration: 0.35)` spring — matched here via duration
+     with a cubic-bezier overshoot approximating its bounce character. */
+  animation: ios-alert-card-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.ios-alert-card--out {
+  animation: ios-alert-card-out 0.18s ease both;
+}
+@keyframes ios-alert-card-in {
+  from { opacity: 0; transform: scale(1.15); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes ios-alert-card-out {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.9); }
+}
+
+.ios-alert-body {
+  padding: 20px 16px 18px;
+  text-align: center;
+}
+.ios-alert-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 4px;
+}
+.ios-alert-message {
+  font-size: 13px;
+  color: #3c3c43;
+  line-height: 1.35;
+}
+
+.ios-alert-actions {
+  display: flex;
+  border-top: 0.5px solid rgba(60, 60, 67, 0.29);
+}
+.ios-alert-btn {
+  flex: 1;
+  padding: 11px 0;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 17px;
+  color: #007AFF;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ios-alert-btn:first-child {
+  border-right: 0.5px solid rgba(60, 60, 67, 0.29);
+}
+.ios-alert-btn--confirm {
+  font-weight: 600;
+}
+.ios-alert-btn:active {
+  background: rgba(0, 0, 0, 0.06);
+}

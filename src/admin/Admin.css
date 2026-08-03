@@ -721,3 +721,157 @@
   margin: 0;
   max-width: 280px;
 }
+
+/* -- Transfer Fee Section ------------------------------ */
+.fee-section {
+  margin-bottom: 30px;
+}
+
+.fee-current {
+  font-size: 14px;
+  color: #666;
+  background: #f4f4fb;
+  border: 1px solid #e2e2f2;
+  border-radius: 6px;
+  padding: 8px 14px;
+}
+.fee-current strong { color: #667eea; }
+
+.fee-description {
+  font-size: 13.5px;
+  color: #888;
+  line-height: 1.5;
+  margin: -12px 0 20px;
+  max-width: 560px;
+}
+
+.fee-form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fee-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+.fee-input-wrap:focus-within { border-color: #667eea; }
+
+.fee-dollar {
+  padding: 0 4px 0 12px;
+  color: #888;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.fee-input {
+  border: none;
+  outline: none;
+  padding: 11px 12px 11px 4px;
+  font-size: 15px;
+  width: 120px;
+  color: #333;
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .fee-form { flex-direction: column; align-items: stretch; }
+  .fee-input { width: 100%; }
+}
+
+/* -- Ticket Status Section ------------------------------ */
+.ticket-status-section {
+  margin-bottom: 30px;
+}
+
+.ts-event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ts-event-group {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.ts-event-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.ts-ticket-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ts-ticket-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 10px 12px;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.ts-ticket-row--sent {
+  background: #f0fbf4;
+  border-color: #bfe8cd;
+}
+
+.ts-ticket-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ts-ticket-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #667eea;
+  text-transform: uppercase;
+}
+
+.ts-ticket-seat {
+  font-size: 13px;
+  color: #444;
+  font-weight: 500;
+}
+
+.ts-toggle-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #e3f2fd;
+  color: #1976d2;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+.ts-toggle-btn:hover { background: #bbdefb; }
+
+.ts-toggle-btn--sent {
+  background: #d9f5e3;
+  color: #1a8a4c;
+}
+.ts-toggle-btn--sent:hover { background: #c3edd3; }

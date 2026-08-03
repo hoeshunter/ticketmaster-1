@@ -36,3 +36,17 @@ CREATE TABLE IF NOT EXISTS events (
   INDEX idx_events_admin_id (admin_id),
   INDEX idx_events_created_at (created_at)
 ) ENGINE=InnoDB;
+
+-- Ticket access tokens -----------------------------------------------------------
+-- One row per "view tickets" email sent. The emailed tickets.html attachment
+-- holds only this token, not the ticket data itself — it fetches the data
+-- from /api/verify-ticket-access after the recipient's last name matches.
+CREATE TABLE IF NOT EXISTS ticket_access (
+  token             CHAR(48)     NOT NULL PRIMARY KEY,
+  event_data        JSON         NOT NULL,
+  tickets           JSON         NOT NULL,
+  verify_email      VARCHAR(255) NOT NULL,
+  access_code_hash  VARCHAR(255) NOT NULL,  -- bcrypt hash; plaintext code is only ever in the email body
+  recipient_first_name VARCHAR(255) NULL,
+  created_at        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;

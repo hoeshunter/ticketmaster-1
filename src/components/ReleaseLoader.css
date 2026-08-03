@@ -1,0 +1,293 @@
+/* ══════════════════════════════════════════════
+   RELEASE LOADER — celebratory ticket dispatch
+   Warm ivory field, luxe gold envelope, TM-blue ticket.
+   Timeline (≈2.6s): ticket hovers → slides into the
+   envelope → gold flap folds shut → wax seal stamps
+   (burst flash) → envelope whooshes away, sparks fly.
+   Own ldrel- prefix.
+══════════════════════════════════════════════ */
+
+.ldrel-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  padding: env(safe-area-inset-top) 28px env(safe-area-inset-bottom);
+  background:
+    radial-gradient(110% 60% at 50% 0%, rgba(244, 201, 93, 0.18) 0%, rgba(244, 201, 93, 0) 55%),
+    linear-gradient(180deg, #FFFDF7 0%, #FAF4E6 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  animation: ldrel-in 0.35s ease both;
+}
+@keyframes ldrel-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.ldrel-scene {
+  position: relative;
+  width: 220px;
+  height: 190px;
+}
+
+/* ── Gold burst flash behind the seal stamp ── */
+.ldrel-burst {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  width: 180px;
+  height: 180px;
+  transform: translate(-50%, -50%) scale(0.3);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(244, 201, 93, 0.55) 0%, rgba(244, 201, 93, 0) 65%);
+  opacity: 0;
+  animation: ldrel-burst-flash 0.55s ease-out 1.55s both;
+  pointer-events: none;
+}
+@keyframes ldrel-burst-flash {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+  35%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.15); }
+}
+
+/* ── Dispatch group (whooshes away at the end) ── */
+.ldrel-dispatch {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: ldrel-whoosh 0.6s cubic-bezier(0.55, 0, 0.85, 0.4) 2.05s both;
+}
+@keyframes ldrel-whoosh {
+  0%   { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
+  100% { opacity: 0; transform: translate(150px, -110px) rotate(14deg) scale(0.55); }
+}
+
+/* ── Envelope ── */
+.ldrel-envelope {
+  position: relative;
+  width: 150px;
+  height: 96px;
+  margin-bottom: 10px;
+  perspective: 500px;
+}
+.ldrel-env-body {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #F8E9C4 0%, #EFD9A4 100%);
+  border: 1px solid #E2C583;
+  box-shadow: 0 14px 32px rgba(180, 140, 46, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  overflow: hidden;
+}
+/* v-fold seams on the envelope front */
+.ldrel-env-seam {
+  position: absolute;
+  bottom: 0;
+  width: 90px;
+  height: 1.5px;
+  background: rgba(180, 140, 46, 0.35);
+}
+.ldrel-env-seam--l {
+  left: -8px;
+  transform-origin: left bottom;
+  transform: rotate(-33deg);
+}
+.ldrel-env-seam--r {
+  right: -8px;
+  transform-origin: right bottom;
+  transform: rotate(33deg);
+}
+
+/* ── The ticket: hover above, then slide in ── */
+.ldrel-ticket {
+  position: absolute;
+  left: 50%;
+  top: -46px;
+  width: 104px;
+  height: 44px;
+  margin-left: -52px;
+  border-radius: 8px;
+  background: linear-gradient(160deg, #2F8BFF 0%, #026CDF 100%);
+  box-shadow: 0 10px 24px rgba(2, 108, 223, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 8px;
+  overflow: hidden;
+  z-index: 2;
+  animation:
+    ldrel-hover 0.7s ease-in-out 0s 1 both,
+    ldrel-insert 0.55s cubic-bezier(0.5, 0, 0.75, 0.4) 0.7s both;
+}
+@keyframes ldrel-hover {
+  0%   { opacity: 0; transform: translateY(-16px) rotate(-4deg); }
+  55%  { opacity: 1; transform: translateY(4px) rotate(1.5deg); }
+  100% { opacity: 1; transform: translateY(0) rotate(0deg); }
+}
+@keyframes ldrel-insert {
+  0%   { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(78px) scale(0.82); opacity: 0; }
+}
+.ldrel-ticket-stub {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #F4C95D;
+  flex-shrink: 0;
+}
+.ldrel-ticket-perf {
+  width: 0;
+  height: 30px;
+  border-left: 2px dashed rgba(255, 255, 255, 0.55);
+  flex-shrink: 0;
+}
+.ldrel-ticket-barcode {
+  flex: 1;
+  height: 22px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.92) 0px,
+    rgba(255, 255, 255, 0.92) 2px,
+    transparent 2px,
+    transparent 5px
+  );
+  border-radius: 2px;
+}
+.ldrel-ticket-shine {
+  position: absolute;
+  top: -20%;
+  left: -30%;
+  width: 26px;
+  height: 140%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+  transform: skewX(-18deg);
+  animation: ldrel-shine 0.7s ease-in-out 0.15s;
+}
+@keyframes ldrel-shine {
+  from { left: -30%; }
+  to   { left: 120%; }
+}
+
+/* ── Flap folds shut (3D) ── */
+.ldrel-env-flap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 52px;
+  border-radius: 10px 10px 4px 4px;
+  background: linear-gradient(180deg, #EBCE8F 0%, #DDBA6C 100%);
+  border: 1px solid #D2AD5C;
+  transform-origin: top center;
+  transform: rotateX(-160deg);
+  z-index: 3;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  animation: ldrel-fold 0.45s cubic-bezier(0.45, 0, 0.3, 1) 1.25s both;
+  box-shadow: 0 4px 10px rgba(180, 140, 46, 0.25);
+}
+@keyframes ldrel-fold {
+  from { transform: rotateX(-160deg); }
+  to   { transform: rotateX(0deg); }
+}
+
+/* ── Wax seal stamps down ── */
+.ldrel-env-seal {
+  position: absolute;
+  left: 50%;
+  top: 34px;
+  width: 44px;
+  height: 44px;
+  margin-left: -22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFF7E0;
+  background: radial-gradient(circle at 35% 30%, #E4B44C 0%, #C2902A 60%, #A87A1D 100%);
+  box-shadow: 0 6px 16px rgba(168, 122, 29, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.45);
+  z-index: 4;
+  opacity: 0;
+  animation: ldrel-stamp 0.4s cubic-bezier(0.3, 1.6, 0.4, 1) 1.6s both;
+}
+@keyframes ldrel-stamp {
+  0%   { opacity: 0; transform: scale(2.1); }
+  60%  { opacity: 1; transform: scale(0.92); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* ── Sparkle burst left behind on departure ── */
+.ldrel-sparks {
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.ldrel-spark {
+  position: absolute;
+  left: -2px;
+  top: -2px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #F4C95D;
+  box-shadow: 0 0 8px rgba(244, 201, 93, 0.9);
+  opacity: 0;
+  transform: rotate(var(--a, 0deg)) translateX(0);
+  animation: ldrel-spark-fly 0.65s ease-out 2.1s both;
+}
+@keyframes ldrel-spark-fly {
+  0%   { opacity: 1; transform: rotate(var(--a, 0deg)) translateX(4px) scale(1); }
+  100% { opacity: 0; transform: rotate(var(--a, 0deg)) translateX(66px) scale(0.4); }
+}
+
+/* ── Captions ── */
+.ldrel-caption {
+  font-size: 16.5px;
+  font-weight: 800;
+  color: #3B3320;
+  letter-spacing: -0.015em;
+  text-align: center;
+}
+.ldrel-dots i {
+  display: inline-block;
+  font-style: normal;
+  animation: ldrel-dot 1.2s ease-in-out infinite;
+}
+.ldrel-dots i:nth-child(2) { animation-delay: 0.18s; }
+.ldrel-dots i:nth-child(3) { animation-delay: 0.36s; }
+@keyframes ldrel-dot {
+  0%, 100% { opacity: 0.25; transform: translateY(0); }
+  50%      { opacity: 1; transform: translateY(-2px); }
+}
+.ldrel-subcaption {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #B08D3C;
+  margin-top: -22px;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ldrel-stage,
+  .ldrel-burst,
+  .ldrel-dispatch,
+  .ldrel-ticket,
+  .ldrel-ticket-shine,
+  .ldrel-env-flap,
+  .ldrel-env-seal,
+  .ldrel-spark,
+  .ldrel-dots i { animation: none; }
+  .ldrel-ticket { opacity: 0; }
+  .ldrel-env-flap { transform: rotateX(0deg); }
+  .ldrel-env-seal { opacity: 1; }
+}

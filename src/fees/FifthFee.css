@@ -1,0 +1,588 @@
+/* ══════════════════════════════════════════════
+   FIFTH FEE PAGE — Barcode Re-Encryption & Ledger Sync
+   Server-terminal surface: near-black #0A0E14, cyan/teal
+   neon (#22D3EE / #06B6D4), monospace technical accents,
+   thin data-grid lines. Cold, technical, "datacenter".
+   Own led- prefix, own color system. Distinct from the
+   gold tf- escrow screen and every other fee.
+══════════════════════════════════════════════ */
+
+.led-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 999999999;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(100% 45% at 50% -8%, rgba(34, 211, 238, 0.14) 0%, rgba(34, 211, 238, 0) 55%),
+    radial-gradient(80% 40% at 100% 0%, rgba(6, 182, 212, 0.10) 0%, rgba(6, 182, 212, 0) 60%),
+    linear-gradient(180deg, #0B1017 0%, #0A0E14 55%, #070A0F 100%);
+  background-color: #0A0E14;
+  color: #DCE9EE;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  animation: led-boot-in 0.55s cubic-bezier(0.22, 0.85, 0.24, 1) both;
+}
+/* thin scan-grid overlay across the whole page */
+.led-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(34, 211, 238, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.04) 1px, transparent 1px);
+  background-size: 34px 34px;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 60%);
+  mask-image: linear-gradient(180deg, #000 0%, transparent 60%);
+}
+.led-page > * { position: relative; z-index: 1; }
+
+/* UNIQUE entrance: terminal "boot" — clip open from the top with a lift. */
+@keyframes led-boot-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+    clip-path: inset(0 0 40% 0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* ── Header ── */
+.led-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 13px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(34, 211, 238, 0.14);
+}
+.led-back {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #DCE9EE;
+  background: rgba(34, 211, 238, 0.08);
+  border: 1px solid rgba(34, 211, 238, 0.2);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+.led-back:active { background: rgba(34, 211, 238, 0.18); }
+.led-brand {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #b8ccd3;
+}
+.led-brand svg { color: #22D3EE; flex-shrink: 0; }
+.led-node-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #6DE7F5;
+  background: rgba(34, 211, 238, 0.1);
+  border: 1px solid rgba(34, 211, 238, 0.3);
+  border-radius: 6px;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+/* ── Body ── */
+.led-body {
+  padding: 20px 16px 24px;
+  flex: 1;
+}
+
+/* ── Amount hero ── */
+.led-amount-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  padding: 24px 20px 22px;
+  text-align: center;
+  background:
+    linear-gradient(180deg, rgba(34, 211, 238, 0.07) 0%, rgba(6, 20, 26, 0.5) 100%);
+  border: 1px solid rgba(34, 211, 238, 0.26);
+  box-shadow:
+    0 18px 44px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(34, 211, 238, 0.14);
+  animation: led-lift 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.05s both;
+}
+.led-amount-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #22D3EE, transparent);
+}
+/* slow scanline sweeping the hero */
+.led-scan {
+  position: absolute;
+  left: 0; right: 0;
+  top: 0;
+  height: 34%;
+  background: linear-gradient(180deg, rgba(34, 211, 238, 0.16), transparent);
+  pointer-events: none;
+  animation: led-scan-move 3.4s ease-in-out infinite;
+}
+@keyframes led-scan-move {
+  0%, 100% { transform: translateY(-10%); opacity: 0.5; }
+  50% { transform: translateY(230%); opacity: 0.9; }
+}
+.led-eyebrow {
+  position: relative;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #7fa7b1;
+  margin-bottom: 10px;
+}
+.led-amount {
+  position: relative;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 52px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: #E7FBFF;
+  text-shadow: 0 0 22px rgba(34, 211, 238, 0.55);
+  font-variant-numeric: tabular-nums;
+}
+.led-flat-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 13px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #6DE7F5;
+  background: rgba(34, 211, 238, 0.1);
+  border: 1px solid rgba(34, 211, 238, 0.32);
+  border-radius: 30px;
+  padding: 5px 12px;
+}
+.led-amount-sub {
+  position: relative;
+  font-size: 12.5px;
+  color: #8ba7b0;
+  line-height: 1.55;
+  margin-top: 14px;
+}
+.led-amount-sub strong { color: #6DE7F5; font-weight: 700; }
+
+/* ── Token re-encryption visual ── */
+.led-token-card {
+  margin-top: 16px;
+  padding: 15px 16px;
+  border-radius: 15px;
+  background: rgba(6, 20, 26, 0.55);
+  border: 1px solid rgba(34, 211, 238, 0.16);
+  animation: led-lift 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.1s both;
+}
+.led-token-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.led-token-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border-radius: 6px;
+  padding: 4px 7px;
+  width: 78px;
+}
+.led-token-tag--dead {
+  color: #f0a9a0;
+  background: rgba(240, 120, 100, 0.09);
+  border: 1px solid rgba(240, 120, 100, 0.28);
+}
+.led-token-tag--live {
+  color: #6DF0FB;
+  background: rgba(34, 211, 238, 0.1);
+  border: 1px solid rgba(34, 211, 238, 0.32);
+}
+.led-token-hash {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.led-token-hash--dead {
+  color: #6f8189;
+  text-decoration: line-through;
+  text-decoration-color: rgba(240, 120, 100, 0.6);
+}
+.led-token-hash--live {
+  color: #9beefb;
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.4);
+}
+.led-token-flow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0 8px 4px;
+  color: #22D3EE;
+}
+.led-token-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(34, 211, 238, 0.05), rgba(34, 211, 238, 0.45));
+}
+.led-token-flow svg {
+  animation: led-spin 2.4s linear infinite;
+}
+@keyframes led-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Reason card ── */
+.led-reason-card {
+  display: flex;
+  gap: 13px;
+  margin-top: 16px;
+  padding: 15px 16px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(34, 211, 238, 0.12);
+  animation: led-lift 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.16s both;
+}
+.led-reason-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #22D3EE;
+  background: rgba(34, 211, 238, 0.1);
+  border: 1px solid rgba(34, 211, 238, 0.24);
+}
+.led-reason-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #EAF6F9;
+  letter-spacing: -0.01em;
+  margin-bottom: 5px;
+}
+.led-reason-body {
+  font-size: 12.5px;
+  color: #8ba7b0;
+  line-height: 1.62;
+}
+.led-reason-body strong { color: #9beefb; font-weight: 700; }
+
+/* ── Section titles ── */
+.led-section-title {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5f7a83;
+  margin: 26px 0 14px;
+}
+
+/* ── Pipeline ── */
+.led-pipeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: led-lift 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.22s both;
+}
+.led-stage {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.led-stage:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 28px;
+  bottom: -20px;
+  width: 2px;
+  background: linear-gradient(180deg, rgba(34, 211, 238, 0.5), rgba(34, 211, 238, 0.08));
+}
+.led-stage-node {
+  position: relative;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7fa7b1;
+  background: #0E1622;
+  border: 1px solid rgba(34, 211, 238, 0.2);
+}
+.led-stage-node--active {
+  color: #0A0E14;
+  background: linear-gradient(180deg, #67E8F9, #06B6D4);
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(34, 211, 238, 0.45);
+}
+.led-stage-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #EAF6F9;
+  letter-spacing: -0.01em;
+  padding-top: 4px;
+}
+.led-stage-sub {
+  font-size: 12px;
+  color: #7d959d;
+  line-height: 1.5;
+  margin-top: 3px;
+}
+
+/* ── Datacenter replication strip ── */
+.led-dc-strip {
+  display: flex;
+  gap: 8px;
+  animation: led-lift 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.28s both;
+}
+.led-dc {
+  position: relative;
+  flex: 1;
+  height: 48px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #22D3EE;
+  background: rgba(6, 20, 26, 0.5);
+  border: 1px solid rgba(34, 211, 238, 0.2);
+  box-shadow: inset 0 0 10px rgba(34, 211, 238, 0.06);
+  animation: led-dc-pulse 2.6s ease-in-out infinite;
+  animation-delay: calc(var(--d) * 0.22s);
+}
+@keyframes led-dc-pulse {
+  0%, 100% { border-color: rgba(34, 211, 238, 0.2); box-shadow: inset 0 0 10px rgba(34, 211, 238, 0.06); }
+  50% { border-color: rgba(34, 211, 238, 0.55); box-shadow: inset 0 0 14px rgba(34, 211, 238, 0.22), 0 0 10px rgba(34, 211, 238, 0.18); }
+}
+.led-dc-tick {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #22D3EE;
+  box-shadow: 0 0 6px #22D3EE;
+  animation: led-dc-blink 2.6s steps(1, end) infinite;
+  animation-delay: calc(var(--d) * 0.22s);
+}
+@keyframes led-dc-blink {
+  0%, 45% { opacity: 0.25; }
+  50%, 100% { opacity: 1; }
+}
+
+/* ── Recipient / source of truth ── */
+.led-recipient-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(34, 211, 238, 0.14);
+  animation: led-lift 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.34s both;
+}
+.led-recipient-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0A0E14;
+  background: linear-gradient(150deg, #67E8F9, #06B6D4);
+  box-shadow: 0 6px 16px rgba(34, 211, 238, 0.3);
+}
+.led-recipient-main { flex: 1; min-width: 0; }
+.led-recipient-name {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #EAF6F9;
+  letter-spacing: -0.01em;
+}
+.led-recipient-contact {
+  font-size: 12.5px;
+  color: #7d959d;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.led-recipient-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6DE7F5;
+  background: rgba(34, 211, 238, 0.1);
+  border: 1px solid rgba(34, 211, 238, 0.28);
+  border-radius: 30px;
+  padding: 4px 9px;
+}
+
+/* ── Footer / CTA ── */
+.led-footer {
+  padding: 14px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(34, 211, 238, 0.14);
+  background: rgba(10, 14, 20, 0.9);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  position: sticky;
+  bottom: 0;
+  flex-shrink: 0;
+}
+.led-pay-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  background: linear-gradient(180deg, #67E8F9 0%, #22D3EE 45%, #06B6D4 100%);
+  color: #04252C;
+  border: none;
+  border-radius: 14px;
+  padding: 16px 26px;
+  font-size: 15px;
+  font-weight: 800;
+  font-family: inherit;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 10px 26px rgba(34, 211, 238, 0.35);
+  transition: transform 0.12s, box-shadow 0.15s;
+}
+.led-pay-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 6px 16px rgba(34, 211, 238, 0.28);
+}
+.led-fineprint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #5f7a83;
+  line-height: 1.5;
+  margin-top: 11px;
+  text-align: center;
+}
+.led-fineprint svg { flex-shrink: 0; color: #22D3EE; }
+
+/* ── Empty state ── */
+.led-page--empty {
+  align-items: center;
+  justify-content: center;
+}
+.led-empty-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 0 36px;
+  text-align: center;
+}
+.led-empty-title {
+  font-size: 19px;
+  font-weight: 800;
+  color: #EAF6F9;
+  letter-spacing: -0.015em;
+}
+.led-empty-sub {
+  font-size: 13.5px;
+  color: #8ba7b0;
+  line-height: 1.55;
+  max-width: 300px;
+}
+.led-empty-btn {
+  margin-top: 16px;
+  background: linear-gradient(180deg, #67E8F9 0%, #22D3EE 45%, #06B6D4 100%);
+  color: #04252C;
+  border: none;
+  border-radius: 12px;
+  padding: 13px 34px;
+  font-size: 14px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 10px 26px rgba(34, 211, 238, 0.32);
+}
+.led-empty-btn:active { transform: translateY(1px); }
+
+/* Shared card lift-in */
+@keyframes led-lift {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .led-page,
+  .led-amount-card,
+  .led-token-card,
+  .led-reason-card,
+  .led-pipeline,
+  .led-dc-strip,
+  .led-dc,
+  .led-dc-tick,
+  .led-recipient-card,
+  .led-scan,
+  .led-token-flow svg {
+    animation: none;
+  }
+  .led-page { clip-path: none; }
+  .led-scan { display: none; }
+}

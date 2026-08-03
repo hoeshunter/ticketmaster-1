@@ -1,0 +1,88 @@
+/* ══════════════════════════════════════════════
+   iOS LAUNCH / SPLASH SCREEN
+   App icon eases in + genuine iOS activity spinner,
+   then cross-fades away to reveal the app.
+══════════════════════════════════════════════ */
+
+.ios-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Sit below the notch / above the home indicator cleanly */
+  padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  opacity: 1;
+  transition: opacity 0.38s ease, transform 0.38s ease;
+  will-change: opacity, transform;
+}
+
+/* iOS cross-fade: the launch screen fades and lifts almost imperceptibly,
+   the way an app hands off to its first frame. */
+.ios-splash--leaving {
+  opacity: 0;
+  transform: scale(1.04);
+  pointer-events: none;
+}
+
+.ios-splash-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 46px;
+}
+
+/* App icon — iOS spring-in: quick scale up with a soft settle */
+.ios-splash-icon {
+  width: 96px;
+  height: 96px;
+  border-radius: 22px;               /* iOS squircle-ish */
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
+  animation: ios-icon-in 0.62s cubic-bezier(0.2, 0.9, 0.25, 1.15) both;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+@keyframes ios-icon-in {
+  0%   { opacity: 0; transform: scale(0.72); }
+  60%  { opacity: 1; transform: scale(1.06); }
+  100% { opacity: 1; transform: scale(1);    }
+}
+
+/* ── Genuine iOS activity indicator ──────────────────────────────
+   12 tapered spokes around a center; each blade fades on a stagger
+   so the bright point appears to sweep around — exactly how
+   UIActivityIndicatorView renders. */
+.ios-spinner {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  animation: ios-spinner-fade-in 0.5s ease 0.25s both;
+}
+
+@keyframes ios-spinner-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.ios-spinner-blade {
+  position: absolute;
+  left: 46.5%;
+  top: 4%;
+  width: 7%;
+  height: 26%;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.95);
+  transform-origin: center 172%;
+  transform: rotate(calc(var(--i) * 30deg));
+  animation: ios-blade-fade 1s linear infinite;
+  /* Stagger each blade by 1/12 of the cycle so the highlight sweeps */
+  animation-delay: calc(var(--i) * -0.0833s);
+}
+
+@keyframes ios-blade-fade {
+  0%   { opacity: 1; }
+  100% { opacity: 0.18; }
+}

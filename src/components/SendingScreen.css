@@ -1,0 +1,107 @@
+/* ══════════════════════════════════════════════
+   iOS "SENDING" LOADING SCREEN
+   Recipient avatar + paper-plane badge, iOS spinner,
+   and a "sending one ticket to {name}" caption.
+   Shares the dark background of the launch splash so
+   the sequence feels like one seamless handoff.
+══════════════════════════════════════════════ */
+
+.ios-sending {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: env(safe-area-inset-top) 24px env(safe-area-inset-bottom);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  animation: ios-sending-fade 0.4s ease both;
+}
+
+@keyframes ios-sending-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.ios-sending-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 34px;
+  text-align: center;
+}
+
+/* ── Recipient avatar with paper-plane badge ── */
+.ios-sending-avatar {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(150deg, #0a84ff 0%, #026CDF 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 34px rgba(2, 108, 223, 0.42);
+  animation: ios-avatar-in 0.6s cubic-bezier(0.2, 0.9, 0.25, 1.15) both,
+             ios-avatar-breathe 2.4s ease-in-out 0.6s infinite;
+}
+.ios-sending-initials {
+  color: #fff;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.ios-sending-plane {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #fff;
+  color: #026CDF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  animation: ios-plane-float 1.8s ease-in-out 0.6s infinite;
+}
+
+@keyframes ios-avatar-in {
+  0%   { opacity: 0; transform: scale(0.7); }
+  60%  { opacity: 1; transform: scale(1.06); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes ios-avatar-breathe {
+  0%, 100% { box-shadow: 0 12px 34px rgba(2, 108, 223, 0.42); }
+  50%      { box-shadow: 0 12px 44px rgba(2, 108, 223, 0.65); }
+}
+@keyframes ios-plane-float {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50%      { transform: translate(2px, -3px) rotate(-8deg); }
+}
+
+/* ── Caption ── */
+.ios-sending-text {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  animation: ios-caption-in 0.5s ease 0.35s both;
+}
+.ios-sending-text strong {
+  font-weight: 700;
+}
+.ios-sending-sub {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13.5px;
+  margin-top: -22px;
+  animation: ios-caption-in 0.5s ease 0.55s both;
+}
+
+@keyframes ios-caption-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

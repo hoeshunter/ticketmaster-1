@@ -1,0 +1,310 @@
+/* ══════════════════════════════════════════════
+   TICKET BARCODE — classic Ticketmaster SafeTix stub
+   White perforated ticket card on the dark viewer
+   background: seat details on top, a torn/notched
+   divider, then the barcode on the bottom half behind
+   a privacy cover. Own bct- prefix.
+
+   NOTE: .bct-notch fill must match the page background
+   it sits on (.bcv-page, #131313) — the "punched hole"
+   illusion depends on the notch reading as a cut-out to
+   whatever is directly behind the card.
+══════════════════════════════════════════════ */
+
+.bct-stub {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+}
+.bct-stub + .bct-stub { margin-top: 20px; }
+
+/* ── Top half: seat / event details ── */
+.bct-stub-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 16px 4px;
+}
+.bct-stub-info { min-width: 0; }
+.bct-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #026CDF;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.bct-event-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+.bct-event-meta {
+  font-size: 11.5px;
+  color: #888;
+  margin-top: 3px;
+}
+.bct-refresh-btn {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  border: 1px solid #e2e2e2;
+  color: #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+.bct-refresh-btn:active { background: #e4e4e4; }
+.bct-refresh-btn:disabled { opacity: 0.6; cursor: default; }
+.bct-refresh-btn--spinning svg { animation: bct-spin 0.7s linear infinite; }
+@keyframes bct-spin { to { transform: rotate(360deg); } }
+
+/* ── SECTION / ROW / SEAT — matches the tp-ticket-field layout elsewhere ── */
+.bct-fields {
+  display: flex;
+  align-items: flex-start;
+  padding: 10px 16px 18px;
+}
+.bct-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.bct-field:nth-child(2) { align-items: center; }
+.bct-field:nth-child(3) { align-items: flex-end; }
+.bct-field-label {
+  font-size: 9px;
+  color: #999;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+.bct-field-value {
+  font-size: 17px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+/* ── Perforated tear line with punched side-notches ── */
+.bct-tear {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.bct-tear-line {
+  flex: 1;
+  border-top: 2px dashed #d5d5d5;
+}
+.bct-notch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #131313; /* matches .bcv-page background — see note above */
+  flex-shrink: 0;
+}
+.bct-notch--left { margin-left: -11px; }
+.bct-notch--right { margin-right: -11px; }
+
+/* ── Bottom half: the barcode itself ── */
+.bct-barcode-frame {
+  position: relative;
+  background: #fff;
+}
+.bct-barcode-visual {
+  padding: 20px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.bct-bars {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  height: 72px;
+}
+.bct-bar { background: #131313; }
+.bct-gap { background: transparent; }
+.bct-code {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: #555;
+}
+
+/* ── Privacy cover — sits over just the barcode half ── */
+.bct-cover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 14px;
+  text-align: center;
+  background: linear-gradient(180deg, #1c1c1e 0%, #111113 100%);
+  transform: translateY(0);
+  transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.bct-cover--open {
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+.bct-cover-icon { color: #8a8a8e; margin-bottom: 2px; }
+.bct-cover-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+.bct-cover-sub {
+  font-size: 12px;
+  color: #9a9a9e;
+  margin-bottom: 8px;
+}
+.bct-view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #026CDF;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 9px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.bct-view-btn:active { background: #0257b3; }
+.bct-cover-warn {
+  margin-top: 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #f2b84b;
+}
+
+/* ── Hide-again control once revealed ── */
+.bct-hide-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  padding: 5px 11px;
+  font-size: 10.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Regenerated confirmation chip ── */
+.bct-regen-chip {
+  margin: 10px 16px 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #1a8a4c;
+  background: #e4f7ec;
+  border-radius: 30px;
+  padding: 5px 12px;
+  display: inline-block;
+  animation: bct-chip-in 0.25s ease both;
+}
+@keyframes bct-chip-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── SafeTix branding strip ── */
+.bct-safetix {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px 0;
+}
+.bct-safetix-icon { color: #026CDF; flex-shrink: 0; }
+.bct-safetix-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #026CDF;
+}
+.bct-safety-text {
+  font-size: 11px;
+  color: #999;
+  line-height: 1.5;
+  padding: 4px 16px 16px;
+}
+
+/* ── Sent state — the barcode half is replaced with this muted panel ── */
+.bct-stub--sent {
+  background: #f5f5f5;
+}
+.bct-stub--sent .bct-stub-info,
+.bct-stub--sent .bct-fields {
+  opacity: 0.55;
+}
+.bct-stub--sent .bct-tear-line {
+  border-top-color: #ddd;
+}
+
+.bct-sent-ribbon {
+  position: absolute;
+  top: 14px;
+  right: -34px;
+  width: 140px;
+  padding: 4px 0;
+  background: #6b7280;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-align: center;
+  transform: rotate(45deg);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.bct-sent-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 22px 24px 26px;
+  background: #f5f5f5;
+}
+.bct-sent-icon { color: #9aa0a8; margin-bottom: 2px; }
+.bct-sent-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #555;
+  letter-spacing: -0.01em;
+}
+.bct-sent-sub {
+  font-size: 12px;
+  color: #888;
+  line-height: 1.55;
+  max-width: 280px;
+}
