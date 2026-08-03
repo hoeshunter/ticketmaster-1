@@ -22,6 +22,15 @@ const AdminDashboard = () => {
       const data = await fetchAdminEvents();
       setEvents(data);
     } catch (err) {
+      // A stale/expired token isLoggedIn() still treats as "logged in" (it
+      // only checks the token exists, not that it's still valid) — without
+      // this, the dashboard silently shows an empty events list with a small
+      // error banner forever. Send them back to sign in properly instead.
+      if (/invalid or expired token/i.test(err.message)) {
+        logout();
+        navigate('/admin');
+        return;
+      }
       setError('Failed to load events: ' + err.message);
     } finally {
       setLoading(false);
