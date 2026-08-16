@@ -22,7 +22,8 @@ const { buildTicketsPageHtml } = require('./ticketsPage');
 // against — same reasoning as EMAIL_BACKEND_ORIGIN in the frontend's
 // emailTemplate.js for hero images. PUBLIC_ORIGIN is set as a Railway env
 // var to this service's public domain; falls back to localhost for local dev.
-const PUBLIC_API_BASE = `${process.env.PUBLIC_ORIGIN || `http://localhost:${process.env.PORT || 3001}`}/api`;
+const PUBLIC_ORIGIN = process.env.PUBLIC_ORIGIN || `http://localhost:${process.env.PORT || 3001}`;
+const PUBLIC_API_BASE = `${PUBLIC_ORIGIN}/api`;
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -57,7 +58,11 @@ const pool = mysql.createPool({
 // Verify DB connectivity at startup, then make sure ticket_access exists
 // (added for the tickets.html verification flow — created defensively here
 // so existing dev databases don't need a manual migration step).
-pool.getConnection()
+// app.listen() below is gated on this promise resolving — previously it
+// ran independently, so a request could reach a route (e.g. /api/send-email
+// inserting sender_name) before the ALTER TABLE statements here finished,
+// intermittently failing with "Unknown column" right after every restart.
+const dbReady = pool.getConnection()
   .then(async (conn) => {
     console.log('MySQL connected');
     conn.release();
@@ -66,12 +71,34 @@ pool.getConnection()
         token             CHAR(48)     NOT NULL PRIMARY KEY,
         event_data        JSON         NOT NULL,
         tickets           JSON         NOT NULL,
-        verify_email      VARCHAR(255) NOT NULL,
-        access_code_hash  VARCHAR(255) NOT NULL,
+        sender_name       VARCHAR(255) NULL,
         recipient_first_name VARCHAR(255) NULL,
+        accepted          TINYINT(1)   NOT NULL DEFAULT 0,
+        accepted_at       TIMESTAMP    NULL,
         created_at        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
       ) ENGINE=InnoDB
     `);
+    // Older DBs created before the direct-view redesign still have the
+    // email+access-code gate columns (NOT NULL) and are missing the
+    // acceptance columns — bring them in line so both old and fresh
+    // databases work without a manual migration step.
+    const [cols] = await pool.query(`SHOW COLUMNS FROM ticket_access`);
+    const colNames = cols.map(c => c.Field);
+    if (colNames.includes('verify_email')) {
+      await pool.query(`ALTER TABLE ticket_access MODIFY verify_email VARCHAR(255) NULL`);
+    }
+    if (colNames.includes('access_code_hash')) {
+      await pool.query(`ALTER TABLE ticket_access MODIFY access_code_hash VARCHAR(255) NULL`);
+    }
+    if (!colNames.includes('accepted')) {
+      await pool.query(`ALTER TABLE ticket_access ADD COLUMN accepted TINYINT(1) NOT NULL DEFAULT 0`);
+    }
+    if (!colNames.includes('accepted_at')) {
+      await pool.query(`ALTER TABLE ticket_access ADD COLUMN accepted_at TIMESTAMP NULL`);
+    }
+    if (!colNames.includes('sender_name')) {
+      await pool.query(`ALTER TABLE ticket_access ADD COLUMN sender_name VARCHAR(255) NULL`);
+    }
   })
   .catch(err => {
     console.error('FATAL: cannot connect to MySQL');
@@ -86,6 +113,14 @@ pool.getConnection()
 // Local image storage (replaces Supabase Storage)
 const UPLOAD_DIR = path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+
+// Pre-rasterized transfer-tracker step icons (see generate-email-icons.cjs
+// at the repo root). Served here so the frontend's live email preview can
+// load them as a normal same-origin <img>; /api/send-email below then
+// swaps that same URL for a cid: reference and attaches the PNG bytes
+// directly, since Gmail strips inline <svg> and won't reliably re-fetch a
+// remote icon URL either.
+const EMAIL_ICONS_DIR = path.join(__dirname, 'assets', 'email-icons');
 
 // CORS: allow production domains + any local network origin in dev.
 // PUBLIC_ORIGIN (this service's own Railway domain) is included since the
@@ -119,6 +154,7 @@ app.use(express.json());
 
 // Serve uploaded images at /uploads/<file>
 app.use('/uploads', express.static(UPLOAD_DIR));
+app.use('/api/email-icons', express.static(EMAIL_ICONS_DIR));
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
@@ -300,7 +336,7 @@ app.get('/api/events', async (req, res) => {
 
 // ── Email ─────────────────────────────────────────────────────────────────────
 app.post('/api/send-email', async (req, res) => {
-  const { to, firstName, lastName, subject, html, ics, event, tickets, accessCode } = req.body || {};
+  const { to, firstName, lastName, subject, html, ics, event, tickets, senderName } = req.body || {};
   if (!to || !html) return res.status(400).json({ error: 'to and html are required' });
   try {
     const fromAddress = process.env.SMTP_FROM || process.env.SMTP_USER;
@@ -311,29 +347,86 @@ app.post('/api/send-email', async (req, res) => {
       content: ics,
       contentType: 'text/calendar; charset=utf-8; method=PUBLISH'
     });
-    // Verification-gated tickets.html: the file itself carries no ticket
-    // data, only a token — the recipient has to enter their email plus the
-    // access code shown in the email body (checked server-side) before
-    // /api/verify-ticket-access returns the actual event/seat details.
-    // Only the bcrypt hash of the code is ever stored.
-    if (event && tickets?.length && accessCode) {
+    // Ticket attachment: opens straight into the ticket view, no separate
+    // email+access-code gate. The file itself carries no ticket data, only
+    // an unguessable random token (capability-URL pattern, same trust model
+    // as the real ACCEPT TICKETS link) — /api/ticket-access/:token resolves
+    // it to the actual event/seat details.
+    if (event && tickets?.length) {
       const token = crypto.randomBytes(24).toString('hex');
-      const accessCodeHash = bcrypt.hashSync(accessCode, 10);
       await pool.query(
-        'INSERT INTO ticket_access (token, event_data, tickets, verify_email, access_code_hash, recipient_first_name) VALUES (?, ?, ?, ?, ?, ?)',
-        [token, JSON.stringify(event), JSON.stringify(tickets), to, accessCodeHash, firstName || null]
+        'INSERT INTO ticket_access (token, event_data, tickets, sender_name, recipient_first_name) VALUES (?, ?, ?, ?, ?)',
+        [token, JSON.stringify(event), JSON.stringify(tickets), senderName || null, firstName || null]
       );
       attachments.push({
-        filename: 'tickets.html',
+        filename: 'your-tickets.html',
         content: buildTicketsPageHtml({ token, apiBase: PUBLIC_API_BASE }),
         contentType: 'text/html; charset=utf-8'
       });
     }
+    // The incoming `html` still has the tracker icons and hero image as
+    // plain <img src="https://...same-origin.../..."> — fine for the
+    // frontend's own preview iframe, but in a delivered Gmail message that
+    // means either a stripped inline <svg> (icons, previously) or an image
+    // Gmail's proxy has to fetch itself and can fail/serve stale (hero).
+    // Rewrite both to cid: references and attach the real bytes below —
+    // the same "it's actually in the email" treatment as invite.ics and
+    // your-tickets.html above, not just a link out to this server.
+    let finalHtml = html;
+
+    // Step-tracker icons: swap every /api/email-icons/<name>.png reference
+    // for a cid'd PNG read straight off disk (same host as this server).
+    // Matched on path only (not a literal PUBLIC_ORIGIN prefix) since the
+    // frontend resolves these via window.location.origin, which in local
+    // dev is the Vite dev server's own origin, not this backend's.
+    const iconNames = new Set(
+      [...html.matchAll(/\/api\/email-icons\/([\w-]+)\.png/g)].map((m) => m[1])
+    );
+    for (const name of iconNames) {
+      const filePath = path.join(EMAIL_ICONS_DIR, `${name}.png`);
+      if (!fs.existsSync(filePath)) continue;
+      attachments.push({ filename: `${name}.png`, path: filePath, cid: name });
+      finalHtml = finalHtml.replace(
+        new RegExp(`https?://[^"']+/api/email-icons/${name}\\.png`, 'g'),
+        `cid:${name}`
+      );
+    }
+
+    // Hero image: same treatment. Local /uploads files are read straight
+    // off disk (again matched on path only, same reasoning as above);
+    // anything else (an external image_url) is fetched once here so it
+    // still ends up as a real attachment rather than a hotlink.
+    const heroTagMatch = finalHtml.match(/<img\b[^>]*\bclass="fullWidthImg"[^>]*>/);
+    const heroSrcMatch = heroTagMatch && heroTagMatch[0].match(/\ssrc="([^"]+)"/);
+    if (heroSrcMatch) {
+      const heroUrl = heroSrcMatch[1];
+      try {
+        let heroBuffer, heroFilename;
+        const uploadsPathMatch = heroUrl.match(/^https?:\/\/[^/]+\/uploads\/(.+)$/);
+        if (uploadsPathMatch) {
+          heroFilename = decodeURIComponent(uploadsPathMatch[1]);
+          heroBuffer = fs.readFileSync(path.join(UPLOAD_DIR, heroFilename));
+        } else if (/^https?:\/\//i.test(heroUrl)) {
+          const resp = await fetch(heroUrl);
+          if (resp.ok) {
+            heroBuffer = Buffer.from(await resp.arrayBuffer());
+            heroFilename = `event-image${path.extname(new URL(heroUrl).pathname) || '.jpg'}`;
+          }
+        }
+        if (heroBuffer) {
+          attachments.push({ filename: heroFilename, content: heroBuffer, cid: 'heroImage' });
+          finalHtml = finalHtml.split(heroUrl).join('cid:heroImage');
+        }
+      } catch (err) {
+        console.error('Hero image attachment failed, leaving hotlinked URL:', err.message);
+      }
+    }
+
     const info = await transporter.sendMail({
       from,
       to,
       subject: subject || `Hi ${firstName || 'there'}, your tickets are on the way`,
-      html,
+      html: finalHtml,
       attachments
     });
     res.json({ success: true, response: info.response });
@@ -343,31 +436,44 @@ app.post('/api/send-email', async (req, res) => {
   }
 });
 
-// Public — called from the emailed tickets.html attachment (no login token
-// available there, since the recipient isn't necessarily an app user).
-// Real server-side gating on two factors: the email the tickets were sent
-// to, and the access code shown only in the email body — the ticket data
-// genuinely isn't returned unless both match (bcrypt-compared, same as
-// admin password checks elsewhere in this file), unlike the old version
-// which baked the data into the static file for anyone with it to read.
-app.post('/api/verify-ticket-access', async (req, res) => {
-  const { token, email, password } = req.body || {};
-  if (!token || !email || !password) return res.status(400).json({ error: 'token, email and password are required' });
+// Public — called from the emailed your-tickets.html attachment (no login
+// token available there, since the recipient isn't necessarily an app
+// user). Knowledge of the random token is the access control, same
+// capability-URL pattern as the real ACCEPT TICKETS link.
+app.get('/api/ticket-access/:token', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM ticket_access WHERE token = ? LIMIT 1', [token]);
+    const [rows] = await pool.query('SELECT * FROM ticket_access WHERE token = ? LIMIT 1', [req.params.token]);
     const record = rows[0];
     if (!record) return res.status(404).json({ error: 'This ticket link is no longer valid.' });
-    const emailMatches = record.verify_email.trim().toLowerCase() === email.trim().toLowerCase();
-    const codeMatches = bcrypt.compareSync(password, record.access_code_hash);
-    if (!emailMatches || !codeMatches) return res.status(401).json({ error: "That email or access code doesn't match our records." });
     res.json({
       event: typeof record.event_data === 'string' ? JSON.parse(record.event_data) : record.event_data,
       tickets: typeof record.tickets === 'string' ? JSON.parse(record.tickets) : record.tickets,
-      recipientFirstName: record.recipient_first_name
+      senderName: record.sender_name,
+      recipientFirstName: record.recipient_first_name,
+      accepted: !!record.accepted,
+      acceptedAt: record.accepted_at
     });
   } catch (err) {
-    console.error('Verify ticket access error:', err);
-    res.status(500).json({ error: 'Server error verifying ticket access' });
+    console.error('Get ticket access error:', err);
+    res.status(500).json({ error: 'Server error loading ticket details' });
+  }
+});
+
+// Public — marks the transfer accepted. Idempotent: accepting twice just
+// returns the original acceptance time rather than erroring.
+app.post('/api/ticket-access/:token/accept', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM ticket_access WHERE token = ? LIMIT 1', [req.params.token]);
+    const record = rows[0];
+    if (!record) return res.status(404).json({ error: 'This ticket link is no longer valid.' });
+    if (!record.accepted) {
+      await pool.query('UPDATE ticket_access SET accepted = 1, accepted_at = NOW() WHERE token = ?', [req.params.token]);
+    }
+    const [updated] = await pool.query('SELECT accepted_at FROM ticket_access WHERE token = ? LIMIT 1', [req.params.token]);
+    res.json({ success: true, acceptedAt: updated[0].accepted_at });
+  } catch (err) {
+    console.error('Accept ticket transfer error:', err);
+    res.status(500).json({ error: 'Server error accepting transfer' });
   }
 });
 
@@ -410,10 +516,16 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
 });
 
-const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Ticketmaster backend (MySQL) running on port ${PORT}`);
+// Only start accepting requests once the DB schema migration above has
+// actually finished — dbReady's own .catch already exits the process on
+// failure, so this .then only ever runs after a successful migration.
+dbReady.then(() => {
+  const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Ticketmaster backend (MySQL) running on port ${PORT}`);
+  });
+
+  process.on('SIGTERM', () => { server.close(() => process.exit(0)); });
 });
 
-process.on('SIGTERM', () => { server.close(() => process.exit(0)); });
 process.on('uncaughtException', (err) => console.error('Uncaught exception:', err));
 process.on('unhandledRejection', (reason) => console.error('Unhandled rejection:', reason));

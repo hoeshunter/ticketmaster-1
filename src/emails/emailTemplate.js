@@ -20,12 +20,16 @@ const FONT_STACK = 'Arial, Helvetica, sans-serif'
 // Emails are opened in Gmail — a different origin than this app entirely —
 // so any embedded <img> needs a real, publicly reachable absolute URL.
 // event.image_url is stored as a relative path ("/uploads/xyz.jpg"), only
-// valid same-origin with the backend; a bundled local dev asset would be
-// even worse (resolves relative to whichever frontend origin built it,
-// meaningless to Gmail's servers). Previously this silently embedded a
-// broken image path, which just renders as a broken-image icon in Gmail —
-// resolve to a real absolute URL, or omit the image entirely.
-const EMAIL_BACKEND_ORIGIN = import.meta.env.VITE_PUBLIC_ORIGIN || ''
+// valid same-origin with the backend. Previously this relied on a
+// VITE_PUBLIC_ORIGIN env var that was never actually set, so the sent
+// email silently got a bare relative src — broken in every real inbox,
+// even though it looked fine in this app's own same-origin preview iframe.
+// window.location.origin is used instead: in production the backend serves
+// both the frontend and /uploads from the same origin (single-service
+// deploy), and in local dev /uploads is reachable from whichever host/IP
+// the page itself is currently being browsed from — no env var to go
+// stale when switching networks.
+const EMAIL_BACKEND_ORIGIN = typeof window !== 'undefined' ? window.location.origin : ''
 const resolveAbsoluteImageUrl = (path) => {
   if (!path) return null
   if (/^https?:\/\//i.test(path)) return path
@@ -85,26 +89,54 @@ const buildCalendarMarkup = (event, recipientName) => {
   return `<script type="application/ld+json">${JSON.stringify(data)}</script>`
 }
 
-// Matches the real tracker's exact geometry (32px icon, connecting rule
-// between each step, label below) — the only substitution is a CSS-drawn
-// circle standing in for their hotlinked step-icon PNGs.
-const buildProgressDot = (active, glyph) => `
+// Step icons. These used to be inline <svg> markup — self-contained, no
+// hotlinked CDN icon to 404 — but Gmail strips inline <svg> out of HTML
+// emails entirely, so they rendered fine in this app's own preview iframe
+// (a real browser) and simply vanished once actually received in Gmail.
+// Pre-rasterized to PNG instead (see generate-email-icons.cjs at the repo
+// root — keep it in sync with any visual change here) and referenced as
+// real <img> tags. This gives the live preview a normal same-origin URL;
+// server.js then swaps that URL for a cid: reference and attaches the
+// actual PNG bytes at send time — same real-attachment treatment as the
+// hero image below and the your-tickets.html attachment, so nothing is
+// hotlinked or Gmail-stripped in the delivered email.
+// Traced from the reference screenshot at 8x crop zoom: Received = tilted
+// phone outline with a download arrow inside it (not a generic
+// arrow-into-tray), Accepted = a checkmark that carries its own circle as
+// part of the glyph (so it reads as a ring inside the dashed stage-circle),
+// Complete = two overlapping torn ticket stubs.
+const resolveIconUrl = (iconKey, active) =>
+  `${EMAIL_BACKEND_ORIGIN}/api/email-icons/${iconKey}-${active ? 'active' : 'inactive'}.png`
+
+// Matches the reference tracker's exact geometry: 32px dot, dashed slate
+// outline on the two steps not yet reached (solid blue fill once active,
+// no border), connecting rule between each step, bold label below — no
+// underline on any step in the reference, despite how it can look at a
+// glance (that's the Accepted glyph's own built-in circle, not a UI accent).
+const buildProgressDot = (active, iconKey) => `
                     <td align="center" width="32">
-                      <div style="width:32px;height:32px;border-radius:50%;box-sizing:border-box;display:inline-block;line-height:32px;text-align:center;
-                        background:${active ? BRAND_BLUE : '#ffffff'};border:${active ? 'none' : '2px solid #bbc3c9'};font-family:${FONT_STACK};font-size:15px;color:${active ? '#ffffff' : '#7c8b97'};">${glyph}</div>
+                      <div style="width:32px;height:32px;border-radius:50%;box-sizing:border-box;display:inline-block;line-height:30px;text-align:center;
+                        background:${active ? BRAND_BLUE : '#ffffff'};border:${active ? 'none' : '1.5px dashed #5b6670'};"><img src="${resolveIconUrl(iconKey, active)}" width="15" height="15" alt="" style="vertical-align:middle;border:0;"></div>
                     </td>`
-const buildProgressLine = () => '<td style="border-top: 2px solid #bbc3c9;" width="120">&nbsp;</td>'
+// The border sits on a nested div rather than directly on the <td> — a
+// border-top on the cell itself sits at the cell's top edge (row top),
+// not level with the dot centers. margin-top:15px (half the 32px dot
+// height, minus half the 2px line) pushes it down to vertical-center.
+const buildProgressLine = () => `
+                    <td width="120" valign="middle">
+                      <div style="height:0; border-top: 2px solid #d8dde1; margin-top:15px;"></div>
+                    </td>`
 const buildProgressLabel = (label, active) => `
-                    <td align="center" class="tmsans" style="font-family:${FONT_STACK}; color:${active ? BRAND_BLUE : '#7c8b97'}; font-size:10px; line-height: 12px; padding-top: 5px; font-weight:bold;">${label}</td>`
+                    <td align="center" class="tmsans" style="font-family:${FONT_STACK}; color:${active ? BRAND_BLUE : '#7c8b97'}; font-size:11px; line-height: 13px; padding-top: 6px; font-weight:bold;">${label}</td>`
 
 const buildProgressTracker = () => `
                 <table border="0" cellpadding="0" cellspacing="0" width="100%">
                   <tr>
-                    ${buildProgressDot(true, '&#9873;')}
+                    ${buildProgressDot(true, 'received')}
                     ${buildProgressLine()}
-                    ${buildProgressDot(false, '&#10003;')}
+                    ${buildProgressDot(false, 'accepted')}
                     ${buildProgressLine()}
-                    ${buildProgressDot(false, '&#127915;')}
+                    ${buildProgressDot(false, 'complete')}
                   </tr>
                   <tr>
                     ${buildProgressLabel('Received', true)}
@@ -122,8 +154,7 @@ export const buildTransferEmailHtml = ({
   event = DEFAULT_EVENT,
   tickets = DEFAULT_TICKETS,
   transferLink = '#',
-  calendarMarkup = false,
-  accessCode = ''
+  calendarMarkup = false
 } = {}) => {
   const name = [firstName, lastName].filter(Boolean).join(' ') || 'there'
   const ticketCount = tickets.length || 1
@@ -135,19 +166,6 @@ export const buildTransferEmailHtml = ({
                                                         </td>
                                                       </tr>`).join('')
   const calendarScript = calendarMarkup ? buildCalendarMarkup(event, name) : ''
-  // Shown only here, never in the tickets.html attachment itself — the
-  // recipient needs both this code and their email to unlock the attached
-  // ticket details via /api/verify-ticket-access.
-  const accessCodeSection = accessCode ? `
-                      <tr>
-                        <td align="left" valign="top" style="font-family:${FONT_STACK}; color:#353c42; font-size:14px; line-height: 19.6px; font-weight:bold; padding:15px 0px 5px 0px;" class="tmsans">Your Ticket Access Code</td>
-                      </tr>
-                      <tr>
-                        <td align="left" style="font-family:${FONT_STACK}; color:${BRAND_BLUE}; font-size:22px; line-height: 26px; font-weight:bold; letter-spacing:0.08em; padding:0px 0px 5px 0px;" class="tmsans">${accessCode}</td>
-                      </tr>
-                      <tr>
-                        <td align="left" style="font-family:${FONT_STACK}; color:#69747c; font-size:12px; line-height: 16px; padding:0px 0px 30.2px 0px;" class="tmsans">Open the attached tickets.html file and enter this code along with your email to view your seat details.</td>
-                      </tr>` : ''
 
   return `<!doctype html>
 <html>
@@ -190,11 +208,11 @@ export const buildTransferEmailHtml = ({
     <table cellpadding="0" cellspacing="0" border="0" width="100%" class="font-averta" bgcolor="#FFFFFF" style="background-color:#FFFFFF;">
       <tr>
         <td align="center">
-          <table cellpadding="0" cellspacing="0" border="0" width="480" class="full-width-container">
-            <tr>
-              <td width="480" align="center" style="min-width:480px;" class="full-width-container">
 
-                <!-- Header -->
+                <!-- Header: intentionally OUTSIDE the 480px boxed container
+                     below, so its blue background spans the full reading-pane
+                     width edge-to-edge instead of being capped at 480px like
+                     everything nested inside that box. -->
                 <table border="0" cellpadding="0" cellspacing="0" bgcolor="${BRAND_BLUE}" width="100%">
                   <tr>
                     <!-- hidden preheader -->
@@ -209,6 +227,10 @@ export const buildTransferEmailHtml = ({
                   </tr>
                 </table>
                 <!-- End Header -->
+
+          <table cellpadding="0" cellspacing="0" border="0" width="480" class="full-width-container">
+            <tr>
+              <td width="480" align="center" style="min-width:480px;" class="full-width-container">
 
                 <!-- Headline -->
                 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -273,7 +295,7 @@ export const buildTransferEmailHtml = ({
                                 </td>
                               </tr>` : ''}
                               <tr>
-                                <td align="center" style="padding: 20px 20px 0;">
+                                <td align="center" style="padding: 20px 0 0;">
                                   <table cellspacing="0" width="100%" cellpadding="0" border="0" bgcolor="${BRAND_BLUE}">
                                     <tr>
                                       <td align="center" style="font-family:${FONT_STACK}; font-weight: bold; color:#ffffff; font-size:12px; line-height: 16px; padding: 10px 0;">
@@ -325,7 +347,6 @@ export const buildTransferEmailHtml = ({
                             You'll need to first accept the ticket transfer so the order is moved to your Ticketmaster account. Once the transfer is complete, we'll let ${senderName} know you're all set. To accept the tickets, have your Ticketmaster password handy and login to your Ticketmaster account, or create a <a href="${transferLink}" class="blue-text-link" style="color: ${BRAND_BLUE}; text-decoration: none;">new one</a>. Visit <a href="${transferLink}" class="blue-text-link" style="color: ${BRAND_BLUE}; text-decoration: none;">Event Details</a> to view your ticket(s).
                           </td>
                         </tr>
-${accessCodeSection}
                       </table>
                     </td>
                   </tr>
