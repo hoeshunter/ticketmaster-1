@@ -16,17 +16,22 @@ const fs = require('fs');
 const path = require('path');
 const transporter = require('./mailer');
 const { buildTicketsPageHtml } = require('./ticketsPage');
+const { buildWalletCardPageHtml } = require('./walletCardPage');
+const { isAppleWalletConfigured, isGoogleWalletConfigured, buildApplePass, buildGoogleWalletSaveUrl } = require('./wallet');
 
 // The tickets.html attachment is opened outside this app entirely (often
 // from a file:// context), so it needs a real absolute API URL to verify
 // against — same reasoning as EMAIL_BACKEND_ORIGIN in the frontend's
-// emailTemplate.js for hero images. PUBLIC_ORIGIN is set as a Railway env
-// var to this service's public domain; falls back to localhost for local dev.
-const PUBLIC_ORIGIN = process.env.PUBLIC_ORIGIN || `http://localhost:${process.env.PORT || 3001}`;
+// emailTemplate.js for hero images. Hardcoded to the real production
+// domain (no localhost/LAN-IP dev fallback) so every email — Add to
+// Wallet buttons included — always points somewhere reachable from any
+// device on any network, not just whoever happens to be running the
+// backend locally at send time.
+const PUBLIC_ORIGIN = process.env.PUBLIC_ORIGIN;
 const PUBLIC_API_BASE = `${PUBLIC_ORIGIN}/api`;
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.SERVER_PORT || process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET;
 const IS_DEV = process.env.NODE_ENV !== 'production';
 
@@ -34,8 +39,11 @@ console.log('=== STARTUP DEBUG ===');
 console.log(`Using PORT = ${PORT}`);
 console.log(`Mode = ${IS_DEV ? 'development' : 'production'}`);
 console.log(`JWT_SECRET set: ${!!JWT_SECRET}`);
-console.log(`MYSQL_HOST set: ${!!process.env.MYSQL_HOST}`);
-console.log(`MYSQL_DATABASE set: ${!!process.env.MYSQL_DATABASE}`);
+console.log(`MYSQL_HOST = ${process.env.MYSQL_HOST || '(not set)'}`);
+console.log(`MYSQL_PORT = ${process.env.MYSQL_PORT || '3306 (default)'}`);
+console.log(`MYSQL_USER = ${process.env.MYSQL_USER || '(not set)'}`);
+console.log(`MYSQL_DATABASE = ${process.env.MYSQL_DATABASE || '(not set)'}`);
+console.log(`MYSQL_PASSWORD set: ${!!process.env.MYSQL_PASSWORD}`);
 console.log('=====================');
 
 if (!JWT_SECRET) { console.error('FATAL: JWT_SECRET not set.'); process.exit(1); }
@@ -55,17 +63,69 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
-// Verify DB connectivity at startup, then make sure ticket_access exists
-// (added for the tickets.html verification flow — created defensively here
-// so existing dev databases don't need a manual migration step).
+// Verify DB connectivity at startup with retry logic (Railway MySQL can take
+// a moment to become available after a restart/migration). Retries up to
+// MAX_RETRIES times with exponential backoff before giving up and exiting.
 // app.listen() below is gated on this promise resolving — previously it
 // ran independently, so a request could reach a route (e.g. /api/send-email
 // inserting sender_name) before the ALTER TABLE statements here finished,
 // intermittently failing with "Unknown column" right after every restart.
-const dbReady = pool.getConnection()
+const MAX_RETRIES = 10;
+const RETRY_DELAY_MS = 3000;
+
+async function getConnectionWithRetry(attempt = 1) {
+  try {
+    const conn = await pool.getConnection();
+    return conn;
+  } catch (err) {
+    if (attempt >= MAX_RETRIES) throw err;
+    console.warn(`MySQL connection attempt ${attempt}/${MAX_RETRIES} failed (${err.code || err.message}). Retrying in ${RETRY_DELAY_MS / 1000}s...`);
+    await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
+    return getConnectionWithRetry(attempt + 1);
+  }
+}
+
+const dbReady = getConnectionWithRetry()
   .then(async (conn) => {
     console.log('MySQL connected');
     conn.release();
+    // admins/events previously had to exist already (created by hand once,
+    // undocumented in code) — creating them defensively here too means a
+    // brand-new database (e.g. after moving Railway accounts) self-
+    // provisions on first boot, same as ticket_access already did below.
+    // See backend/migrations/001_initial_schema.sql for the same schema
+    // as a standalone reference/fast-path.
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS admins (
+        id         CHAR(36)     NOT NULL PRIMARY KEY,
+        username   VARCHAR(255) NOT NULL UNIQUE,
+        password   VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB
+    `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS events (
+        id         CHAR(36)     NOT NULL PRIMARY KEY,
+        admin_id   CHAR(36)     NOT NULL,
+        name       VARCHAR(255) NOT NULL,
+        state      VARCHAR(255) NULL,
+        city       VARCHAR(255) NULL,
+        stadium    VARCHAR(255) NULL,
+        \`time\`     VARCHAR(64)  NULL,
+        \`date\`     VARCHAR(64)  NULL,
+        \`day\`      VARCHAR(64)  NULL,
+        order_num  VARCHAR(255) NULL,
+        tickets    JSON         NOT NULL,
+        image_url  VARCHAR(1024) NULL,
+        held       TINYINT(1)   NOT NULL DEFAULT 0,
+        held_at    TIMESTAMP    NULL,
+        created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        KEY idx_events_admin_id (admin_id),
+        CONSTRAINT fk_events_admin
+          FOREIGN KEY (admin_id) REFERENCES admins(id)
+          ON DELETE CASCADE
+      ) ENGINE=InnoDB
+    `);
     await pool.query(`
       CREATE TABLE IF NOT EXISTS ticket_access (
         token             CHAR(48)     NOT NULL PRIMARY KEY,
@@ -78,6 +138,19 @@ const dbReady = pool.getConnection()
         created_at        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
       ) ENGINE=InnoDB
     `);
+    // Older DBs created before the event-hold feature don't have these
+    // columns yet — add them defensively so existing databases don't need a
+    // manual migration step (see backend/migrations/002_add_event_hold.sql
+    // for the same change as a standalone reference/fast-path).
+    const [eventCols] = await pool.query(`SHOW COLUMNS FROM events`);
+    const eventColNames = eventCols.map(c => c.Field);
+    if (!eventColNames.includes('held')) {
+      await pool.query(`ALTER TABLE events ADD COLUMN held TINYINT(1) NOT NULL DEFAULT 0`);
+    }
+    if (!eventColNames.includes('held_at')) {
+      await pool.query(`ALTER TABLE events ADD COLUMN held_at TIMESTAMP NULL`);
+    }
+
     // Older DBs created before the direct-view redesign still have the
     // email+access-code gate columns (NOT NULL) and are missing the
     // acceptance columns — bring them in line so both old and fresh
@@ -133,7 +206,9 @@ const ALLOWED_ORIGINS = [
   'https://jimcooks211.github.io',
   'http://localhost:5173',
   'http://localhost:5174',
-  ...(process.env.PUBLIC_ORIGIN ? [process.env.PUBLIC_ORIGIN] : []),
+  'http://localhost:5175',
+  PUBLIC_ORIGIN,
+  `https://www.${new URL(PUBLIC_ORIGIN).hostname}`,
 ];
 
 app.use(cors({
@@ -151,6 +226,42 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+
+// ── Resell proxy ──────────────────────────────────────────────────────────────
+// In production (single Railway service) there is no Vite proxy, so the main
+// server must forward /api/admin/resell* and /api/resell* to the resell server
+// which runs internally on port 3002 (started by server.cjs alongside this
+// process). Uses Node's built-in http — no extra dependency needed.
+// The body has already been parsed by express.json() above, so we re-serialize
+// it rather than piping the raw request stream.
+{
+  const http = require('http');
+  const resellProxy = (req, res) => {
+    const body = req.body && Object.keys(req.body).length ? JSON.stringify(req.body) : '';
+    const headers = { ...req.headers, host: 'localhost:3002' };
+    if (body) {
+      headers['content-length'] = Buffer.byteLength(body).toString();
+      headers['content-type'] = 'application/json';
+    } else {
+      delete headers['content-length'];
+    }
+    const proxy = http.request(
+      { hostname: 'localhost', port: 3002, path: req.originalUrl, method: req.method, headers },
+      (proxyRes) => {
+        res.writeHead(proxyRes.statusCode, proxyRes.headers);
+        proxyRes.pipe(res);
+      }
+    );
+    proxy.on('error', (err) => {
+      console.error('Resell proxy error:', err.message);
+      if (!res.headersSent) res.status(502).json({ error: 'Resell service unavailable' });
+    });
+    if (body) proxy.write(body);
+    proxy.end();
+  };
+  app.all('/api/admin/resell*', resellProxy);
+  app.all('/api/resell*', resellProxy);
+}
 
 // Serve uploaded images at /uploads/<file>
 app.use('/uploads', express.static(UPLOAD_DIR));
@@ -177,6 +288,8 @@ const formatEvent = (ev) => ({
   orderNum: ev.order_num,
   tickets: typeof ev.tickets === 'string' ? JSON.parse(ev.tickets || '[]') : (ev.tickets || []),
   image_url: ev.image_url || null,
+  held: !!ev.held,
+  heldAt: ev.held_at || null,
   createdAt: ev.created_at,
   admin_id: ev.admin_id,
   createdBy: ev.createdBy || null
@@ -294,13 +407,21 @@ app.post('/api/admin/events', auth, async (req, res) => {
 });
 
 app.put('/api/admin/events/:id', auth, async (req, res) => {
-  const { name, state, city, stadium, time, date, day, orderNum, tickets = [], image_url } = req.body || {};
+  const { name, state, city, stadium, time, date, day, orderNum, tickets = [], image_url, held } = req.body || {};
   try {
     const [existing] = await pool.query('SELECT id FROM events WHERE id = ? AND admin_id = ? LIMIT 1', [req.params.id, req.admin.id]);
     if (!existing.length) return res.status(404).json({ error: 'Event not found' });
     const fields = ['name = ?', 'state = ?', 'city = ?', 'stadium = ?', '`time` = ?', '`date` = ?', '`day` = ?', 'order_num = ?', 'tickets = ?'];
     const values = [name, state, city, stadium, time, date, day, orderNum, JSON.stringify(tickets)];
     if (image_url !== undefined) { fields.push('image_url = ?'); values.push(image_url); }
+    if (held !== undefined) {
+      // held_at uses the DB's own clock (NOW()/NULL as literal SQL, not a
+      // bound param) rather than the client-sent ISO string — MySQL's
+      // TIMESTAMP column rejects "2026-08-18T14:52:18.954Z" (needs
+      // "YYYY-MM-DD HH:MM:SS"), and the server clock is authoritative anyway.
+      fields.push('held = ?'); values.push(held ? 1 : 0);
+      fields.push(held ? 'held_at = NOW()' : 'held_at = NULL');
+    }
     values.push(req.params.id);
     await pool.query(`UPDATE events SET ${fields.join(', ')} WHERE id = ?`, values);
     const [rows] = await pool.query('SELECT * FROM events WHERE id = ? LIMIT 1', [req.params.id]);
@@ -323,10 +444,13 @@ app.delete('/api/admin/events/:id', auth, async (req, res) => {
 });
 
 // ── Public events ─────────────────────────────────────────────────────────────
+// Held events are excluded here (not just filtered client-side) so a held
+// event never appears in the public events list, regardless of caller.
 app.get('/api/events', async (req, res) => {
   try {
     const [rows] = await pool.query(
-      'SELECT e.*, a.username AS createdBy FROM events e LEFT JOIN admins a ON a.id = e.admin_id ORDER BY e.created_at DESC'
+      `SELECT e.*, a.username AS createdBy FROM events e LEFT JOIN admins a ON a.id = e.admin_id
+       WHERE e.held = 0 ORDER BY e.created_at DESC`
     );
     res.json(rows.map(formatEvent));
   } catch (err) {
@@ -351,18 +475,27 @@ app.post('/api/send-email', async (req, res) => {
     // email+access-code gate. The file itself carries no ticket data, only
     // an unguessable random token (capability-URL pattern, same trust model
     // as the real ACCEPT TICKETS link) — /api/ticket-access/:token resolves
-    // it to the actual event/seat details.
+    // it to the actual event/seat details. The same token also backs the
+    // per-ticket "Add to Apple/Google Wallet" links below, since it's
+    // already the exact capability-URL this app uses to hand a stranger
+    // read access to one order's tickets without a login.
+    let walletToken = null;
     if (event && tickets?.length) {
       const token = crypto.randomBytes(24).toString('hex');
+      walletToken = token;
       await pool.query(
         'INSERT INTO ticket_access (token, event_data, tickets, sender_name, recipient_first_name) VALUES (?, ?, ?, ?, ?)',
         [token, JSON.stringify(event), JSON.stringify(tickets), senderName || null, firstName || null]
       );
-      attachments.push({
-        filename: 'your-tickets.html',
-        content: buildTicketsPageHtml({ token, apiBase: PUBLIC_API_BASE }),
-        contentType: 'text/html; charset=utf-8'
-      });
+      // TEMP: your-tickets.html attachment disabled while the "stuck on
+      // Loading your tickets…" bug is being tracked down. Token/DB insert
+      // above is left in place (harmless, just an unused row) so this is a
+      // one-line flip to restore once fixed.
+      // attachments.push({
+      //   filename: 'your-tickets.html',
+      //   content: buildTicketsPageHtml({ token, apiBase: PUBLIC_API_BASE }),
+      //   contentType: 'text/html; charset=utf-8'
+      // });
     }
     // The incoming `html` still has the tracker icons and hero image as
     // plain <img src="https://...same-origin.../..."> — fine for the
@@ -373,6 +506,17 @@ app.post('/api/send-email', async (req, res) => {
     // the same "it's actually in the email" treatment as invite.ics and
     // your-tickets.html above, not just a link out to this server.
     let finalHtml = html;
+
+    // "Add to Apple/Google Wallet" links: emailTemplate.js has no way to
+    // know the capability token yet (it's only generated above, after the
+    // html is built), so it emits __WALLET_APPLE_<ticketIndex>__ /
+    // __WALLET_GOOGLE_<ticketIndex>__ placeholders instead — swap them for
+    // the real URLs now. Falls back to "#" if there's no walletToken (e.g.
+    // this send had no event/tickets attached) so a stray placeholder never
+    // leaks into a delivered email.
+    finalHtml = finalHtml
+      .replace(/__WALLET_APPLE_(\d+)__/g, (_, i) => walletToken ? `${PUBLIC_API_BASE}/wallet/apple/${walletToken}/${i}` : '#')
+      .replace(/__WALLET_GOOGLE_(\d+)__/g, (_, i) => walletToken ? `${PUBLIC_API_BASE}/wallet/google/${walletToken}/${i}` : '#');
 
     // Step-tracker icons: swap every /api/email-icons/<name>.png reference
     // for a cid'd PNG read straight off disk (same host as this server).
@@ -407,7 +551,13 @@ app.post('/api/send-email', async (req, res) => {
           heroFilename = decodeURIComponent(uploadsPathMatch[1]);
           heroBuffer = fs.readFileSync(path.join(UPLOAD_DIR, heroFilename));
         } else if (/^https?:\/\//i.test(heroUrl)) {
-          const resp = await fetch(heroUrl);
+          // No timeout here previously — an unresponsive external image
+          // host would hang this fetch (and the whole /api/send-email
+          // request) indefinitely, same failure mode as the SMTP
+          // handshake fixed in mailer.js. Bail out after 8s and fall
+          // through to the existing catch, which leaves the hero image
+          // hotlinked instead of blocking the send.
+          const resp = await fetch(heroUrl, { signal: AbortSignal.timeout(8000) });
           if (resp.ok) {
             heroBuffer = Buffer.from(await resp.arrayBuffer());
             heroFilename = `event-image${path.extname(new URL(heroUrl).pathname) || '.jpg'}`;
@@ -456,6 +606,70 @@ app.get('/api/ticket-access/:token', async (req, res) => {
   } catch (err) {
     console.error('Get ticket access error:', err);
     res.status(500).json({ error: 'Server error loading ticket details' });
+  }
+});
+
+// ── Add to Wallet ─────────────────────────────────────────────────────────
+// Same capability-token pattern as /api/ticket-access/:token above — the
+// email links straight here per-ticket, no login required. Resolves the
+// token to one specific ticket within that order (:ticketIndex matches the
+// position it had in the `tickets` array passed to /api/send-email).
+const resolveWalletTicket = async (token, ticketIndex) => {
+  const [rows] = await pool.query('SELECT * FROM ticket_access WHERE token = ? LIMIT 1', [token]);
+  const record = rows[0];
+  if (!record) return { error: 'This ticket link is no longer valid.', status: 404 };
+  const event = typeof record.event_data === 'string' ? JSON.parse(record.event_data) : record.event_data;
+  const tickets = typeof record.tickets === 'string' ? JSON.parse(record.tickets) : record.tickets;
+  const ticket = tickets[Number(ticketIndex)];
+  if (!ticket) return { error: 'Ticket not found.', status: 404 };
+  return { event, ticket };
+};
+
+app.get('/api/wallet/apple/:token/:ticketIndex', async (req, res) => {
+  if (!isAppleWalletConfigured()) {
+    return res.status(503).send('Add to Apple Wallet isn\'t set up on this server yet — see WALLET_SETUP.md.');
+  }
+  try {
+    const { event, ticket, error, status } = await resolveWalletTicket(req.params.token, req.params.ticketIndex);
+    if (error) return res.status(status).send(error);
+    const buffer = await buildApplePass(event, ticket, req.params.token, req.params.ticketIndex);
+    res.set('Content-Type', 'application/vnd.apple.pkpass');
+    res.set('Content-Disposition', 'attachment; filename="ticket.pkpass"');
+    res.send(buffer);
+  } catch (err) {
+    console.error('Apple Wallet pass error:', err);
+    res.status(500).send('Could not generate this pass right now.');
+  }
+});
+
+// PassKit can't render our custom card design (no HTML engine in Wallet —
+// see wallet.js), so this is the bridge: the pass links here (a backField
+// URL, auto-linked by Wallet), opening the exact TicketBarcode.css design
+// in the browser instead. Same token pattern as the routes above.
+app.get('/api/wallet-card/:token/:ticketIndex', async (req, res) => {
+  try {
+    const { event, ticket, error, status } = await resolveWalletTicket(req.params.token, req.params.ticketIndex);
+    if (error) return res.status(status).send(error);
+    res.set('Content-Type', 'text/html; charset=utf-8');
+    res.send(buildWalletCardPageHtml({ event, ticket }));
+  } catch (err) {
+    console.error('Wallet card page error:', err);
+    res.status(500).send('Could not load this ticket right now.');
+  }
+});
+
+app.get('/api/wallet/google/:token/:ticketIndex', async (req, res) => {
+  if (!isGoogleWalletConfigured()) {
+    return res.status(503).send('Add to Google Wallet isn\'t set up on this server yet — see WALLET_SETUP.md.');
+  }
+  try {
+    const { event, ticket, error, status } = await resolveWalletTicket(req.params.token, req.params.ticketIndex);
+    if (error) return res.status(status).send(error);
+    const saveUrl = await buildGoogleWalletSaveUrl(event, ticket, req.params.token, req.params.ticketIndex);
+    res.redirect(saveUrl);
+  } catch (err) {
+    console.error('Google Wallet pass error:', err);
+    res.status(500).send('Could not generate this pass right now.');
   }
 });
 

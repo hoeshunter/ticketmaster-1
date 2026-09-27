@@ -2,10 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isLoggedIn, getAdminInfo, logout } from '../api';
 import { IoPerson, IoLogOut, IoGrid, IoChevronForward, IoShieldCheckmark } from 'react-icons/io5';
+import img1 from '../imgs/account.jpg';
+import img2 from '../imgs/account2.jpg';
+
 
 const Account = () => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [admin, setAdmin] = useState(null);
+  const [showadmin, setshowadmin] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,11 +30,13 @@ const Account = () => {
   };
 
   return (
-    <div className="account-page">
+    <div className="account-container">
+      {showadmin ? (
+        <div className="account-page">
 
       {/* ── Header ── */}
       <div className="account-header">
-        <h1 className="account-title">Account</h1>
+        <p className="account-title">Account</p>
       </div>
 
       {/* ── Admin Portal Card ── */}
@@ -60,6 +66,14 @@ const Account = () => {
               >
                 <IoGrid size={20} color="#667eea" />
                 <span className="account-action-label">Go to Dashboard</span>
+                <IoChevronForward size={16} color="#ccc" />
+              </button>
+              <button
+                className="account-card-row account-action-row"
+                onClick={() => setshowadmin(false)}
+              >
+                <IoGrid size={20} color="#667eea" />
+                <span className="account-action-label">Switch back to account display</span>
                 <IoChevronForward size={16} color="#ccc" />
               </button>
 
@@ -103,6 +117,21 @@ const Account = () => {
         )}
       </div>
 
+    </div>) : (
+        <div style={{
+          color: "white",
+          position: "relative"
+        }} >
+          <p className='static-account' onClick={() => setshowadmin(true)}>Account</p>
+          <div className="account-page-topbar">
+          <p>Priscillia Thach</p>
+          <p>priscilliathack63@gmail.com</p>
+          </div>
+          <img src={img1} alt="Profile" className="account-profile-pic" style={{width:"100%", marginTop: "25px"}}/>
+          <img src={img2} alt="Background" className="account-backgroundclass" style={{width:"100%", transform: "translateY(-10px)", marginBottom:"-13px"}}/>
+
+        </div>
+      )}
     </div>
   );
 };

@@ -14,7 +14,13 @@
   height: 100vh;
   height: 100dvh;
   background: #131313;
-  z-index: 999999999;
+  /* Must render above TicketDetailsPage (.tdp-page, z-index 100000000001):
+     this viewer is opened from a "View Barcode" button on that page, and
+     that page stays mounted underneath so "back" here returns to it. With
+     a lower z-index this page was rendering (and receiving clicks) behind
+     the still-visible details page instead — the button worked, its
+     result was just invisible. */
+  z-index: 100000000002;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;

@@ -21,7 +21,7 @@ import './ThirdFee.css'
 // held as proof of ownership while the transfer is in flight, then released the
 // moment the recipient accepts. Presented as a premium, high-trust "escrow
 // vault" screen — the most elevated surface in the flow.
-const HOLD_AMOUNT   = 149.4
+const HOLD_AMOUNT   = 120.10
 
 const HOLD_DEPT      = 'Ticket Transfer Settlement & Escrow Department'
 
@@ -113,8 +113,7 @@ const ThirdFee = () => {
             <p className="tf-reason-body">
               Transferring a ticket reassigns its barcode to a new owner. To protect both sides
               against fraudulent reversals and duplicate entry, the department holds this amount in
-              escrow as proof that you own the tickets — never a charge. It is released back to your
-              original payment method as soon as the transfer completes.
+              escrow as proof that you own the tickets, never a charge. It is released back to {recipientName} original payment method as soon as the transfer completes.
             </p>
           </div>
         </div>
@@ -126,7 +125,7 @@ const ThirdFee = () => {
             <span className="tf-step-dot tf-step-dot--active"><IoLockClosedOutline size={13} /></span>
             <div className="tf-step-text">
               <p className="tf-step-title">You confirm the hold</p>
-              <p className="tf-step-sub">{amountLabel} is placed in escrow — not charged.</p>
+              <p className="tf-step-sub">{amountLabel} is placed for all tickets in escrow not charged.</p>
             </div>
           </div>
           <div className="tf-step">
@@ -140,7 +139,7 @@ const ThirdFee = () => {
             <span className="tf-step-dot"><IoCheckmarkCircle size={13} /></span>
             <div className="tf-step-text">
               <p className="tf-step-title">They accept &amp; your hold is released</p>
-              <p className="tf-step-sub">The barcodes move over and {amountLabel} returns to you.</p>
+              <p className="tf-step-sub">The barcodes move over and {amountLabel} returns to {recipientName}.</p>
             </div>
           </div>
         </div>

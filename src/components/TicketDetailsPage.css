@@ -1,0 +1,161 @@
+.tdp-page {
+  position: fixed;
+  inset: 0;
+  z-index: 100000000001;
+  background: #ffffff;
+  overflow-y: auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  animation: tdp-slide-up 0.28s ease-out;
+}
+
+@keyframes tdp-slide-up {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.tdp-header {
+  background: #131415;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+}
+
+.tdp-close-btn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+}
+
+.tdp-title {
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.tdp-help-link {
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.tdp-body {
+  padding: 0 20px;
+  max-width: 590px;
+  margin: 0 auto;
+}
+
+.tdp-row {
+  padding: 16px 0;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.tdp-body > .tdp-row:first-child {
+  padding-top: 20px;
+}
+
+.tdp-ticket-block + .tdp-ticket-block {
+  margin-top: 4px;
+}
+
+.tdp-ticket-block:not(:last-of-type) {
+  border-bottom: 6px solid #f2f2f2;
+}
+
+/* â”€â”€ "Sent" ticket state â”€â”€ matches the ribbon/muted treatment used on the
+   SafeTix barcode stub (TicketBarcode.css) and the main ticket popup card. */
+.tdp-ticket-block--sent {
+  position: relative;
+  overflow: hidden;
+  background: #fafafa;
+}
+.tdp-ticket-block--sent .tdp-row {
+  opacity: 0.55;
+}
+.tdp-sent-ribbon {
+  position: absolute;
+  top: 14px;
+  right: -34px;
+  width: 140px;
+  padding: 4px 0;
+  background: #6b7280;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-align: center;
+  transform: rotate(45deg);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.tdp-row-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #131415;
+  padding-bottom: 4px;
+}
+
+.tdp-row-title--price {
+  padding-bottom: 10px;
+}
+
+.tdp-row-value {
+  font-size: 14px;
+  color: #6b7178;
+}
+
+.tdp-price-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  padding: 3px 0;
+  color: #6b7178;
+}
+
+.tdp-price-line span:last-child {
+  color: #131415;
+}
+
+.tdp-price-line--total {
+  font-weight: 700;
+  color: #131415;
+  padding: 8px 0 0 0;
+  margin-top: 5px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.tdp-price-line--total span:last-child {
+  color: #131415;
+}
+
+.tdp-barcode-btn {
+  width: 100%;
+  margin: 20px 0 0;
+  padding: 13px;
+  border-radius: 999px;
+  border: none;
+  background: #026CDF;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.tdp-terms {
+  padding: 16px 0 24px 0;
+  border-bottom: none;
+}
+
+.tdp-terms-text {
+  font-size: 13px;
+  line-height: 19px;
+  color: #6b7178;
+}

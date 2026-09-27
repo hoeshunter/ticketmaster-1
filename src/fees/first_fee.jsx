@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { IoArrowBack, IoInformationCircleOutline } from 'react-icons/io5'
 import { MdOutlineConfirmationNumber } from 'react-icons/md'
 import { getFeeAmount } from '../api'
-import eventHeaderFallback from '../imgs/event_header.jpg'
+import { getHeaderImage } from '../imgs/headerImage'
 import SplashScreen from '../components/SplashScreen'
 import ConfirmAlert from '../components/ConfirmAlert'
 import LoadingScreen from '../components/LoadingScreen'
@@ -50,7 +50,7 @@ const FirstFee = () => {
     )
   }
 
-  const heroImg           = event.IMG || event.image_url || eventHeaderFallback
+  const heroImg           = event.IMG || event.image_url || getHeaderImage()
   const recipientName     = [recipient.firstName, recipient.lastName].filter(Boolean).join(' ')
   const recipientContact  = recipient.email || recipient.phone || ''
 
@@ -86,7 +86,14 @@ const FirstFee = () => {
   return (
     <div className="ff-page">
       <div className="ff-hero-wrapper">
-        <img src={heroImg} alt={event.name} className="ff-hero-img" />
+        <img
+          src={heroImg}
+          alt={event.name}
+          className="ff-hero-img"
+          onError={(e) => {
+            e.target.src = getHeaderImage();
+          }}
+        />
         <div className="ff-hero-overlay">
           <button className="ff-back-btn" onClick={() => navigate(-1)}>
             <IoArrowBack size={18} />

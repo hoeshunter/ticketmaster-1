@@ -1,20 +1,28 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchAllEvents, sendEmail } from '../api'
-import { buildTransferEmailHtml, buildIsoStartDate } from './emailTemplate'
+import { buildTransferEmailHtml, buildPurchaseEmailHtml, buildIsoStartDate } from './emailTemplate'
 import { buildIcsInvite } from './buildIcs'
 import './SendEmail.css'
 
 // ── Send Email page ─────────────────────────────────────────────────────────
-// Standalone utility page: pick an event (pulled from every admin's account),
-// a seat and quantity from that event's tickets, and a recipient — see the
-// exact HTML email body live in the preview pane, then send it through the
-// backend's /api/send-email (GoDaddy SMTP relay, configured via backend/.env).
+// Standalone utility page: pick an email type (purchase confirmation or
+// ticket transfer), an event (pulled from every admin's account), a seat and
+// quantity from that event's tickets, and a recipient — see the exact HTML
+// email body live in the preview pane, then send it through the backend's
+// /api/send-email (GoDaddy SMTP relay, configured via backend/.env).
+const EMAIL_TYPES = [
+  { key: 'purchase', label: 'Purchase Confirmation' },
+  { key: 'transfer', label: 'Transfer Confirmation' }
+]
+
 const SendEmail = () => {
-  const [to, setTo]               = useState('')
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName]   = useState('')
-  const [sending, setSending]     = useState(false)
-  const [status, setStatus]       = useState(null) // { type: 'success' | 'error', message }
+  const [emailType, setEmailType]   = useState('purchase') // 'purchase' | 'transfer'
+  const [to, setTo]                 = useState('')
+  const [firstName, setFirstName]   = useState('')
+  const [lastName, setLastName]     = useState('')
+  const [senderName, setSenderName] = useState('')
+  const [sending, setSending]       = useState(false)
+  const [status, setStatus]         = useState(null) // { type: 'success' | 'error', message }
 
   const [events, setEvents]             = useState([])
   const [eventsLoading, setEventsLoading] = useState(true)
@@ -23,7 +31,6 @@ const SendEmail = () => {
   const [seatIndex, setSeatIndex]       = useState(0)
   const [amount, setAmount]             = useState(1)
   const [includeCalendar, setIncludeCalendar] = useState(false)
-  const [accessCode, setAccessCode]     = useState('')
 
   useEffect(() => {
     fetchAllEvents()
@@ -47,38 +54,43 @@ const SendEmail = () => {
   const restTickets = availableTickets.filter((_, idx) => idx !== seatIndex)
   const selectedTickets = chosenTicket ? [chosenTicket, ...restTickets].slice(0, amount) : []
 
-  // 8-char code shown only in the email body — the recipient needs it plus
-  // their email to unlock the ticket details in the attached tickets.html.
-  // Regenerated per event pick, matching the intent of "this is a fresh
-  // one-time code for this transfer," and kept in state so the value
-  // previewed in the iframe is exactly what actually gets sent.
-  const generateAccessCode = () => {
-    const bytes = new Uint8Array(6)
-    crypto.getRandomValues(bytes)
-    return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('').toUpperCase().slice(0, 8)
-  }
-
   const handleEventChange = (id) => {
     setEventId(id)
     setSeatIndex(0)
     setAmount(1)
-    setAccessCode(id ? generateAccessCode() : '')
   }
   const handleSeatChange = (idx) => {
     setSeatIndex(idx)
   }
 
-  const html = buildTransferEmailHtml({
-    firstName,
-    lastName,
-    event: selectedEvent || undefined,
-    tickets: selectedTickets.length ? selectedTickets : undefined,
-    calendarMarkup: includeCalendar && !!selectedEvent,
-    accessCode: selectedEvent ? accessCode : ''
-  })
-  const subject = selectedEvent
-    ? `Your tickets for ${selectedEvent.name} are on the way`
-    : `Hi ${firstName || 'there'}, your tickets are on the way`
+  // Both templates share the same event/ticket inputs — only the wording
+  // differs. The purchase email has no sender (it comes from Ticketmaster,
+  // not a friend), so senderName is only wired into the transfer build/send.
+  const isTransfer = emailType === 'transfer'
+  const html = isTransfer
+    ? buildTransferEmailHtml({
+        firstName,
+        lastName,
+        senderName: senderName || undefined,
+        event: selectedEvent || undefined,
+        tickets: selectedTickets.length ? selectedTickets : undefined,
+        calendarMarkup: includeCalendar && !!selectedEvent
+      })
+    : buildPurchaseEmailHtml({
+        firstName,
+        lastName,
+        recipientEmail: to || undefined,
+        event: selectedEvent || undefined,
+        tickets: selectedTickets.length ? selectedTickets : undefined,
+        calendarMarkup: includeCalendar && !!selectedEvent
+      })
+  const subject = isTransfer
+    ? (selectedEvent
+        ? `Your tickets for ${selectedEvent.name} are on the way`
+        : `Hi ${firstName || 'there'}, your tickets are on the way`)
+    : (selectedEvent
+        ? `You Got ${selectedEvent.name} Tickets!`
+        : `You Got Tickets!`)
 
   const ics = (includeCalendar && selectedEvent)
     ? buildIcsInvite(selectedEvent, buildIsoStartDate(selectedEvent))
@@ -91,16 +103,15 @@ const SendEmail = () => {
     setStatus(null)
     try {
       // event/tickets are sent as data, not a pre-built HTML file — the
-      // backend generates a one-time token, hashes accessCode (bcrypt) and
-      // stores it plus the ticket data server-side against that token, then
-      // builds a verification-gated tickets.html attachment. The recipient
-      // has to enter their email + this same access code (shown only in
-      // the email body) before /api/verify-ticket-access releases the data.
+      // backend generates a random capability token, stores it plus the
+      // ticket data server-side against that token, then builds a
+      // your-tickets.html attachment that resolves the token straight to
+      // the ticket view (no separate login/access-code step).
       await sendEmail({
         to, firstName, lastName, subject, html, ics,
+        senderName: isTransfer ? (senderName || undefined) : undefined,
         event: selectedEvent || undefined,
-        tickets: selectedTickets.length ? selectedTickets : undefined,
-        accessCode: selectedEvent ? accessCode : undefined
+        tickets: selectedTickets.length ? selectedTickets : undefined
       })
       setStatus({ type: 'success', message: `Sent to ${to}.` })
     } catch (err) {
@@ -115,6 +126,21 @@ const SendEmail = () => {
       <div className="se-header">
         <p className="se-title">Send Email</p>
         <p className="se-subtitle">Preview updates live as you type. Sends through the configured SMTP relay.</p>
+      </div>
+
+      <div className="se-tabs" role="tablist" aria-label="Email type">
+        {EMAIL_TYPES.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={emailType === key}
+            className={`se-tab${emailType === key ? ' se-tab--active' : ''}`}
+            onClick={() => setEmailType(key)}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       <div className="se-layout">
@@ -141,10 +167,14 @@ const SendEmail = () => {
             {eventsError && <div className="se-status se-status--error">{eventsError}</div>}
             {selectedEvent && (
               <p className="se-field-hint">
-                A "tickets.html" attachment will be included automatically, gated behind a one-time
-                access code (<strong>{accessCode}</strong>) shown further down in the email body —
-                the recipient enters their email + that code before the attachment reveals any
-                ticket details.
+                {isTransfer
+                  ? <>A "your-tickets.html" attachment will be included automatically — opening it shows
+                     the ticket view directly with an ACCEPT TICKETS button, no separate login step.</>
+                  : <>The purchase confirmation shows the Order # (event's order number, or
+                     "178.../&lt;state&gt;5" if none is stored) and "You Paid" (explicit purchase price,
+                     else the selected tickets' face value + fees + tax), with per-ticket
+                     "Add to Apple Wallet" / "Add to Google Wallet" buttons and a
+                     "View Mobile Ticket" call to action.</>}
               </p>
             )}
           </div>
@@ -178,6 +208,29 @@ const SendEmail = () => {
               />
             </div>
           </div>
+
+          {/* Sender only exists for transfers — a purchase confirmation comes
+              from Ticketmaster itself, so the field would do nothing there. */}
+          {isTransfer && (
+            <>
+              <p className="se-section-title">SENDER</p>
+
+              <div className="se-field">
+                <label htmlFor="se-sender">Sender name</label>
+                <input
+                  id="se-sender"
+                  type="text"
+                  value={senderName}
+                  onChange={(e) => setSenderName(e.target.value)}
+                  placeholder="A friend"
+                />
+                <p className="se-field-hint">
+                  Shown throughout the email as who sent the transfer (e.g. "Your Ticket Transfer
+                  From {senderName || 'A friend'} Is Ready To Be Accepted!"). Defaults to "A friend" if left blank.
+                </p>
+              </div>
+            </>
+          )}
 
           <p className="se-section-title">RECIPIENT</p>
 
@@ -247,7 +300,9 @@ const SendEmail = () => {
         </form>
 
         <div className="se-preview">
-          <p className="se-section-title">EMAIL PREVIEW</p>
+          <p className="se-section-title">
+            EMAIL PREVIEW — {isTransfer ? 'TRANSFER CONFIRMATION' : 'PURCHASE CONFIRMATION'}
+          </p>
           <iframe
             title="Email preview"
             className="se-preview-frame"

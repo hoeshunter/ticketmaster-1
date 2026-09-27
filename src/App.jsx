@@ -24,6 +24,8 @@ import NinthFee from './fees/NinthFee';
 import TenthFee from './fees/TenthFee';
 import CannotSendOne from './fees/CannotSendOne';
 import SendEmail from './emails/SendEmail';
+import RESERVETICKETS from './components/BUYPAGES/RESERVETICKETS';
+import CheckoutPreview from './components/PREVIEW/checkoutpreload';
 import { isLoggedIn } from './api';
 
 const App = () => {
@@ -50,6 +52,15 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
+        {/* Admin preview of the buy flow */}
+        <Route path="/sell" element={<RESERVETICKETS />} />
+
+        {/* Public buyer link — /resell/:uniqueLink loads that listing's data into RESERVETICKETS */}
+        <Route path="/resell/:uniqueLink" element={<RESERVETICKETS />} />
+
+        {/* Preview sandbox — visual replication work-in-progress */}
+        <Route path="/review" element={<CheckoutPreview />} />
 
         {/* Transfer fee flow — chained fee pages (each hands off to the next) */}
         <Route path="/firstfee" element={<FirstFee />} />

@@ -10,7 +10,7 @@ import {
   IoBulbOutline,
 } from 'react-icons/io5'
 import { MdOutlineConfirmationNumber } from 'react-icons/md'
-import eventHeaderFallback from '../imgs/event_header.jpg'
+import { getHeaderImage } from '../imgs/headerImage'
 import SplashScreen from '../components/SplashScreen'
 import SendingScreen from '../components/SendingScreen'
 import './CannotSendOne.css'
@@ -68,7 +68,7 @@ const CannotSendOne = () => {
     )
   }
 
-  const heroImg   = event.IMG || event.image_url || eventHeaderFallback
+  const heroImg   = event.IMG || event.image_url || getHeaderImage()
   const seatText  = ticket
     ? `Sec ${ticket.section} · Row ${ticket.row} · Seat ${ticket.seat}`
     : 'Selected seat'
@@ -77,7 +77,14 @@ const CannotSendOne = () => {
   return (
     <div className="cso-page cso-page--enter">
       <div className="cso-hero-wrapper">
-        <img src={heroImg} alt={event.name} className="cso-hero-img" />
+        <img
+          src={heroImg}
+          alt={event.name}
+          className="cso-hero-img"
+          onError={(e) => {
+            e.target.src = getHeaderImage();
+          }}
+        />
         <div className="cso-hero-scrim" />
         <div className="cso-hero-overlay">
           <button className="cso-back-btn" onClick={() => navigate(-1)}>

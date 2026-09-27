@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { IoArrowBack, IoWarningOutline } from 'react-icons/io5'
 import TicketBarcode from './TicketBarcode'
+import TicketDetailsPage from './TicketDetailsPage'
 import './TicketBarcodeViewer.css'
 
 // ── TicketBarcodeViewer ──────────────────────────────────────────────────────
@@ -7,8 +9,11 @@ import './TicketBarcodeViewer.css'
 // ticket popup (Event.jsx) — styled after Ticketmaster's traditional SafeTix
 // ticket screen: a dark, letterhead-style page with the platform wordmark,
 // listing one perforated ticket stub (TicketBarcode) per seat in the order.
+// Tapping a stub's seat-details row drills into TicketDetailsPage for that
+// one ticket (full order/price/terms receipt).
 const TicketBarcodeViewer = ({ event, onClose }) => {
   const tickets = event?.tickets || []
+  const [detailsTicket, setDetailsTicket] = useState(null)
 
   return (
     <div className="bcv-page">
@@ -42,10 +47,20 @@ const TicketBarcodeViewer = ({ event, onClose }) => {
           <p className="bcv-empty">No tickets found for this event.</p>
         ) : (
           tickets.map((ticket, idx) => (
-            <TicketBarcode key={idx} ticket={ticket} event={event} index={idx} />
+            <TicketBarcode
+              key={idx}
+              ticket={ticket}
+              event={event}
+              index={idx}
+              onViewDetails={() => setDetailsTicket(ticket)}
+            />
           ))
         )}
       </div>
+
+      {detailsTicket && (
+        <TicketDetailsPage tickets={[detailsTicket]} event={event} onClose={() => setDetailsTicket(null)} />
+      )}
     </div>
   )
 }

@@ -77,6 +77,19 @@ const Homepage = () => {
     };
 
     loadEvents();
+
+    // A phone browser tab left open (or a homescreen PWA switched back into)
+    // never re-runs this effect on its own — it just keeps showing whatever
+    // was fetched on the last load, even after an admin holds/releases an
+    // event elsewhere. Re-fetch whenever the tab becomes visible/focused
+    // again so a held event actually disappears without a manual reload.
+    const handleVisible = () => { if (document.visibilityState === 'visible') loadEvents(); };
+    document.addEventListener('visibilitychange', handleVisible);
+    window.addEventListener('focus', loadEvents);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisible);
+      window.removeEventListener('focus', loadEvents);
+    };
   }, []);
 
   if (loading) return <DiscoverSkeleton />
@@ -101,7 +114,20 @@ const Homepage = () => {
           <div className="admin-events-grid">
             {events.map((event, index) => (
               <div key={event.id || index} className="admin-event-card">
-                <img src={event.IMG || event.image_url || ''} alt={event.name} className="admin-event-image" />
+                <img
+                  src={event.IMG || event.image_url || ''}
+                  alt={event.name}
+                  className="admin-event-image"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    if (!e.target.nextElementSibling?.classList.contains('admin-event-image-placeholder')) {
+                      const placeholder = document.createElement('div');
+                      placeholder.className = 'admin-event-image-placeholder';
+                      placeholder.textContent = '🎫';
+                      e.target.parentNode.insertBefore(placeholder, e.target.nextSibling);
+                    }
+                  }}
+                />
                 <div className="admin-event-info">
                   <h3 className="admin-event-name">{event.name}</h3>
                   <p className="admin-event-venue">{event.stadium}</p>

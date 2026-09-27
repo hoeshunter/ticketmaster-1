@@ -1,7 +1,8 @@
-﻿import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IoAdd, IoLogOut, IoTrash, IoPencil, IoPerson, IoImage, IoCash, IoPaperPlane, IoCheckmarkCircle } from 'react-icons/io5';
-import { fetchAdminEvents, createEvent, updateEvent, deleteEvent, logout, getAdminInfo, uploadImage, getFeeAmount, setFeeAmount } from '../api';
+import { IoAdd, IoLogOut, IoTrash, IoPencil, IoPerson, IoImage, IoCash, IoPaperPlane, IoCheckmarkCircle, IoLockClosed, IoLockOpen } from 'react-icons/io5';
+import { fetchAdminEvents, createEvent, updateEvent, deleteEvent, logout, getAdminInfo, uploadImage, getFeeAmount, setFeeAmount, getCountry, setCountry } from '../api';
+import { EVENT_SORT_STORAGE_KEY, naturalCompare, EVENT_SORT_OPTIONS, getSortedEvents } from '../utils/eventSort';
 import './Admin.css';
 
 const AdminDashboard = () => {
@@ -10,8 +11,15 @@ const AdminDashboard = () => {
   const [editingEvent, setEditingEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [eventSortBy, setEventSortBy] = useState(
+    () => localStorage.getItem(EVENT_SORT_STORAGE_KEY) || 'newest'
+  );
   const navigate = useNavigate();
   const admin = getAdminInfo();
+
+  const sortedEvents = useMemo(() => getSortedEvents(events, eventSortBy), [events, eventSortBy]);
+
+  useEffect(() => { localStorage.setItem(EVENT_SORT_STORAGE_KEY, eventSortBy); }, [eventSortBy]);
 
   useEffect(() => { loadEvents(); }, []);
 
@@ -90,6 +98,26 @@ const AdminDashboard = () => {
     }
   };
 
+  // ── Put an entire event on hold / release it ──────────────────────────────
+  // Holding an event doesn't touch its tickets — it flags the event itself.
+  // The public "/events" endpoint filters out held events server-side, so a
+  // held event simply stops appearing in the events list (and its ticket
+  // link) until released here — nothing about it is deleted in the meantime.
+  const handleToggleEventHold = async (eventId) => {
+    const event = events.find(e => e.id === eventId);
+    if (!event) return;
+    try {
+      const updated = await updateEvent(eventId, {
+        ...event,
+        held: !event.held,
+        heldAt: event.held ? undefined : new Date().toISOString()
+      });
+      setEvents(prev => prev.map(e => e.id === eventId ? updated : e));
+    } catch (err) {
+      alert('Failed to update event hold: ' + err.message);
+    }
+  };
+
   return (
     <div className="admin-dashboard">
       <div className="dashboard-header">
@@ -98,6 +126,24 @@ const AdminDashboard = () => {
           <p className="admin-welcome">Welcome, {admin.username}</p>
         </div>
         <div className="header-actions">
+          <button
+            className="resell-nav-btn"
+            onClick={() => navigate('/sell')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              background: '#026cdf',
+              color: 'white',
+              padding: '0.5rem 1rem',
+              borderRadius: '6px',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: '600'
+            }}
+          >
+            <IoCash size={20} /> Resell Tickets
+          </button>
           <div className="admin-profile">
             <IoPerson size={20} />
             <span>{admin.username}</span>
@@ -111,14 +157,37 @@ const AdminDashboard = () => {
       <div className="dashboard-content">
         <FeeSection />
 
-        <TicketStatusSection events={events} onToggleSent={handleToggleTicketSent} />
+        <CountrySection />
+
+        <TicketStatusSection
+          events={sortedEvents}
+          onToggleSent={handleToggleTicketSent}
+          onToggleEventHold={handleToggleEventHold}
+        />
 
         <div className="events-section">
           <div className="section-header">
             <h2>My Events ({events.length})</h2>
-            <button className="add-event-btn" onClick={() => setShowForm(true)}>
-              <IoAdd size={20} /> Create Event
-            </button>
+            <div className="header-actions-inline">
+              {events.length > 0 && (
+                <div className="ts-sort-control">
+                  <label htmlFor="event-sort-select">Sort by</label>
+                  <select
+                    id="event-sort-select"
+                    className="ts-sort-select"
+                    value={eventSortBy}
+                    onChange={(e) => setEventSortBy(e.target.value)}
+                  >
+                    {EVENT_SORT_OPTIONS.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              <button className="add-event-btn" onClick={() => setShowForm(true)}>
+                <IoAdd size={20} /> Create Event
+              </button>
+            </div>
           </div>
 
           {error && <div className="error-message">{error}</div>}
@@ -142,13 +211,27 @@ const AdminDashboard = () => {
                 </button>
               </div>
             ) : (
-              events.map(event => (
+              sortedEvents.map(event => (
                 <div key={event.id} className="event-card">
                   {event.image_url && (
-                    <img src={event.image_url} alt={event.name} className="event-card-img" />
+                    <img
+                      src={event.image_url}
+                      alt={event.name}
+                      className="event-card-img"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'event-card-img-placeholder';
+                        placeholder.textContent = event.name || 'Event Image';
+                        e.target.parentNode.insertBefore(placeholder, e.target);
+                      }}
+                    />
                   )}
                   <div className="event-card-header">
-                    <h3>{event.name}</h3>
+                    <h3>
+                      {event.name}
+                      {event.held && <span className="ts-held-badge"><IoLockClosed size={11} /> On Hold</span>}
+                    </h3>
                     <div className="event-actions">
                       <button className="action-btn edit-btn" onClick={() => handleEdit(event)}>
                         <IoPencil size={16} />
@@ -224,22 +307,132 @@ const FeeSection = () => {
   );
 };
 
+// ── Country Section ────────────────────────────────────────────────────────────
+// Toggles which flag shows in the "My Events" header and which banner image
+// is used as the fee-page fallback hero (US vs UK).
+
+const CountrySection = () => {
+  const [country, setCountryState] = useState(() => getCountry());
+
+  const handleSetCountry = (value) => {
+    const saved = setCountry(value);
+    setCountryState(saved);
+  };
+
+  return (
+    <div className="events-section fee-section">
+      <div className="section-header">
+        <h2>Country</h2>
+        <span className="fee-current">
+          Current: <strong>{country === 'UK' ? '🇬🇧 UK' : country === 'CA' ? '🇨🇦 Canada' : '🇺🇸 US'}</strong>
+        </span>
+      </div>
+      <p className="fee-description">
+        Controls the flag shown in the "My Events" header and the fallback banner image
+        used on fee pages when an event has no photo of its own.
+      </p>
+      <div className="fee-form">
+        <button
+          type="button"
+          className="submit-btn"
+          style={{ opacity: country === 'US' ? 1 : 0.55 }}
+          onClick={() => handleSetCountry('US')}
+        >
+          🇺🇸 US
+        </button>
+        <button
+          type="button"
+          className="submit-btn"
+          style={{ opacity: country === 'UK' ? 1 : 0.55 }}
+          onClick={() => handleSetCountry('UK')}
+        >
+          🇬🇧 UK
+        </button>
+        <button
+          type="button"
+          className="submit-btn"
+          style={{ opacity: country === 'CA' ? 1 : 0.55 }}
+          onClick={() => handleSetCountry('CA')}
+        >
+          🇨🇦 Canada
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // ── Ticket Status Section ─────────────────────────────────────────────────────
 // Lets the admin mark individual tickets as sent (transferred to their
 // recipient) without opening the full edit form. Read by the consumer-facing
 // ticket component to switch to a "Sent" design once flagged.
+// naturalCompare is defined once near the top of the file and shared with
+// the event-sorting logic above.
 
-const TicketStatusSection = ({ events, onToggleSent }) => {
+const TICKET_SORT_OPTIONS = [
+  { value: 'default', label: 'Default order' },
+  { value: 'section', label: 'Section' },
+  { value: 'row', label: 'Row' },
+  { value: 'seat', label: 'Seat' },
+  { value: 'label', label: 'Label' },
+  { value: 'status', label: 'Status (unsent first)' },
+  { value: 'status-desc', label: 'Status (sent first)' },
+];
+
+// Sorts a copy of the tickets while keeping each ticket's original array
+// index attached, since onToggleSent needs the real index into event.tickets
+// (the JSON column order), not its position in the sorted/displayed list.
+const getSortedTickets = (tickets, sortBy) => {
+  const indexed = tickets.map((ticket, idx) => ({ ticket, idx }));
+  switch (sortBy) {
+    case 'section':
+      return indexed.sort((a, b) => naturalCompare(a.ticket.section, b.ticket.section));
+    case 'row':
+      return indexed.sort((a, b) => naturalCompare(a.ticket.row, b.ticket.row));
+    case 'seat':
+      return indexed.sort((a, b) => naturalCompare(a.ticket.seat, b.ticket.seat));
+    case 'label':
+      return indexed.sort((a, b) => naturalCompare(a.ticket.label, b.ticket.label));
+    case 'status':
+      return indexed.sort((a, b) => Number(!!a.ticket.sent) - Number(!!b.ticket.sent));
+    case 'status-desc':
+      return indexed.sort((a, b) => Number(!!b.ticket.sent) - Number(!!a.ticket.sent));
+    default:
+      return indexed;
+  }
+};
+
+const TicketStatusSection = ({ events, onToggleSent, onToggleEventHold }) => {
   const eventsWithTickets = events.filter(e => e.tickets?.length);
+  const [sortBy, setSortBy] = useState(
+    () => localStorage.getItem('admin-ticket-sort') || 'default'
+  );
+
+  useEffect(() => { localStorage.setItem('admin-ticket-sort', sortBy); }, [sortBy]);
 
   return (
     <div className="events-section ticket-status-section">
       <div className="section-header">
         <h2><IoPaperPlane size={20} style={{ verticalAlign: 'text-bottom', marginRight: 8 }} />Ticket Status</h2>
+        <div className="ts-sort-control">
+          <label htmlFor="ts-sort-select">Sort by</label>
+          <select
+            id="ts-sort-select"
+            className="ts-sort-select"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            {TICKET_SORT_OPTIONS.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
       </div>
       <p className="fee-description">
         Mark a ticket as sent once it's been transferred to its recipient. Sent tickets show a
-        distinct "Sent" design in the ticket view instead of their live barcode.
+        distinct "Sent" design in the ticket view instead of their live barcode. Put
+        <strong> an event on hold</strong> to pull the whole event off the site — it stops
+        showing up in the events list for customers (nothing is deleted) — release the hold
+        any time to make it visible again.
       </p>
 
       {eventsWithTickets.length === 0 ? (
@@ -247,23 +440,39 @@ const TicketStatusSection = ({ events, onToggleSent }) => {
       ) : (
         <div className="ts-event-list">
           {eventsWithTickets.map(event => (
-            <div key={event.id} className="ts-event-group">
-              <p className="ts-event-name">{event.name}</p>
+            <div key={event.id} className={`ts-event-group ${event.held ? 'ts-event-group--held' : ''}`}>
+              <div className="ts-event-group-header">
+                <p className="ts-event-name">
+                  {event.name}
+                  {event.held && <span className="ts-held-badge"><IoLockClosed size={11} /> On Hold</span>}
+                </p>
+                <button
+                  className={`ts-toggle-btn ts-hold-btn ${event.held ? 'ts-hold-btn--held' : ''}`}
+                  onClick={() => onToggleEventHold(event.id)}
+                >
+                  {event.held ? (<><IoLockOpen size={15} /> Release Event</>) : (<><IoLockClosed size={15} /> Hold Event</>)}
+                </button>
+              </div>
               <div className="ts-ticket-rows">
-                {event.tickets.map((ticket, idx) => (
-                  <div key={idx} className={`ts-ticket-row ${ticket.sent ? 'ts-ticket-row--sent' : ''}`}>
+                {getSortedTickets(event.tickets, sortBy).map(({ ticket, idx }) => (
+                  <div
+                    key={idx}
+                    className={`ts-ticket-row ${ticket.sent ? 'ts-ticket-row--sent' : ''}`}
+                  >
                     <div className="ts-ticket-info">
                       {ticket.label && <span className="ts-ticket-label">{ticket.label}</span>}
                       <span className="ts-ticket-seat">
                         Sec {ticket.section} &middot; Row {ticket.row} &middot; Seat {ticket.seat}
                       </span>
                     </div>
-                    <button
-                      className={`ts-toggle-btn ${ticket.sent ? 'ts-toggle-btn--sent' : ''}`}
-                      onClick={() => onToggleSent(event.id, idx)}
-                    >
-                      {ticket.sent ? (<><IoCheckmarkCircle size={15} /> Sent</>) : 'Mark Sent'}
-                    </button>
+                    <div className="ts-ticket-actions">
+                      <button
+                        className={`ts-toggle-btn ${ticket.sent ? 'ts-toggle-btn--sent' : ''}`}
+                        onClick={() => onToggleSent(event.id, idx)}
+                      >
+                        {ticket.sent ? (<><IoCheckmarkCircle size={15} /> Sent</>) : 'Mark Sent'}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -282,16 +491,20 @@ const DRAFT_KEY = 'tm_event_form_draft';
 const EMPTY_FORM = {
   name: '', state: '', city: '', stadium: '',
   time: '', date: '', day: '', orderNum: '',
-  tickets: [{ label: 'ARTIST PRESALE', section: '', row: '', seat: '' }],
+  tickets: [{ label: 'ARTIST PRESALE', section: '', row: '', seat: '', faceValue: '', fee: '', tax: '' }],
   image_url: ''
 };
 
 const EventForm = ({ onSubmit, onCancel, initialData }) => {
   const isCreate = !initialData;
 
+  // faceValue/fee/tax default to '' (not 0) so existing events edited
+  // before this feature existed show blank price inputs instead of a
+  // misleading $0.00 — same reasoning as the pre-existing `label: ''`
+  // default just below.
   const normalizeTickets = (data) => ({
     ...data,
-    tickets: (data.tickets || []).map(t => ({ label: '', ...t }))
+    tickets: (data.tickets || []).map(t => ({ label: '', faceValue: '', fee: '', tax: '', ...t }))
   });
 
   const [formData, setFormData] = useState(() => {
@@ -369,7 +582,7 @@ const EventForm = ({ onSubmit, onCancel, initialData }) => {
   };
 
   const addTicket = () =>
-    setFormData({ ...formData, tickets: [...formData.tickets, { label: 'ARTIST PRESALE', section: '', row: '', seat: '' }] });
+    setFormData({ ...formData, tickets: [...formData.tickets, { label: 'ARTIST PRESALE', section: '', row: '', seat: '', faceValue: '', fee: '', tax: '' }] });
 
   const removeTicket = (index) => {
     if (formData.tickets.length > 1)
@@ -540,6 +753,26 @@ const EventForm = ({ onSubmit, onCancel, initialData }) => {
                     <input type="text" value={ticket.seat}
                       onChange={(e) => handleTicketChange(index, 'seat', e.target.value)}
                       required placeholder="e.g., 13" />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Face Value</label>
+                    <input type="number" step="0.01" min="0" value={ticket.faceValue ?? ''}
+                      onChange={(e) => handleTicketChange(index, 'faceValue', e.target.value)}
+                      placeholder="e.g., 89.50" />
+                  </div>
+                  <div className="form-group">
+                    <label>Fee</label>
+                    <input type="number" step="0.01" min="0" value={ticket.fee ?? ''}
+                      onChange={(e) => handleTicketChange(index, 'fee', e.target.value)}
+                      placeholder="e.g., 12.75" />
+                  </div>
+                  <div className="form-group">
+                    <label>Tax</label>
+                    <input type="number" step="0.01" min="0" value={ticket.tax ?? ''}
+                      onChange={(e) => handleTicketChange(index, 'tax', e.target.value)}
+                      placeholder="e.g., 5.00" />
                   </div>
                 </div>
               </div>

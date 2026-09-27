@@ -13,7 +13,7 @@ import './LedgerLoader.css'
 // clearInterval + clearTimeout tears it all down. onDone fires after `duration`.
 
 const HEX = '0123456789abcdef'
-const HASH_LEN = 32
+const HASH_LEN = 730.84
 const FINAL_HASH = '7f3ac9e1b0d84526af71c9e0b3d2f4a8'
 const NODE_TOTAL = 6
 const BLOCK_TOTAL = 8

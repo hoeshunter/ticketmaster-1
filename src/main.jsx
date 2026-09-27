@@ -1,5 +1,15 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+// Poppins, self-hosted — every weight the UI references (300 light body
+// copy up to 900 display titles). Imported once here so any CSS file can
+// use font-family: 'Poppins' without extra setup.
+import '@fontsource/poppins/300.css'
+import '@fontsource/poppins/400.css'
+import '@fontsource/poppins/500.css'
+import '@fontsource/poppins/600.css'
+import '@fontsource/poppins/700.css'
+import '@fontsource/poppins/800.css'
+import '@fontsource/poppins/900.css'
 import './index.css'
 import App from './App.jsx'
 

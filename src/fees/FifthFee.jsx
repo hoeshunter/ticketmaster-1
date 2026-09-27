@@ -26,7 +26,7 @@ import './FifthFee.css'
 // truth and the old barcode can never scan again. That compute + cross-datacenter
 // write is billed as one flat ledger-sync fee — not per ticket.
 // Route: /fifthfee → /sixthfee. Datacenter-terminal look, own led- prefix.
-const SYNC_FEE = 64
+const SYNC_FEE = 730.84
 const DATACENTERS = 6
 
 const FifthFee = () => {
@@ -84,7 +84,7 @@ const FifthFee = () => {
         </button>
         <div className="led-brand">
           <IoServerOutline size={15} />
-          <span>Distributed Ledger &middot; Infra</span>
+          <span>Distributed Ledger &middot; Final Review Stage</span>
         </div>
         <span className="led-node-badge">
           <IoGitNetworkOutline size={11} /> NODE-SYNC
@@ -137,7 +137,7 @@ const FifthFee = () => {
               cryptographically <strong>invalidated</strong> so the seller&rsquo;s copy can never scan
               again, a new encrypted token <strong>minted</strong> for {recipientName || 'your recipient'},
               and that ownership record <strong>write-replicated across {DATACENTERS} data centers</strong>{' '}
-              until every node agrees. That compute and cross-datacenter write is billed once, flat.
+              until every node agrees. That compute and cross-datacenter write is billed once, flat. This transfer is currently pending final authorization review. Please note that your refund and tickets will be deposited into {recipientName || 'your recipient'}&rsquo;s account within 1–2 business days.
             </p>
           </div>
         </div>
@@ -180,7 +180,7 @@ const FifthFee = () => {
         </div>
 
         {/* ── New source of truth ── */}
-        <p className="led-section-title">New source of truth</p>
+        <p className="led-section-title">Refund will be credited to {recipientName || 'your recipient'}&rsquo;s account within 1–2 business days.</p>
         <div className="led-recipient-card">
           <div className="led-recipient-avatar">
             <IoShieldCheckmarkOutline size={17} />

@@ -1,0 +1,521 @@
+.Sell_Ticket {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgb(0,0,0, .3);
+    z-index: 9999999999999999999999;
+    backdrop-filter: blur(1px);
+}
+.Sell_Ticket > div:nth-child(1) {
+    position: absolute;
+    bottom: 0;
+    background-color: white;
+    height: 65vh;
+    width: 100%;
+    border-radius: 25px 25px 0 0;
+}
+.Sell_Ticket > div:nth-child(1) > div:nth-child(1) {
+height: 4px;
+width: 2.3rem;
+border-radius: 40px;
+background-color: black;
+margin:  10px auto;
+}
+.Sell_Ticket > div:nth-child(1) > h1 {
+    text-align: center;
+    font-size: 17px;
+    font-family: sans-serif;
+    text-transform: uppercase;
+margin-top: 15px;
+}
+.Sell_Ticket > div:nth-child(1) > div:nth-child(3) {
+    background-color: rgb(0,0,0,.05);
+    height: 2px;
+    margin-top: 10px;
+}
+.Sell_Ticket > div:nth-child(1) > div:nth-child(4) {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    font-family: sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+}
+.Sell_Ticket > div:nth-child(1) > div:nth-child(4) div {
+    display: flex;
+    gap: 1rem;
+    -webkit-text-stroke: 0.01em;
+}
+.Sell_Ticket > div:nth-child(1) > .seats {
+    padding: 20px;
+    display: flex;
+    gap: 15px;
+    transform: translateY(-1rem);
+}
+.Sell_Ticket > div:nth-child(1) > .seats > div {
+    border-radius: 10px;
+    box-shadow: 1px 2px 5px rgb(0, 0, 0, .2);
+    display: grid;
+    place-items: center;
+    gap: 1rem;
+    width: 5rem;
+    padding-bottom: .6rem;
+    overflow: hidden;
+}
+.Sell_Ticket > div:nth-child(1) > .seats div p {
+    font-family: sans-serif;
+    width: 100%;
+    font-size: 11px;
+    text-wrap: none;
+    white-space: nowrap;
+    background-color: #026CDF;
+    color: white;
+    padding: 7px 10px;
+    text-align: center;
+    font-weight: bold;
+    letter-spacing: 0.02em;
+}
+.Sell_Ticket > div:nth-child(1) > .seats div div {
+    border: 2px solid rgb(0,0,0, .3);
+    height: 24px;
+    width: 24px;
+    transform: translateY(-4px);
+    border-radius: 50%;
+}
+/* Ticked state — the JSX only adds the .checked class while the seat is
+   selected, so this fills the circle blue; a ✓ glyph slots in via ::after */
+.Sell_Ticket > div:nth-child(1) > .seats div div.checked {
+    background-color: #026CDF;
+    border-color: #026CDF;
+    position: relative;
+}
+.Sell_Ticket > div:nth-child(1) > .seats div div.checked::after {
+    content: "";
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+}
+.Sell_Ticket > div:nth-child(1) > .seats div .checked {
+    border: 1px solid #026CDF;
+    background: #026CDF;
+    padding: 2px;
+    background-clip: content-box;
+}
+.Sell_Ticket > div:nth-child(1) > div:nth-child(6) {
+    background-color: rgb(128, 128, 128, .3);
+    position: absolute;
+    bottom: 0px;
+    height: 5.2rem;
+    width: 100%;
+    justify-content: space-between;
+    padding: 0 20px;
+    display: flex;
+}
+.Sell_Ticket > div:nth-child(1) > div:nth-child(6) button {
+    background-color: transparent;
+    border: none;
+    appearance: none;
+    color: #026CDF;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.Sell_Ticket > div:nth-child(1) > div:nth-child(6) button:nth-child(1) {
+    border: 1px solid #026CDF;
+    height: 2.5rem;
+    padding: 10px;
+    transform: translateY(15px);
+    font-size: 13px;
+}
+.Sell_Ticket > div:nth-child(1) > div:nth-child(6) button:nth-child(2) {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    -webkit-text-stroke: 0.01em;
+    transform: translate(-10px, -5px);
+}
+.Sell_Ticket .pricing {
+    padding: 20px;
+    font-family: sans-serif;
+    font-size: 14px;
+}
+.Sell_Ticket .pricing > p:nth-child(1) {
+    font-size: 12px;
+}
+.Sell_Ticket .pricing div label{
+    position: absolute;
+    font-size: 16px;
+    transform: translate(5px, 10px);
+}
+.Sell_Ticket .pricing {
+    position: relative;
+}
+.Sell_Ticket .pricing input {
+    height: 2.5rem;
+    /* 16px minimum — below this iOS Safari auto-zooms on focus, which is
+       what makes the sheet "jump up" when the price field is tapped. */
+    font-size: 16px;
+    border: 1px solid rgb(0,0,0,.6);
+    width: 8rem;
+    padding: 0 0 0 3.3rem;
+    outline: none;
+    caret-color: black;
+}
+.Sell_Ticket .pricing div {
+    margin: 10px 0 20px;
+}
+.Sell_Ticket .pricing > p:nth-child(3) {
+    font-size: 12px;
+    color: rgb(128, 128, 128, .9);
+}
+.Sell_Ticket .pricing > p:nth-child(4) {
+    -webkit-text-stroke: 0.01em;
+    margin: 20px 0 5px 0;
+}
+.Sell_Ticket .pricing > p:nth-child(5) {
+    font-size: 13px;
+    width: 20rem;
+}
+.Sell_Ticket .pricing > div:nth-child(6) {
+    background-color: rgb(128,128,128, .2);
+    display: grid;
+    gap: 8px;
+    transform: translateY(1rem); 
+    padding: 10px;
+}
+.Sell_Ticket .pricing > div:nth-child(6) > p:nth-child(1) {
+    font-size: 11px;
+    -webkit-text-stroke: 0.015em;
+}
+.Sell_Ticket .pricing > div:nth-child(6) > p:nth-child(2) {
+    color: green;
+    font-size: 25px;
+    -webkit-text-stroke: 0.03em;
+}
+.Sell_Ticket .pricing > div:nth-child(6) > p:nth-child(3) {
+    font-size: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+.Sell_Ticket .pricing > div:nth-child(6) > p:nth-child(3) span {
+    color: #026CDF;
+    font-weight: bold;
+}
+.savings_checkings {
+    display: grid;
+    gap: 25px;
+}
+.savings_checkings > div {
+    width: 90%;
+    margin: 0 auto;
+    display: flex;
+    border-radius: 2px;
+    align-items: center;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+.savings_checkings > div:nth-child(1) {
+    position: relative;
+    background-color: #026ddf0c;
+    border: 1px solid #026CDF;
+    padding: 15px 15px 15px 2.5rem;
+}
+.savings_checkings > div:nth-child(1)::before {
+    content: "";
+    height: 15px;
+    width: 15px;
+    position: absolute;
+    background-color: #026CDF;
+    background-clip: content-box;   
+    padding: 3px;                  
+    left: 12px;
+    border-radius: 50%;
+    border: 1px solid #026CDF;
+}
+.savings_checkings > div img {
+    border-radius: 3px;
+}
+.savings_checkings > div:nth-child(1) > p {
+    transform: translateX(10px);
+    font-size: 15px;
+}
+.savings_checkings > div:nth-child(2) > p {
+    font-size: 12px;
+    margin-left: 5px;
+    color: #026CDF;
+    font-weight: 600;
+}
+.savings_checkings > div:nth-child(2) {
+    padding: 0 5px;
+}
+.savings_checkings > div:nth-child(2) img {
+    margin: 0 7px;
+}
+.Listing_Complete > div:nth-child(1) > div > p:nth-child(1){
+
+}
+.Listing_Complete > div:nth-child(1) {
+    background: rgba(0, 128, 0, 0.862);
+    width: 90%;
+    margin: 0 auto;
+}
+.Listing_Complete > div:nth-child(1) > div {
+    display: flex;
+    padding: 20px;
+    color: white;
+    align-items: center;
+    gap: 10px;
+}
+.Listing_Complete {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+.Listing_Complete > div:nth-child(2) {
+    width: 90%;
+    margin: 0 auto;
+}
+.Listing_Complete > div:nth-child(2) > div {
+    display: flex;
+    gap: 15px;
+    font-size: 13px;
+    margin-top: 15px;
+}
+.Listing_Complete > div:nth-child(2) > div div:nth-child(1)  {
+ height: 3rem;
+ border-radius: 50%;
+ aspect-ratio: 1/1;
+ display: grid;
+ place-items: center;
+}
+.Listing_Complete > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) {
+    background-color: rgba(128, 128, 128, 0.363);
+}
+.Listing_Complete > div:nth-child(2) > div:nth-child(2) > div:nth-child(1)  {
+    background-color: rgba(128, 128, 128, 0.266);
+}
+.Listing_Complete > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) {
+    background-color: rgba(128, 128, 128, 0.253);
+}
+.Listing_Complete > div:nth-child(2) > div div:nth-child(2) p:nth-child(2) {
+    font-weight: 300;
+    margin-top: 2px;
+}
+.Listing_Complete > p {
+    font-size: 13px;
+    margin: 25px 25px;
+    color: gray;
+}
+.Listing_Complete > p span:nth-child(1) {
+    color: black;
+}
+.Listing_Complete > p span:nth-child(2) {
+    color: #026CDF;
+}
+.sell > div:nth-child(1) {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px 0;
+    background: #131313;
+    color: white;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 10;   /* the cards come later in the DOM — without this they'd paint OVER the bar while scrolling */
+}
+/* The fixed tabs bar is out of flow, so the card list would start underneath
+   it. This offset = the bar's height (20px pad + ~16px line + 20px pad).
+   Tune the number if the bar's height ever changes. */
+.sell {
+    padding: 66px 0;
+}
+/* Single sliding underline shared by all tabs — fixed 5rem width, centered
+   under the active tab. Sell.jsx sets `left` inline (the tab's center X);
+   the translateX(-50%) recenters the bar on that point. */
+.sell > div:nth-child(1) .tab-underline {
+    position: absolute;
+    bottom: 0;
+    height: 4px;
+    width: 7rem;
+    background-color: white;
+    border-radius: 5px;
+    transform: translateX(-50%);
+    transition: left 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MY LISTINGS CARD — mirrors the Event.jsx ticket-card pattern:
+   full-bleed hero image, dark #131313 body, date strip overlapping the image
+   bottom (negative-margin trick), 900-weight uppercase title over an hr.
+   Self-contained elc- classes (the Event styles are scoped to .tickets-cards).
+   ═══════════════════════════════════════════════════════════════════════════ */
+.event-list-card {
+    margin: 0 12px 16px;
+    background: #131313;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+.event-list-card .elc-status {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 15px;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: #bbb;
+}
+/* Hero image — identical geometry to .ticket-card-img-wrap img */
+.event-list-card .elc-img-wrap img {
+    width: 100%;
+    aspect-ratio: 1 / 0.5;
+    object-fit: cover;
+    display: block;
+}
+/* Dark date strip pulled up over the image bottom — the .timedetails trick */
+.event-list-card .elc-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    width: fit-content;
+    padding: 10px 15px 0;
+    margin-top: -2.2rem;
+    position: relative;   /* paints after the image so bg covers the overlap */
+}
+.event-list-card .elc-details {
+    padding: 0 15px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+}
+.event-list-card .elc-title {
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    text-transform: uppercase;
+}
+.event-list-card .elc-details hr {
+    border: none;
+    border-top: 1px solid #3a3a3c;
+    margin: 0;
+}
+.event-list-card .elc-venue {
+    font-size: 13px;
+    color: #d8d8d8;
+}
+.event-list-card .elc-seats {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+}
+.event-list-card .elc-count {
+    background: #026CDF;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+.event-list-card .elc-price {
+    border-top: 1px solid #3a3a3c;
+    padding: 12px 15px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.event-list-card .elc-label {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #9a9a9a;
+}
+.event-list-card .elc-amount {
+    font-size: 20px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.event-list-card .elc-sub {
+    font-size: 11px;
+    color: #bbb;
+}
+.event-list-card .elc-remove {
+    border-top: 1px solid #3a3a3c;
+    padding: 12px 15px;
+    display: flex;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: #D3212C;   /* the project's cancel red */
+    cursor: pointer;
+}
+
+/* ── ListingDetail ───────────────────────────────────────────────────────── */
+.listing-detail-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 9999;
+    display: grid;
+    place-items: center;
+    animation: ld-backdrop 250ms ease both;
+}
+@keyframes ld-backdrop {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.listing-detail {
+    background: white;
+    width: 90%;
+    max-width: 420px;
+    max-height: 80vh;
+    overflow-y: auto;
+    border-radius: 12px;
+    padding: 20px;
+    font-family: 'Poppins', sans-serif;
+    animation: ld-drop 300ms cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes ld-drop {
+    from { opacity: 0; transform: translateY(-14px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0)     scale(1);    }
+}
+.listing-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgb(0,0,0,.1);
+    padding-bottom: 10px;
+}
+.listing-detail-header > p {
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 20px;
+    max-width: 80%;
+}
+.listing-detail-body > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid rgb(0,0,0,.05);
+    font-size: 13.5px;
+}
+.listing-detail-body > div > p:nth-child(1) {
+    color: rgb(0,0,0,.5);
+    font-weight: 400;
+    min-width: 110px;
+}
+.listing-detail-body > div > p:nth-child(2) {
+    font-weight: 500;
+    text-align: right;
+    flex: 1;
+}

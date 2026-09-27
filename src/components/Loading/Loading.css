@@ -1,0 +1,83 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   THREELINEROTATE css part
+   Three nested rings (purple / white / blue) sweeping like the Material
+   "indeterminate" spinner, staggered 0.15s apart so they chase each other.
+   Copied from the transfer "Authentication" loading stage
+   (TransferAuth.jsx stage === 'loading' / App.css .tra-spinner-tri).
+   Used by components/Loading/THREELINEROTATE.jsx.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.tlr-spinner {
+  width: 60px;
+  height: 60px;
+  animation: tlr-rotate 1.6s linear infinite;
+}
+.tlr-ring {
+  stroke-linecap: round;
+  animation: tlr-dash 1.4s ease-in-out infinite;
+}
+.tlr-ring--purple { stroke: #7b5cf0; }
+.tlr-ring--white  { stroke: #f0f0f0; animation-delay: 0.15s; }
+.tlr-ring--blue   { stroke: #026CDF; animation-delay: 0.3s; }
+
+@keyframes tlr-rotate {
+  100% { transform: rotate(360deg); }
+}
+@keyframes tlr-dash {
+  0%   { stroke-dasharray: 1 200; stroke-dashoffset: 0; }
+  50%  { stroke-dasharray: 70 200; stroke-dashoffset: -25; }
+  100% { stroke-dasharray: 70 200; stroke-dashoffset: -100; }
+}
+
+/* 
+One Line Loading
+*/
+.LINEINCIRCLELOADING {
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  z-index: 9999;
+  left: 0;
+  display: grid;
+  place-items: center;
+  color: white;
+}
+.LINELOADING {
+    background-color: rgb(0,0,0,.6);
+}
+
+.LINEINCIRCLELOADING > div > div:nth-child(1) {
+  border-radius: 50%;
+  border: 7.3px solid rgb(128, 128, 128, 0.5);
+  aspect-ratio: 1/1;
+  height: 4.8rem;
+  width: 4.8rem;
+  position: relative;
+  animation: spin 1s linear infinite;
+}
+.linecirclepayment > div > div:nth-child(1) {
+  height: 4.3rem;
+  width: 4.3rem;
+}
+.LINEINCIRCLELOADING > div > div:nth-child(1)::after {
+  content: "";
+  position: absolute;
+  inset: -6.5px;
+  border-radius: 50%;
+  border: 7.3px solid transparent;
+  border-top-color: white;
+  border-right-color: white;
+  border-bottom-color: white;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.LINEINCIRCLELOADING p {
+  font-weight: 500;
+  margin-top: 20px;
+}
+.LINEINCIRCLELOADING > div {
+  display: grid;
+  place-items: center;
+}

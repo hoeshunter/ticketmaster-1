@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Second Fee — Confirmation Modal Options</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0d0d0f;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px 64px;
+    color: #fff;
+  }
+  h1 { font-size: 15px; font-weight: 500; color: #9a9aa0; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 4px; }
+  .sub { font-size: 12.5px; color: #6a6a72; margin-bottom: 28px; }
+
+  /* ── Phone frame ── */
+  .phone {
+    width: 390px; height: 780px; border-radius: 54px; background: #fff;
+    position: relative; overflow: hidden; border: 10px solid #1a1a1e;
+    box-shadow: 0 30px 80px rgba(0,0,0,.6);
+  }
+  .screen {
+    position: absolute; inset: 0; background: linear-gradient(#fff, #fafafa 40%, #f4f4f6);
+    display: flex; flex-direction: column;
+  }
+  .notch { position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    width: 118px; height: 32px; background: #1a1a1e; border-radius: 20px; z-index: 5; }
+
+  /* Fake fee page behind modal */
+  .fakepage { padding: 70px 22px 0; color: #131313; }
+  .fakepage .fp-tag { font-size: 10.5px; letter-spacing: .14em; color: #b8963e; font-weight: 600; text-transform: uppercase; }
+  .fakepage h2 { font-size: 21px; font-weight: 600; margin: 6px 0 4px; }
+  .fakepage .fp-meta { font-size: 12px; color: #8a8a8e; margin-bottom: 18px; }
+  .fp-row { display: flex; justify-content: space-between; font-size: 12.5px; padding: 11px 0;
+    border-bottom: 1px solid #ececec; color: #55555a; }
+  .fp-row b { color: #131313; font-weight: 600; }
+  .fp-cta { margin-top: 18px; height: 50px; border-radius: 25px; background: #026CDF; color: #fff;
+    display: grid; place-items: center; font-weight: 600; font-size: 14.5px; }
+
+  /* ── Modal layer ── */
+  .layer { position: absolute; inset: 0; display: none; z-index: 10; }
+  .layer.on { display: grid; place-items: center; }
+  .backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.5); backdrop-filter: blur(4px);
+    animation: bd-in .28s ease both; }
+  @keyframes bd-in { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ══ OPTION A — Classic iOS Alert ══ */
+  .optA { width: 272px; background: rgba(250,250,252,.96); backdrop-filter: blur(20px);
+    border-radius: 14px; overflow: hidden; text-align: center;
+    box-shadow: 0 12px 40px rgba(0,0,0,.28);
+    animation: pop-in .34s cubic-bezier(.175,.885,.32,1.12) both; }
+  @keyframes pop-in { from { opacity: 0; transform: scale(1.12); } to { opacity: 1; transform: scale(1); } }
+  .optA .a-body { padding: 20px 16px 17px; }
+  .optA .a-title { font-size: 16px; font-weight: 600; color: #131313; margin-bottom: 4px; }
+  .optA .a-msg { font-size: 12.5px; color: #6d6d72; line-height: 1.45; }
+  .optA .a-btns { display: flex; border-top: .5px solid rgba(0,0,0,.12); }
+  .optA .a-btns button { flex: 1; height: 44px; border: none; background: none; font-size: 14.5px;
+    font-family: inherit; cursor: pointer; }
+  .optA .a-btns button + button { border-left: .5px solid rgba(0,0,0,.12); }
+  .optA .a-cancel { color: #026CDF; font-weight: 400; }
+  .optA .a-go { color: #026CDF; font-weight: 600; }
+
+  /* ══ OPTION B — TM Bottom Sheet ══ */
+  .sheetWrap { position: absolute; inset: 0; pointer-events: none; }
+  .sheetWrap .backdrop { pointer-events: auto; }
+  .optB { position: absolute; left: 0; right: 0; bottom: 0; pointer-events: auto;
+    background: #fff; border-radius: 22px 22px 0 0; padding: 10px 22px 30px;
+    box-shadow: 0 -8px 40px rgba(0,0,0,.18);
+    animation: sheet-up .38s cubic-bezier(.32,.72,0,1) both; }
+  @keyframes sheet-up { from { transform: translateY(102%); } to { transform: translateY(0); } }
+  .grabber { width: 38px; height: 5px; border-radius: 3px; background: #d8d8dc; margin: 4px auto 16px; }
+  .optB .b-title { font-size: 19px; font-weight: 600; color: #131313; }
+  .optB .b-sub { font-size: 12px; color: #8a8a8e; margin: 3px 0 14px; }
+  .b-rows { border-radius: 12px; background: #f4f4f6; padding: 2px 14px; margin-bottom: 14px; }
+  .b-row { display: flex; justify-content: space-between; font-size: 12.5px; color: #55555a;
+    padding: 10px 0; border-bottom: 1px solid #e8e8ea; }
+  .b-row:last-child { border: none; }
+  .b-row.total { font-weight: 600; color: #131313; font-size: 14px; }
+  .optB .b-cta { height: 52px; border-radius: 26px; background: #026CDF; color: #fff; border: none;
+    width: 100%; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .optB .b-cancel { display: block; text-align: center; margin-top: 12px; font-size: 13px;
+    color: #8a8a8e; background: none; border: none; width: 100%; font-family: inherit; cursor: pointer; }
+
+  /* ══ OPTION C — Receipt Card ══ */
+  .optC { width: 310px; background: #fff; border-radius: 16px; padding: 26px 22px 20px;
+    text-align: center; box-shadow: 0 16px 50px rgba(0,0,0,.3);
+    animation: pop-in .34s cubic-bezier(.175,.885,.32,1.12) both; }
+  .c-badge { width: 58px; height: 58px; border-radius: 50%; margin: 0 auto 12px;
+    background: linear-gradient(135deg, #f5e7c4, #e5cf95); display: grid; place-items: center;
+    font-size: 26px; }
+  .optC .c-title { font-size: 17px; font-weight: 600; color: #131313; }
+  .optC .c-ref { font-size: 10.5px; letter-spacing: .1em; color: #b8963e; font-weight: 600;
+    text-transform: uppercase; margin: 3px 0 14px; }
+  .c-lines { text-align: left; border-top: 1px dashed #ddd6c2; border-bottom: 1px dashed #ddd6c2;
+    padding: 10px 2px; margin-bottom: 6px; }
+  .c-line { display: flex; justify-content: space-between; font-size: 12px; color: #6d6d72; padding: 3.5px 0; }
+  .c-line.total { font-size: 14.5px; font-weight: 600; color: #131313; padding-top: 7px; }
+  .optC .c-note { font-size: 10.5px; color: #9a9aa0; margin-bottom: 14px; }
+  .optC .c-cta { height: 48px; border-radius: 24px; background: #026CDF; color: #fff; border: none;
+    width: 100%; font-family: inherit; font-size: 14.5px; font-weight: 600; cursor: pointer; }
+  .optC .c-cancel { display: block; margin-top: 10px; font-size: 12.5px; color: #8a8a8e;
+    background: none; border: none; width: 100%; font-family: inherit; cursor: pointer; }
+
+  /* ══ OPTION D — Authorize Dial ══ */
+  .optD { width: 290px; text-align: center;
+    animation: pop-in .34s cubic-bezier(.175,.885,.32,1.12) both; }
+  .d-ring { width: 96px; height: 96px; margin: 0 auto 16px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 25%, #1a7fe8, #026CDF 70%);
+    display: grid; place-items: center; box-shadow: 0 0 0 10px rgba(2,108,223,.12);
+    animation: d-pulse 2s ease-in-out infinite; }
+  @keyframes d-pulse { 0%,100% { box-shadow: 0 0 0 10px rgba(2,108,223,.12); }
+    50% { box-shadow: 0 0 0 18px rgba(2,108,223,.04); } }
+  .optD { color: #fff; }
+  .optD .d-amount { font-size: 34px; font-weight: 600; letter-spacing: -.02em; }
+  .optD .d-title { font-size: 13px; font-weight: 400; color: rgba(255,255,255,.75); margin: 4px 0 18px; }
+  .optD .d-cta { height: 50px; border-radius: 25px; background: #fff; color: #026CDF; border: none;
+    width: 100%; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .optD .d-cancel { display: block; margin-top: 12px; font-size: 13px; color: rgba(255,255,255,.6);
+    background: none; border: none; width: 100%; font-family: inherit; cursor: pointer; }
+
+  /* ══ OPTION E — Liquid Glass Sheet ══ */
+  .optE { position: absolute; left: 0; right: 0; bottom: 0; pointer-events: auto;
+    background: rgba(255,255,255,.72); backdrop-filter: blur(28px) saturate(1.6);
+    border-radius: 26px 26px 0 0; border: .5px solid rgba(255,255,255,.6);
+    padding: 10px 20px 28px; box-shadow: 0 -8px 40px rgba(0,0,0,.18);
+    animation: sheet-up .42s cubic-bezier(.32,.72,0,1) both; }
+  .optE .e-head { display: flex; align-items: center; gap: 12px; padding: 8px 4px 14px; }
+  .e-ico { width: 42px; height: 42px; border-radius: 12px; background: rgba(2,108,223,.12);
+    display: grid; place-items: center; font-size: 19px; }
+  .optE .e-title { font-size: 16px; font-weight: 600; color: #131313; }
+  .optE .e-sub { font-size: 11.5px; color: #6d6d72; }
+  .e-group { background: rgba(255,255,255,.85); border-radius: 14px; overflow: hidden;
+    border: .5px solid rgba(0,0,0,.05); margin-bottom: 14px; }
+  .e-row { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px;
+    color: #3a3a3e; padding: 12px 14px; border-bottom: .5px solid rgba(0,0,0,.06); }
+  .e-row:last-child { border: none; }
+  .e-row.total { font-weight: 600; color: #131313; }
+  .e-tag { font-size: 9.5px; font-weight: 600; letter-spacing: .06em; color: #1d7a3a;
+    background: rgba(29,122,58,.12); padding: 3px 7px; border-radius: 5px; text-transform: uppercase; }
+  .optE .e-cta { height: 52px; border-radius: 26px; background: #131313; color: #fff; border: none;
+    width: 100%; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .optE .e-cancel { display: block; text-align: center; margin-top: 12px; font-size: 13px;
+    color: #6d6d72; background: none; border: none; width: 100%; font-family: inherit; cursor: pointer; }
+
+  /* ── Picker strip ── */
+  .picker { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 26px; max-width: 420px; }
+  .picker button { padding: 9px 15px; border-radius: 20px; border: 1px solid #2c2c32; background: #16161a;
+    color: #cfcfd6; font-family: inherit; font-size: 12px; cursor: pointer; }
+  .picker button.on { background: #026CDF; border-color: #026CDF; color: #fff; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<h1>Second Fee · Confirmation Modal</h1>
+<p class="sub">Tap an option to preview it live — then tell Claude which letter to build into second_fee.jsx</p>
+
+<div class="phone">
+  <div class="notch"></div>
+  <div class="screen">
+    <div class="fakepage">
+      <p class="fp-tag">Artist Management Office</p>
+      <h2>Review Fee Authorization</h2>
+      <p class="fp-meta">Notice of authorization · Ref TM-8492137</p>
+      <div class="fp-row"><span>Review fee</span><b>$49.78 / ticket</b></div>
+      <div class="fp-row"><span>Tickets</span><b>x2</b></div>
+      <div class="fp-row"><span>Refund status</span><b>Refundable</b></div>
+      <div class="fp-cta">Authorize Review Fee</div>
+    </div>
+
+    <!-- A -->
+    <div class="layer on" id="layerA">
+      <div class="backdrop" onclick="closeAll()"></div>
+      <div class="optA">
+        <div class="a-body">
+          <p class="a-title">Authorization Required</p>
+          <p class="a-msg">Your transfer needs management review. A refundable fee of <b>$49.78 per ticket</b> ($99.56 total) will be authorized now and refunded on approval.</p>
+        </div>
+        <div class="a-btns">
+          <button class="a-cancel" onclick="closeAll()">Cancel</button>
+          <button class="a-go" onclick="closeAll()">Authorize</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- B -->
+    <div class="layer" id="layerB">
+      <div class="sheetWrap" style="position:absolute;inset:0;">
+        <div class="backdrop" onclick="closeAll()"></div>
+        <div class="optB">
+          <div class="grabber"></div>
+          <p class="b-title">Authorize Review Fee</p>
+          <p class="b-sub">Charged by Artist Management Office · Ref TM-8492137</p>
+          <div class="b-rows">
+            <div class="b-row"><span>Review fee</span><span>$49.78 × 2</span></div>
+            <div class="b-row"><span>Refund policy</span><span>Refunded on approval</span></div>
+            <div class="b-row total"><span>Total</span><span>$99.56</span></div>
+          </div>
+          <button class="b-cta">Authorize $99.56</button>
+          <button class="b-cancel" onclick="closeAll()">Not Now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- C -->
+    <div class="layer" id="layerC">
+      <div class="backdrop" onclick="closeAll()"></div>
+      <div class="optC">
+        <div class="c-badge">🏛️</div>
+        <p class="c-title">Management Review</p>
+        <p class="c-ref">Ref TM-8492137</p>
+        <div class="c-lines">
+          <div class="c-line"><span>Review fee</span><span>$49.78 × 2</span></div>
+          <div class="c-line"><span>Issued</span><span>Sep 9, 2026</span></div>
+          <div class="c-line total"><span>Authorization total</span><span>$99.56</span></div>
+        </div>
+        <p class="c-note">Fully refunded once the transfer is approved by management.</p>
+        <button class="c-cta">Authorize Review Fee</button>
+        <button class="c-cancel" onclick="closeAll()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- D -->
+    <div class="layer" id="layerD">
+      <div class="backdrop" onclick="closeAll()" style="background:rgba(0,0,0,.66);"></div>
+      <div class="optD">
+        <div class="d-ring">💳</div>
+        <p class="d-amount">$99.56</p>
+        <p class="d-title">Management review fee · 2 tickets</p>
+        <button class="d-cta">Authorize Payment</button>
+        <button class="d-cancel" onclick="closeAll()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- E -->
+    <div class="layer" id="layerE">
+      <div class="sheetWrap" style="position:absolute;inset:0;">
+        <div class="backdrop" onclick="closeAll()" style="background:rgba(0,0,0,.35);"></div>
+        <div class="optE">
+          <div class="e-head">
+            <div class="e-ico">🛡️</div>
+            <div>
+              <p class="e-title">Confirm Authorization</p>
+              <p class="e-sub">Artist Management Office · TM-8492137</p>
+            </div>
+          </div>
+          <div class="e-group">
+            <div class="e-row"><span>Review fee</span><span>$49.78 × 2</span></div>
+            <div class="e-row"><span>Per-ticket charge</span><span>$49.78</span></div>
+            <div class="e-row total"><span>Total <span class="e-tag">Refundable</span></span><span>$99.56</span></div>
+          </div>
+          <button class="e-cta">Authorize</button>
+          <button class="e-cancel" onclick="closeAll()">Not Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="picker">
+  <button class="on" onclick="show('A', this)">A · iOS Alert</button>
+  <button onclick="show('B', this)">B · TM Bottom Sheet</button>
+  <button onclick="show('C', this)">C · Receipt Card</button>
+  <button onclick="show('D', this)">D · Authorize Dial</button>
+  <button onclick="show('E', this)">E · Liquid Glass</button>
+</div>
+
+<script>
+  function show (id, btn) {
+    document.querySelectorAll('.layer').forEach(l => l.classList.remove('on'))
+    document.getElementById('layer' + id).classList.add('on')
+    document.querySelectorAll('.picker button').forEach(b => b.classList.remove('on'))
+    btn.classList.add('on')
+  }
+  function closeAll () {
+    document.querySelectorAll('.layer').forEach(l => l.classList.remove('on'))
+    document.querySelectorAll('.picker button').forEach(b => b.classList.remove('on'))
+  }
+</script>
+</body>
+</html>

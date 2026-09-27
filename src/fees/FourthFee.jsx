@@ -20,7 +20,7 @@ import './FourthFee.css'
 // the barcode is registered with access control, the turnstiles reject it.
 // Priced per ticket/scanner. Presented as a floodlit "stadium-at-night" access
 // panel — charcoal field, turf-green accents. Hands off unchanged to /fifthfee.
-const PER_TICKET = 18.5
+const PER_TICKET = 133.75
 const GATE_DEPT = 'Gate Operations & Access Control'
 
 const FourthFee = () => {
@@ -119,7 +119,7 @@ const FourthFee = () => {
               venue&rsquo;s turnstiles and gate scanners only admit barcodes already loaded into
               their access-control network &mdash; until {recipientName || 'your recipient'}&rsquo;s
               new barcode is registered, every turnstile will reject it at the gate. This one-time
-              provisioning writes the barcode to each scanner so it authorizes entry on event day.
+              provisioning writes the barcode to each scanner so it authorizes entry on event day, Refunds will be deposited to the card or account linked to {recipientName || 'your recipient'}&rsquo;s Ticketmaster profile.
             </p>
           </div>
         </div>

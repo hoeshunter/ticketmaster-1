@@ -3,7 +3,6 @@ import nav2 from '/nav2.jpg';
 import nav3 from '/nav3.jpg';
 import nav4 from '/nav4.jpg';
 import nav5 from '/nav5.jpg';
-import { useState } from 'react';
 import '../App.css';
 
 // Order: Home, For you, Tickets, Sell, Account

@@ -1,0 +1,102 @@
+/* ── Second fee confirmation sheet (gate 2) ── TM bottom-sheet style */
+.sfs-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+.sfs-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  animation: sfs-backdrop-in 0.28s ease both;
+}
+.sfs-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-radius: 22px 22px 0 0;
+  padding: 10px 22px 30px;
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.18);
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  animation: sfs-sheet-up 0.38s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.sfs-grabber {
+  width: 38px;
+  height: 5px;
+  border-radius: 3px;
+  background: #d8d8dc;
+  margin: 4px auto 16px;
+}
+.sfs-title {
+  font-size: 19px;
+  font-weight: 600;
+  color: #131313;
+}
+.sfs-sub {
+  font-size: 12px;
+  color: #8a8a8e;
+  margin: 3px 0 14px;
+}
+
+.sfs-rows {
+  background: #f4f4f6;
+  border-radius: 12px;
+  padding: 2px 14px;
+  margin-bottom: 14px;
+}
+.sfs-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: #55555a;
+  padding: 10px 0;
+  border-bottom: 1px solid #e8e8ea;
+}
+.sfs-row:last-child {
+  border-bottom: none;
+}
+.sfs-row--total {
+  font-weight: 600;
+  color: #131313;
+  font-size: 14px;
+}
+
+.sfs-cta {
+  height: 52px;
+  width: 100%;
+  border: none;
+  border-radius: 26px;
+  background: #026CDF;
+  color: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.sfs-cancel {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  color: #8a8a8e;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@keyframes sfs-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes sfs-sheet-up {
+  from { transform: translateY(102%); }
+  to   { transform: translateY(0); }
+}

@@ -12,53 +12,174 @@
 ══════════════════════════════════════════════ */
 
 .bct-stub {
+  /* Square corners — confirmed by pixel-scanning the reference screenshot:
+     the card's left edge runs dead straight from the top with no curvature
+     at all, so this isn't a rounded card. */
   position: relative;
   overflow: hidden;
-  border-radius: 16px;
   background: #fff;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
 }
 .bct-stub + .bct-stub { margin-top: 20px; }
 
-/* ── Top half: seat / event details ── */
-.bct-stub-top {
+/* ── Wallet-pass "peek" notch — a half-circle bitten out of the top edge,
+   matching the page background behind it (same trick as .bct-notch below:
+   the top half is clipped away by .bct-stub's overflow:hidden, leaving
+   just the bottom half reading as a cut-out). ── */
+.bct-aw-top-notch {
+  /* A true circle (not a squashed ellipse) so the exposed edge is a real
+     circular arc. Only a shallow cap of it sits below the card's top edge —
+     width comes from the circle's diameter, depth from how much of it pokes
+     through — so widening it doesn't have to mean deepening it.
+     Measured from the reference screenshot: ~27px radius, ~12px visible
+     depth, ~45px chord on a 285px-wide card — scaled up here for a card
+     rendered at roughly 340px wide.
+     Positioned with plain top/left offsets rather than `transform` —
+     iOS Safari has a long-standing bug where overflow:hidden + border-radius
+     on a parent stops clipping correctly once a descendant uses `transform`
+     (it promotes to its own compositing layer and can escape the parent's
+     rounded clip), which flattened this card's corners to square on-device. */
+  position: absolute;
+  top: -49px;
+  left: calc(50% - 32px);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #131313;
+  z-index: 3;
+}
+
+/* ── Apple Wallet–style pass: wordmark/date header, blue banner,
+   event/seat details, all on a near-black card ── */
+.bct-aw {
+  position: relative;
+  background: #1c1e22;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.bct-aw:active { opacity: 0.92; }
+
+.bct-aw-topbar {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  padding: 16px 16px 4px;
+  padding: 12px 14px 10px;
 }
-.bct-stub-info { min-width: 0; }
-.bct-label {
-  font-size: 10.5px;
+.bct-aw-wordmark {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  text-transform: lowercase;
+}
+.bct-aw-datetime {
+  text-align: right;
+}
+.bct-aw-time {
+  /* Measured from the reference: the time is noticeably smaller than the
+     date, not close in size — this was previously inverted-looking with
+     the two set only 3px apart. */
+  font-size: 9px;
+  font-weight: 600;
+  color: #4d9fff;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+.bct-aw-date {
+  font-size: 18px;
+  font-weight: 500;
+  color: #fff;
+  line-height: 1;
+  margin-top: 5px;
+}
+
+.bct-aw-banner {
+  /* Measured from the reference: banner height ≈26% of card width. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 88px;
+  background: #0a66ea;
+}
+.bct-aw-banner-mark {
+  /* Measured from the reference: the glyph's ink spans ≈71% of the
+     banner's height — this font stack renders "t" ink at ≈0.69× the
+     font-size, so font-size ≈ banner-height × 0.71 / 0.69. */
+  font-style: italic;
+  font-weight: 800;
+  font-size: 90px;
+  color: #fff;
+  line-height: 1;
+}
+
+.bct-aw-content {
+  /* Measured from the reference: the gap from the entry-info text down to
+     the card's bottom edge is ≈37% of the card's width — much taller than
+     it looks like it should be at a glance. */
+  position: relative;
+  padding: 14px 16px 126px;
+}
+.bct-aw-label {
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.05em;
-  color: #026CDF;
+  color: #4d9fff;
   text-transform: uppercase;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
-.bct-event-name {
+.bct-aw-event-name {
+  font-size: 15.5px;
+  font-weight: 500;
+  color: #fff;
+  line-height: 1.25;
+  margin-bottom: 12px;
+}
+
+.bct-aw-fields {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.bct-aw-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.bct-aw-fields .bct-aw-field:nth-child(2) { align-items: center; }
+.bct-aw-fields .bct-aw-field:nth-child(3) { align-items: flex-end; }
+.bct-aw-field--entry { margin-bottom: 4px; }
+.bct-aw-value {
   font-size: 15px;
-  font-weight: 800;
-  color: #111;
-  letter-spacing: -0.015em;
-  text-transform: uppercase;
-  line-height: 1.2;
+  font-weight: 500;
+  color: #fff;
+  line-height: 1.1;
 }
-.bct-event-meta {
-  font-size: 11.5px;
-  color: #888;
-  margin-top: 3px;
+
+.bct-aw-nfc {
+  /* Rotated via an SVG-native transform attribute on the icon itself
+     (see TicketBarcode.jsx) rather than a CSS transform here — see the
+     note on .bct-aw-top-notch for why. Measured from the reference: it
+     sits tight to the corner, only ~2% of the card's width off each edge. */
+  position: absolute;
+  right: 8px;
+  bottom: 7px;
+  color: rgba(255, 255, 255, 0.5);
 }
+
 .bct-refresh-btn {
+  position: absolute;
+  top: 16px;
+  right: 18px;
   flex-shrink: 0;
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: #f0f0f0;
-  border: 1px solid #e2e2e2;
-  color: #444;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -66,38 +187,13 @@
   -webkit-tap-highlight-color: transparent;
   transition: background 0.15s;
 }
-.bct-refresh-btn:active { background: #e4e4e4; }
+.bct-refresh-btn:active { background: rgba(255, 255, 255, 0.2); }
 .bct-refresh-btn:disabled { opacity: 0.6; cursor: default; }
 .bct-refresh-btn--spinning svg { animation: bct-spin 0.7s linear infinite; }
 @keyframes bct-spin { to { transform: rotate(360deg); } }
 
-/* ── SECTION / ROW / SEAT — matches the tp-ticket-field layout elsewhere ── */
-.bct-fields {
-  display: flex;
-  align-items: flex-start;
-  padding: 10px 16px 18px;
-}
-.bct-field {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-.bct-field:nth-child(2) { align-items: center; }
-.bct-field:nth-child(3) { align-items: flex-end; }
-.bct-field-label {
-  font-size: 9px;
-  color: #999;
-  letter-spacing: 0.06em;
-  font-weight: 700;
-}
-.bct-field-value {
-  font-size: 17px;
-  font-weight: 800;
-  color: #111;
-  letter-spacing: -0.02em;
-  line-height: 1;
-}
+/* ── Muted variant for a sent ticket's (still visible) pass ── */
+.bct-aw--muted { opacity: 0.6; }
 
 /* ── Perforated tear line with punched side-notches ── */
 .bct-tear {
@@ -260,10 +356,6 @@
 /* ── Sent state — the barcode half is replaced with this muted panel ── */
 .bct-stub--sent {
   background: #f5f5f5;
-}
-.bct-stub--sent .bct-stub-info,
-.bct-stub--sent .bct-fields {
-  opacity: 0.55;
 }
 .bct-stub--sent .bct-tear-line {
   border-top-color: #ddd;

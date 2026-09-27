@@ -1,0 +1,316 @@
+<title>The Ticketmaster Dollar</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans:wght@400;600&family=Roboto:wght@400;600&family=Inter:wght@400;600&family=Geist:wght@400;600&family=Manrope:wght@400;600&family=Figtree:wght@400;600&family=Onest:wght@400;600&family=Instrument+Sans:wght@400;600&family=Hanken+Grotesk:wght@400;600&family=Plus+Jakarta+Sans:wght@400;600&family=DM+Sans:wght@400;600&family=Outfit:wght@400;600&family=Sora:wght@400;600&family=Space+Grotesk:wght@400;600&family=Work+Sans:wght@400;600&family=Fira+Sans:wght@400;600&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Sans:wght@400;600&family=Public+Sans:wght@400;600&family=Lexend:wght@400;600&family=Karla:wght@400;600&family=Rubik:wght@400;600&family=Ubuntu:wght@400;600&family=Overpass:wght@400;600&family=Epilogue:wght@400;600&display=swap">
+<style>
+  :root {
+    --ground: #FAFAF7;
+    --surface: #FFFFFF;
+    --ink: #191917;
+    --muted: #6E6E66;
+    --line: #E3E3DC;
+    --accent: #026CDF;
+    --accent-ink: #FFFFFF;
+    --flag-bg: rgba(2, 108, 223, 0.06);
+    --spec-size: 76px;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #121316;
+      --surface: #1A1C20;
+      --ink: #ECEBE6;
+      --muted: #9A9A92;
+      --line: #2A2D33;
+      --accent: #6AA6FF;
+      --accent-ink: #0D1117;
+      --flag-bg: rgba(106, 166, 255, 0.10);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #121316;
+    --surface: #1A1C20;
+    --ink: #ECEBE6;
+    --muted: #9A9A92;
+    --line: #2A2D33;
+    --accent: #6AA6FF;
+    --accent-ink: #0D1117;
+    --flag-bg: rgba(106, 166, 255, 0.10);
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  img { max-width: 100%; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 40px 24px 64px; }
+
+  header.top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  h1 { font-size: 26px; line-height: 1.2; margin: 0 0 6px; letter-spacing: -0.01em; text-wrap: balance; }
+  .sub { color: var(--muted); max-width: 62ch; margin: 0; }
+
+  .controls { display: flex; align-items: center; gap: 14px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .controls label { letter-spacing: 0.06em; text-transform: uppercase; }
+  .controls input[type="range"] { accent-color: var(--accent); width: 140px; }
+  .controls output { min-width: 4ch; color: var(--ink); }
+  #flagCount { color: var(--accent); font-weight: 600; }
+
+  .fingerprint {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-bottom: 30px;
+  }
+  .fingerprint h2 {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 12px;
+    color: var(--accent);
+  }
+  .fingerprint ul { margin: 0; padding-left: 20px; columns: 2; column-gap: 40px; }
+  .fingerprint li { margin: 0 0 6px; break-inside: avoid; }
+  .fingerprint li strong { font-weight: 600; }
+  .fingerprint .ref {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 12px;
+  }
+
+  .final-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+  .final {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 22px 20px 16px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+  .final .glyph { font-size: 150px; line-height: 1; }
+  .final .sample { font-size: 34px; font-variant-numeric: tabular-nums; }
+  .final .lower { font-size: 19px; color: var(--ink); }
+  .final .name { font-family: var(--mono); font-size: 13px; font-weight: 600; margin-top: 8px; }
+  .final .note { font-family: var(--mono); font-size: 11.5px; color: var(--muted); max-width: 40ch; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(212px, 1fr));
+    gap: 14px;
+  }
+  .spec {
+    appearance: none;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 16px 14px;
+    text-align: center;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .spec:hover { border-color: var(--accent); }
+  .spec:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .spec.flagged { border-color: var(--accent); background: var(--flag-bg); }
+  .spec .glyph {
+    font-size: var(--spec-size);
+    line-height: 1.05;
+    display: block;
+    margin-bottom: 10px;
+  }
+  .spec .sample {
+    font-size: 20px;
+    font-variant-numeric: tabular-nums;
+    display: block;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+  .spec .name {
+    display: block;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .spec .note {
+    display: block;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .spec .flagmark {
+    display: block;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    margin-top: 6px;
+    visibility: hidden;
+  }
+  .spec.flagged .flagmark { visibility: visible; }
+
+  footer.note {
+    margin-top: 34px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 13.5px;
+    max-width: 75ch;
+  }
+  footer.note a { color: var(--accent); }
+  footer.note code { font-family: var(--mono); font-size: 12.5px; }
+</style>
+
+<header class="top">
+  <div>
+    <h1>The Ticketmaster Dollar</h1>
+    <p class="sub">Lineup of candidate typefaces for the broken-bar <strong>$</strong> in the Ticketmaster app&rsquo;s payment amounts. Compare each card against your screenshot and click to flag the match.</p>
+  </div>
+  <div class="controls">
+    <label for="size">Glyph size</label>
+    <input type="range" id="size" min="48" max="160" value="76" step="4">
+    <output for="size" id="sizeOut">76</output>
+    <span>·</span>
+    <span>Flagged <span id="flagCount">0</span></span>
+  </div>
+</header>
+
+<section class="fingerprint">
+  <h2>What you are matching &mdash; verified from the screenshot</h2>
+  <ul>
+    <li><strong>Single vertical bar, interrupted</strong> &mdash; hidden where it crosses the S body; visible only as stubs above the top terminal and below the bottom terminal.</li>
+    <li>Stubs extend roughly <strong>10&ndash;20% of glyph height</strong> beyond cap line and baseline &mdash; not tiny nubs.</li>
+    <li><strong>Monolinear</strong> &mdash; the bar is the same stroke weight as the digits.</li>
+    <li>S terminals cut <strong>on the diagonal</strong>, following the curve&rsquo;s exit angle.</li>
+    <li>Digits: <strong>lining, proportional</strong>; flat straight base on 2, flat top bar on 5, open apertures.</li>
+    <li><strong>Ruled out:</strong> any font whose bar crosses fully through the S counters (Roboto, SF&nbsp;Pro, Inter, Helvetica).</li>
+  </ul>
+  <p class="ref">reference: $25.69 &middot; Ticketmaster app checkout &middot; regular weight</p>
+</section>
+
+<section class="fingerprint" id="finalTwo">
+  <h2>The final two &mdash; Hanken Grotesk vs Ubuntu</h2>
+  <div class="final-grid">
+    <div class="final hanken">
+      <span class="glyph" style="font-family:'Hanken Grotesk'">$</span>
+      <span class="sample" style="font-family:'Hanken Grotesk'">$25.69</span>
+      <span class="sample" style="font-family:'Hanken Grotesk'">0123456789</span>
+      <span class="lower" style="font-family:'Hanken Grotesk'">Order total &middot; Tickets 2 &middot; y a g 6</span>
+      <span class="name">Hanken Grotesk</span>
+      <span class="note">nearer to a neutral grotesque &middot; 6 has a curved hook at the top &middot; slightly narrower bowls</span>
+    </div>
+    <div class="final ubuntu">
+      <span class="glyph" style="font-family:'Ubuntu'">$</span>
+      <span class="sample" style="font-family:'Ubuntu'">$25.69</span>
+      <span class="sample" style="font-family:'Ubuntu'">0123456789</span>
+      <span class="lower" style="font-family:'Ubuntu'">Order total &middot; Tickets 2 &middot; y a g 6</span>
+      <span class="name">Ubuntu</span>
+      <span class="note">wide, almost circular bowls &middot; 6 arches with no hook &middot; lowercase y has a straight, distinctive descender</span>
+    </div>
+  </div>
+  <p class="ref">tie-breaker: open any Ticketmaster screen with lowercase text (an &ldquo;Order total&rdquo; label, &ldquo;All-in price&rdquo;, nav links) &mdash; Ubuntu&rsquo;s lowercase is unmistakable next to Hanken&rsquo;s neutral one. From the $25.69 glyph analysis alone (round bowls, hookless 6), Ubuntu is the lean.</p>
+</section>
+
+<div class="grid" id="grid"></div>
+
+<footer class="note">
+  <p>No match above? The interrupted-bar dollar is rare, and the strongest suspects off Google Fonts are <strong>Satoshi</strong>, <strong>Switzer</strong> and <strong>General Sans</strong> (<a href="https://www.fontshare.com/specimen/satoshi" target="_blank" rel="noopener">Fontshare specimens</a>) plus <strong>Averta</strong> and <strong>GT America</strong> &mdash; check their specimen pages for the <code>$</code> glyph. Once matched, the family name is all you need for your <code>font-family</code> in <code>checkoutpreload.css</code>.</p>
+</footer>
+
+<script>
+  var CANDIDATES = [
+    { name: "SF Pro",        css: '-apple-system, BlinkMacSystemFont, "SF Pro Text"', note: "iOS system" },
+    { name: "Noto Sans",     css: '"Noto Sans"',     note: "TM design-system base" },
+    { name: "Roboto",        css: '"Roboto"',        note: "Android default" },
+    { name: "Inter",         css: '"Inter"',         note: null },
+    { name: "Segoe UI",      css: '"Segoe UI"',      note: "Windows system" },
+    { name: "Helvetica Neue",css: '"Helvetica Neue", Helvetica, Arial', note: "mac fallback" },
+    { name: "Geist",         css: '"Geist"',         note: null },
+    { name: "Manrope",       css: '"Manrope"',       note: null },
+    { name: "Figtree",       css: '"Figtree"',       note: null },
+    { name: "Onest",         css: '"Onest"',         note: null },
+    { name: "Instrument Sans", css: '"Instrument Sans"', note: null },
+    { name: "Hanken Grotesk",css: '"Hanken Grotesk"',note: null },
+    { name: "Plus Jakarta Sans", css: '"Plus Jakarta Sans"', note: null },
+    { name: "DM Sans",       css: '"DM Sans"',       note: null },
+    { name: "Outfit",        css: '"Outfit"',        note: null },
+    { name: "Sora",          css: '"Sora"',          note: null },
+    { name: "Space Grotesk", css: '"Space Grotesk"', note: null },
+    { name: "Work Sans",     css: '"Work Sans"',     note: null },
+    { name: "Fira Sans",     css: '"Fira Sans"',     note: null },
+    { name: "Source Sans 3", css: '"Source Sans 3"', note: null },
+    { name: "IBM Plex Sans", css: '"IBM Plex Sans"', note: null },
+    { name: "Public Sans",   css: '"Public Sans"',   note: null },
+    { name: "Lexend",        css: '"Lexend"',        note: null },
+    { name: "Karla",         css: '"Karla"',         note: null },
+    { name: "Rubik",         css: '"Rubik"',         note: null },
+    { name: "Ubuntu",        css: '"Ubuntu"',        note: null },
+    { name: "Overpass",      css: '"Overpass"',      note: null },
+    { name: "Epilogue",      css: '"Epilogue"',      note: null }
+  ];
+
+  var KEY = "tm-dollar-flags";
+  var flags = {};
+  try { flags = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { flags = {}; }
+
+  var grid = document.getElementById("grid");
+  CANDIDATES.forEach(function (c) {
+    var b = document.createElement("button");
+    b.className = "spec" + (flags[c.name] ? " flagged" : "");
+    b.type = "button";
+    b.setAttribute("aria-pressed", flags[c.name] ? "true" : "false");
+    b.style.fontFamily = "var(--sans)";
+    b.innerHTML =
+      '<span class="glyph" style="font-family:' + c.css.replace(/"/g, "&quot;") + '">$</span>' +
+      '<span class="sample" style="font-family:' + c.css.replace(/"/g, "&quot;") + '">$25.69</span>' +
+      '<span class="name">' + c.name + "</span>" +
+      '<span class="note">' + (c.note || "&nbsp;") + "</span>" +
+      '<span class="flagmark">✓ flagged as match</span>';
+    b.addEventListener("click", function () {
+      var on = b.classList.toggle("flagged");
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+      flags[c.name] = on;
+      try { localStorage.setItem(KEY, JSON.stringify(flags)); } catch (e) {}
+      updateCount();
+    });
+    grid.appendChild(b);
+  });
+
+  function updateCount() {
+    var n = 0;
+    for (var k in flags) { if (flags[k]) n++; }
+    document.getElementById("flagCount").textContent = n;
+  }
+  updateCount();
+
+  var size = document.getElementById("size");
+  var sizeOut = document.getElementById("sizeOut");
+  function applySize(v) {
+    document.documentElement.style.setProperty("--spec-size", v + "px");
+    sizeOut.textContent = v;
+    try { localStorage.setItem("tm-dollar-size", v); } catch (e) {}
+  }
+  try {
+    var saved = parseInt(localStorage.getItem("tm-dollar-size"), 10);
+    if (saved >= 48 && saved <= 160) { size.value = saved; applySize(saved); }
+  } catch (e) {}
+  size.addEventListener("input", function () { applySize(size.value); });
+</script>

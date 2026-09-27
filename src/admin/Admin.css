@@ -686,6 +686,21 @@
   display: block;
 }
 
+.event-card-img-placeholder {
+  width: 100%;
+  height: 140px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px 8px 0 0;
+  text-align: center;
+  padding: 20px;
+}
+
 /* ── Tickets locked (not logged in) ───────────────────────────────────────── */
 
 .tickets-locked {
@@ -795,18 +810,69 @@
   gap: 18px;
 }
 
+.header-actions-inline {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.ts-sort-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ts-sort-control label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  white-space: nowrap;
+}
+
+.ts-sort-select {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13.5px;
+  color: #333;
+  background: #fff;
+  cursor: pointer;
+}
+
+.ts-sort-select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
 .ts-event-group {
   background: #f9fafb;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   padding: 14px 16px;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.ts-event-group--held {
+  background: #fff8ed;
+  border-color: #f3ddab;
+}
+
+.ts-event-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
 .ts-event-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 13.5px;
   font-weight: 700;
   color: #333;
-  margin-bottom: 10px;
 }
 
 .ts-ticket-rows {
@@ -875,3 +941,38 @@
   color: #1a8a4c;
 }
 .ts-toggle-btn--sent:hover { background: #c3edd3; }
+
+.ts-ticket-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.ts-held-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #a15c00;
+  background: #fdecc8;
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin-top: 2px;
+}
+
+.ts-hold-btn {
+  background: #fdecc8;
+  color: #a15c00;
+}
+.ts-hold-btn:hover { background: #fbe0a3; }
+
+.ts-hold-btn--held {
+  background: #a15c00;
+  color: #fff;
+}
+.ts-hold-btn--held:hover { background: #8a4d00; }

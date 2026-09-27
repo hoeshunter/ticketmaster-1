@@ -1,8 +1,16 @@
-// Transfer-notification email body — the full real Ticketmaster template
-// (CSS, responsive media-query block, Outlook conditionals, table structure,
-// exact wording) used as the literal base, with ONLY the per-transfer
-// specifics (sender, event, tickets, recipient) swapped for template
-// variables. Three things are still deliberately not copied, because they
+// Two email bodies share this file, both built from the full real
+// Ticketmaster template (CSS, responsive media-query block, Outlook
+// conditionals, table structure, exact wording) used as the literal base,
+// with ONLY the per-send specifics (sender, event, tickets, recipient)
+// swapped for template variables:
+//   • buildTransferEmailHtml — "Your Ticket Transfer From … Is Ready To Be
+//     Accepted!" (someone sent you tickets).
+//   • buildPurchaseEmailHtml — purchase confirmation ("You Got 'Em. Let the
+//     Anticipation Begin." body / "You Got <event> Tickets!" subject), built
+//     from the real purchase-confirmation reference email (see
+//     src/emails/1718271677.webp): image-on-top order card with Order #,
+//     delivery method, "You Paid" and a "View Mobile Ticket" button.
+// Three things are still deliberately not copied, because they
 // aren't cosmetic — they're either broken-by-default or actively harmful:
 //   1. Their hotlinked logo/icon/@font-face CDN URLs — not ours to embed,
 //      would 404 (their real analytics/CDN isn't provisioned for this app).
@@ -147,6 +155,33 @@ const buildProgressTracker = () => `
                   </tr>
                 </table>`
 
+// Per-ticket row + wallet buttons, shared verbatim by both templates.
+// __WALLET_APPLE_<i>__ / __WALLET_GOOGLE_<i>__ are placeholders — the
+// templates are built client-side, before the backend has generated the
+// capability token those links need. /api/send-email swaps them for the
+// real per-ticket wallet URLs right before sending.
+const buildWalletButtons = (i) => `
+                                                      <tr>
+                                                        <td align="left" style="padding: 6px 0 14px;">
+                                                          <table cellpadding="0" cellspacing="0" border="0" role="presentation">
+                                                            <tr>
+                                                              <td style="padding-right: 8px;">
+                                                                <a href="__WALLET_APPLE_${i}__" style="display:inline-block; font-family:${FONT_STACK}; font-size:11px; font-weight:bold; color:#ffffff; background-color:#000000; border-radius:6px; padding:7px 12px; text-decoration:none;">&#63743; Add to Apple Wallet</a>
+                                                              </td>
+                                                              <td>
+                                                                <a href="__WALLET_GOOGLE_${i}__" style="display:inline-block; font-family:${FONT_STACK}; font-size:11px; font-weight:bold; color:#ffffff; background-color:${BRAND_BLUE}; border-radius:6px; padding:7px 12px; text-decoration:none;">Add to Google Wallet</a>
+                                                              </td>
+                                                            </tr>
+                                                          </table>
+                                                        </td>
+                                                      </tr>`
+const buildTicketRows = (tickets) => tickets.map((t, i) => `
+                                                      <tr>
+                                                        <td align="left" valign="top" style="font-family:${FONT_STACK}; color:#353c42; font-size:14px; line-height: 18px; font-weight:bold;" class="tmsans">
+                                                          Section ${t.section}, Row ${t.row}, Seat ${t.seat}
+                                                        </td>
+                                                      </tr>${buildWalletButtons(i)}`).join('')
+
 export const buildTransferEmailHtml = ({
   firstName = '',
   lastName = '',
@@ -159,12 +194,7 @@ export const buildTransferEmailHtml = ({
   const name = [firstName, lastName].filter(Boolean).join(' ') || 'there'
   const ticketCount = tickets.length || 1
   const heroImg = resolveAbsoluteImageUrl(event.IMG || event.image_url)
-  const ticketRows = tickets.map((t) => `
-                                                      <tr>
-                                                        <td align="left" valign="top" style="font-family:${FONT_STACK}; color:#353c42; font-size:14px; line-height: 18px; font-weight:bold;" class="tmsans">
-                                                          Section ${t.section}, Row ${t.row}, Seat ${t.seat}
-                                                        </td>
-                                                      </tr>`).join('')
+  const ticketRows = buildTicketRows(tickets)
   const calendarScript = calendarMarkup ? buildCalendarMarkup(event, name) : ''
 
   return `<!doctype html>
@@ -205,7 +235,7 @@ export const buildTransferEmailHtml = ({
     <!--[if gt mso 9]> <style type="text/css"> td {font-family: Arial, Helvetica, sans-serif !important;} </style> <![endif]-->
   </head>
   <body style="margin:0px; padding:0px; background-color:#FFFFFF;" bgcolor="#FFFFFF">
-    <table cellpadding="0" cellspacing="0" border="0" width="100%" class="font-averta" bgcolor="#FFFFFF" style="background-color:#FFFFFF;">
+    <table cellpadding="0" cellspacing="0" border="0" role="presentation" width="100%" class="font-averta" bgcolor="#FFFFFF" style="width:100%; min-width:100%; background-color:#FFFFFF;">
       <tr>
         <td align="center">
 
@@ -213,7 +243,7 @@ export const buildTransferEmailHtml = ({
                      below, so its blue background spans the full reading-pane
                      width edge-to-edge instead of being capped at 480px like
                      everything nested inside that box. -->
-                <table border="0" cellpadding="0" cellspacing="0" bgcolor="${BRAND_BLUE}" width="100%">
+                <table border="0" cellpadding="0" cellspacing="0" role="presentation" bgcolor="${BRAND_BLUE}" width="100%" style="width:100%; min-width:100%;">
                   <tr>
                     <!-- hidden preheader -->
                     <td align="left" style="font-family: ${FONT_STACK}; font-size: 0px; line-height: 0px; color: ${BRAND_BLUE}; max-height:0; overflow:hidden;">
@@ -296,10 +326,10 @@ export const buildTransferEmailHtml = ({
                               </tr>` : ''}
                               <tr>
                                 <td align="center" style="padding: 20px 0 0;">
-                                  <table cellspacing="0" width="100%" cellpadding="0" border="0" bgcolor="${BRAND_BLUE}">
+                                  <table cellspacing="0" width="100%" cellpadding="0" border="0" role="presentation" bgcolor="#024DDF" style="width:100%; min-width:100%;">
                                     <tr>
-                                      <td align="center" style="font-family:${FONT_STACK}; font-weight: bold; color:#ffffff; font-size:12px; line-height: 16px; padding: 10px 0;">
-                                        <a href="${transferLink}" style="color: #ffffff; text-decoration: none;">ACCEPT TICKETS</a>
+                                      <td align="center" style="font-family:${FONT_STACK}; font-weight: bold; color:#8a929a; font-size:12px; line-height: 16px; padding: 10px 0;">
+                                        <a href="#" style="color: #fff; text-decoration: none; pointer-events: none; cursor: default;">ACCEPT TICKETS</a>
                                       </td>
                                     </tr>
                                   </table>
@@ -344,7 +374,7 @@ export const buildTransferEmailHtml = ({
                         </tr>
                         <tr>
                           <td align="left" style="font-family:${FONT_STACK}; color:#353c42; font-size:14px; line-height: 19.6px; padding:0px 0px 30.2px 0px;" class="tmsans">
-                            You'll need to first accept the ticket transfer so the order is moved to your Ticketmaster account. Once the transfer is complete, we'll let ${senderName} know you're all set. To accept the tickets, have your Ticketmaster password handy and login to your Ticketmaster account, or create a <a href="${transferLink}" class="blue-text-link" style="color: ${BRAND_BLUE}; text-decoration: none;">new one</a>. Visit <a href="${transferLink}" class="blue-text-link" style="color: ${BRAND_BLUE}; text-decoration: none;">Event Details</a> to view your ticket(s).
+                            ${senderName} needs to complete a required step to finish transferring your tickets. Once it's done, we'll let you're know when you're all set. To accept the tickets and refund(s), have your Ticketmaster password handy and login to your Ticketmaster account, or create a <a href="${transferLink}" class="blue-text-link" style="color: ${BRAND_BLUE}; text-decoration: none;">new one</a>.
                           </td>
                         </tr>
                       </table>
@@ -357,6 +387,290 @@ export const buildTransferEmailHtml = ({
                   <tr>
                     <td align="center" valign="top" style="font-family: ${FONT_STACK}; color: #4b545b; font-weight: normal; font-size: 14px; line-height: 20px; text-align: center; padding: 35px 20px;" class="tmsans">
                       We're here to help. <br> If you have any questions, please <a href="${transferLink}" style="color: ${BRAND_BLUE}; text-decoration: none;">contact</a> <br> Ticketmaster Fan Support.
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Footer -->
+                <table border="0" cellpadding="0" cellspacing="0" bgcolor="${BRAND_BLUE}" width="100%">
+                  <tr>
+                    <td align="center">
+                      <table border="0" cellpadding="0" cellspacing="0" width="480">
+                        <tr>
+                          <td align="center" style="padding: 30px 20px;">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                              <tr>
+                                <td align="center" class="tmsans" style="font-family: ${FONT_STACK}; color: #ffffff; font-size: 12px; line-height: 20px; font-weight: normal;" valign="top">
+                                  Ticketmaster, Attn: Fan Support, <br /> 707 Virginia Street East, Suite 170, Charleston, WV 25301<br><br>
+                                  &copy; ${new Date().getFullYear()} Ticketmaster. All rights reserved.
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`
+}
+
+// Purchase confirmation — modeled on the real Ticketmaster purchase
+// confirmation email (see src/emails/1718271677.webp): a blue hero carries
+// the "You Got 'Em. Let the Anticipation Begin." headline, then one bordered
+// card with the event image on top, event/seating/date/venue details, and a
+// Tickets block with per-ticket wallet buttons, the order number, delivery
+// method and the amount paid, finished by a "View Mobile Ticket" button.
+// Order # prefers the event's stored orderNum (entered in the admin
+// dashboard); the "178.../<ST>5" literal shape is only the fallback.
+// "You Paid" prefers an explicit event.purchaseprice override and otherwise
+// totals the selected tickets' faceValue + fee + tax; the line is hidden
+// entirely when neither is available, rather than showing a fake $0.00.
+export const buildPurchaseEmailHtml = ({
+  firstName = '',
+  lastName = '',
+  recipientEmail = '',
+  event = DEFAULT_EVENT,
+  tickets = DEFAULT_TICKETS,
+  calendarMarkup = false
+} = {}) => {
+  const name = [firstName, lastName].filter(Boolean).join(' ') || 'there'
+  const heroImg = resolveAbsoluteImageUrl(event.IMG || event.image_url)
+  const ticketRows = buildTicketRows(tickets)
+  const calendarScript = calendarMarkup ? buildCalendarMarkup(event, name) : ''
+
+  // Compact seating summary like the reference's "SEC ORCH6, Row K, Seat
+  // 1-6": when every selected ticket shares a section/row and all seats are
+  // numeric, collapse to a min–max range; otherwise list the seats out.
+  const seats = tickets.map((t) => String(t.seat ?? '').trim())
+  const sameRow = tickets.every((t) => t.section === tickets[0].section && t.row === tickets[0].row)
+  const allNumeric = seats.every((s) => /^\d+$/.test(s))
+  const seatingSummary = (sameRow && allNumeric && seats.length > 1)
+    ? (() => {
+        const nums = seats.map(Number).sort((a, b) => a - b)
+        return `SEC ${tickets[0].section}, Row ${tickets[0].row}, Seat ${nums[0]}-${nums[nums.length - 1]}`
+      })()
+    : `SEC ${tickets[0].section}, Row ${tickets[0].row}, Seat ${seats.join(', ')}`
+
+  const orderNum = event.orderNum || `178.../${event.state}5`
+  const explicitPrice = (event.purchaseprice ?? '').toString().trim()
+  const explicitPriceNum = (explicitPrice !== '' && !isNaN(Number(explicitPrice))) ? Number(explicitPrice) : null
+  const ticketTotal = tickets.reduce(
+    (sum, t) => sum + (Number(t.faceValue) || 0) + (Number(t.fee) || 0) + (Number(t.tax) || 0), 0)
+  const paidAmount = explicitPriceNum ?? (ticketTotal > 0 ? ticketTotal : null)
+
+  return `<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width" />
+    <!-- Without these, mobile Gmail/Apple Mail auto-dark-mode can invert or
+         swap the brand blue for something else on phones while desktop
+         webmail (which doesn't apply the same inversion) renders it fine. -->
+    <meta name="color-scheme" content="light">
+    <meta name="supported-color-schemes" content="light">
+    <title>Ticketmaster</title>
+    ${calendarScript}
+    <style type="text/css">
+      .tmsans { font-family: 'Futura', Arial, Helvetica, sans-serif !important; }
+      .font-averta { font-family: Arial, Helvetica, sans-serif !important; }
+      /* Fix gap on Outlook.com and Outlook 365 */
+      [owa] div,button { margin:0 !important; padding:0 !important; display:block !important; }
+      /* prevent iOS font upsizing */
+      * { -webkit-text-size-adjust: none; }
+      /* force Outlook.com to honor line-height */
+      .ExternalClass * { line-height: 100%; }
+      td { mso-line-height-rule: exactly; }
+      /* prevent iOS auto-linking */
+      a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important; }
+      .blue-text-link a:link { color: #024DDF; }
+      /*** Responsive CSS ***/
+      @media only screen and (max-width:599px) {
+        body { width: 100%; min-width: 100%; margin: 0; padding: 0; }
+        .full-width-container { width: 100% !important; min-width: 280px !important; }
+        .mobile-padding20 { padding:20px !important; }
+        img.fullWidthImg { width: 100% !important; height: auto !important; min-width: 100% !important; }
+        .centerText { text-align: center !important; }
+      }
+    </style>
+    <!--OUTLOOK CSS - DO NOT DELETE-->
+    <!--[if gt mso 9]> <style type="text/css"> td {font-family: Arial, Helvetica, sans-serif !important;} </style> <![endif]-->
+  </head>
+  <body style="margin:0px; padding:0px; background-color:#FFFFFF;" bgcolor="#FFFFFF">
+    <table cellpadding="0" cellspacing="0" border="0" role="presentation" width="100%" class="font-averta" bgcolor="#FFFFFF" style="width:100%; min-width:100%; background-color:#FFFFFF;">
+      <tr>
+        <td align="center">
+
+                <!-- Header + hero headline: intentionally OUTSIDE the 480px
+                     boxed container below, so the blue background spans the
+                     full reading-pane width edge-to-edge. The reference email
+                     carries its "You Got 'Em." headline inside this blue
+                     banner rather than in the white content area. -->
+                <table border="0" cellpadding="0" cellspacing="0" role="presentation" bgcolor="${BRAND_BLUE}" width="100%" style="width:100%; min-width:100%;">
+                  <tr>
+                    <!-- hidden preheader -->
+                    <td align="left" style="font-family: ${FONT_STACK}; font-size: 0px; line-height: 0px; color: ${BRAND_BLUE}; max-height:0; overflow:hidden;">
+                      Your Ticketmaster order is confirmed
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align="center" style="padding: 30px 20px 10px;" valign="top">
+                      <span style="color:#ffffff;font-family:${FONT_STACK};font-size:20px;font-weight:bold;font-style:italic;letter-spacing:-0.02em;">ticketmaster<sup style="font-size:10px;">&reg;</sup></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align="center" class="tmsans" style="font-family:${FONT_STACK}; color:#ffffff; font-size:26px; line-height:34px; font-weight:bold; padding: 0 20px 30px;" valign="top">
+                      You Got 'Em. <br> Let the Anticipation Begin.
+                    </td>
+                  </tr>
+                </table>
+                <!-- End Header -->
+
+          <table cellpadding="0" cellspacing="0" border="0" width="480" class="full-width-container">
+            <tr>
+              <td width="480" align="center" style="min-width:480px;" class="full-width-container">
+
+                <!-- Event / order card -->
+                <table cellpadding="0" cellspacing="0" border="0" width="100%" class="center">
+                  <tr>
+                    <td align="center" style="padding: 20px 30px 0;">
+                      <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                        <tr>
+                          <td align="left" style="border: 1px solid #dfe4e7;">
+                            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                              ${heroImg ? `
+                              <tr>
+                                <td align="center" valign="top">
+                                  <img border="0" src="${heroImg}" alt="${event.name}" width="418" style="display:block; width:100%;" class="fullWidthImg">
+                                </td>
+                              </tr>` : ''}
+                              <tr>
+                                <td align="left" style="padding: 20px 16px 20px;" class="tmsans">
+                                  <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                                    <tr>
+                                      <td align="left" style="font-family:${FONT_STACK}; color:#353c42; font-size:18px; line-height: 22px; font-weight:bold;" class="tmsans">
+                                        ${event.name}
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td align="left" style="font-family:${FONT_STACK}; color:#69747c; font-size:14px; line-height: 18px; padding-top: 10px;" class="tmsans">
+                                        ${seatingSummary}
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td align="left" style="font-family:${FONT_STACK}; color:#69747c; font-size:14px; line-height: 18px; padding-top: 10px;" class="tmsans">
+                                        ${event.day}, ${event.date} @ ${event.time}
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td align="left" style="font-family:${FONT_STACK}; color:#69747c; font-size:14px; line-height: 18px; padding-top: 10px;" class="tmsans">
+                                        ${event.city}, ${event.state} &mdash; ${event.stadium}
+                                      </td>
+                                    </tr>
+                                  </table>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td align="left">
+                                  <table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top:solid 1px #dfe4e7; padding:15px 16px;">
+                                    <tr>
+                                      <td align="left" style="font-family:${FONT_STACK}; color:#353c42; font-size:14px; line-height: 18px; font-weight:bold; padding-bottom: 5px;" class="tmsans">Tickets</td>
+                                    </tr>
+                                    ${ticketRows}
+                                    <tr>
+                                      <td align="left" style="font-family:${FONT_STACK}; color:#69747c; font-size:13px; line-height: 18px; padding-top: 6px;" class="tmsans">
+                                        Order #: <a href="#" class="blue-text-link" style="color: ${BRAND_BLUE}; text-decoration: none;">${orderNum}</a>
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td align="left" style="font-family:${FONT_STACK}; color:#69747c; font-size:13px; line-height: 18px; padding-top: 6px;" class="tmsans">
+                                        Go Mobile, Print-at-Home
+                                      </td>
+                                    </tr>
+                                    ${paidAmount != null ? `
+                                    <tr>
+                                      <td align="left" style="font-family:${FONT_STACK}; color:#353c42; font-size:14px; line-height: 18px; font-weight:bold; padding-top: 10px;" class="tmsans">
+                                        You Paid: US $${paidAmount.toFixed(2)}
+                                      </td>
+                                    </tr>` : ''}
+                                    <tr>
+                                      <td align="right" style="padding: 15px 0 20px;">
+                                        <a href="#" style="display:inline-block; font-family:${FONT_STACK}; font-size:14px; font-weight:bold; color:#ffffff; background-color:${BRAND_BLUE}; border-radius:4px; padding:12px 28px; text-decoration:none; pointer-events: none; cursor: default;">View Mobile Ticket</a>
+                                      </td>
+                                    </tr>
+                                  </table>
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Order confirmation fine print (reference: "Order details
+                     emailed to …." right under the card) -->
+                ${recipientEmail ? `
+                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td align="left" valign="top" style="font-family:${FONT_STACK}; color:#69747c; font-size:11px; line-height: 14px; padding: 20px 30px 0;" class="tmsans">
+                      Order details emailed to ${recipientEmail}.
+                    </td>
+                  </tr>
+                </table>` : ''}
+
+                <!-- Important information -->
+                <table width="100%" align="center" class="noFloat" cellpadding="0" cellspacing="0" border="0" style="padding-top:20px;">
+                  <tr>
+                    <td align="left" style="padding: 0 30px;">
+                      <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tr>
+                          <td align="left" style="font-family:${FONT_STACK}; color:#353c42; font-size:14px; line-height: 19.6px; font-weight:bold; padding:0 0 10px;" class="tmsans">Important Information</td>
+                        </tr>
+                        <tr>
+                          <td align="left" bgcolor="#f7f8f9" style="border:1px solid #dfe4e7; font-family:${FONT_STACK}; color:#4b545b; font-size:12px; line-height: 17px; padding: 12px 14px;" class="tmsans">
+                            <b>Please Note</b><br>
+                            Many events and services have COVID-19 vaccination requirements and/or mask policies in place to help keep guests safe. Check the venue website for the latest event information before you leave for the show.
+                          </td>
+                        </tr>
+                        <tr><td style="font-size:0; line-height:0; height:10px;">&nbsp;</td></tr>
+                        <tr>
+                          <td align="left" bgcolor="#f7f8f9" style="border:1px solid #dfe4e7; font-family:${FONT_STACK}; color:#4b545b; font-size:12px; line-height: 17px; padding: 12px 14px;" class="tmsans">
+                            <b>Going with Friends?</b><br>
+                            Transfer your tickets to friends and family who have a Ticketmaster account for free through the Ticketmaster app or website.
+                          </td>
+                        </tr>
+                        <tr><td style="font-size:0; line-height:0; height:10px;">&nbsp;</td></tr>
+                        <tr>
+                          <td align="left" bgcolor="#f7f8f9" style="border:1px solid #dfe4e7; font-family:${FONT_STACK}; color:#4b545b; font-size:12px; line-height: 17px; padding: 12px 14px;" class="tmsans">
+                            <b>Event Ticket Insurance</b><br>
+                            Protect your purchase by securing Event Ticket Insurance. <a href="#" class="blue-text-link" style="color: ${BRAND_BLUE}; text-decoration: none;">Learn More</a>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="left" valign="top" style="font-family:${FONT_STACK}; color:#69747c; font-size:11px; line-height: 14px; padding: 20px 20px 0;" class="tmsans">
+                            This email is <b>NOT</b> your ticket.
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- We're here to help -->
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#f7f8f9">
+                  <tr>
+                    <td align="center" valign="top" style="font-family: ${FONT_STACK}; color: #4b545b; font-weight: normal; font-size: 14px; line-height: 20px; text-align: center; padding: 35px 20px;" class="tmsans">
+                      We're here to help. <br> If you have any questions, please <a href="#" style="color: ${BRAND_BLUE}; text-decoration: none;">contact</a> <br> Ticketmaster Fan Support.
                     </td>
                   </tr>
                 </table>

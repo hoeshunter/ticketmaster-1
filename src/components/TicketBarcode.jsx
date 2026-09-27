@@ -4,6 +4,82 @@ import { TbRefresh } from 'react-icons/tb'
 import ConfirmAlert from './ConfirmAlert'
 import './TicketBarcode.css'
 
+// ── ContactlessIcon ──────────────────────────────────────────────────────────
+// A hand-drawn contactless/NFC glyph — three concentric open arcs fanning
+// from a corner point toward the upper-right, traced from the reference
+// pass's actual icon (three separate curved bands, not a closed ring —
+// a generic rotated "wifi" icon reads more like a Spotify logo than this).
+const ContactlessIcon = ({ size = 17, className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M7.28 14.30 A4 4 0 0 0 7.28 9.70" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <path d="M10.55 16.59 A8 8 0 0 0 10.55 7.41" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <path d="M13.83 18.88 A12 12 0 0 0 13.83 5.12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <path d="M17.10 21.18 A16 16 0 0 0 17.10 2.82" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+  </svg>
+)
+
+// ── AppleWalletCard ──────────────────────────────────────────────────────────
+// The dark, Wallet-pass-style top half of the stub: wordmark + time/date,
+// the blue banner with the platform mark, event/venue name, seat fields,
+// entry info, and the contactless glyph in the corner. Shared by both the
+// active and "sent" states so the pass itself always looks the same —
+// only what's below the tear line changes.
+const AppleWalletCard = ({ event, ticket, muted, onTap, onRefresh, refreshing }) => (
+  <div className={`bct-aw ${muted ? 'bct-aw--muted' : ''}`} onClick={onTap}>
+    <div className="bct-aw-topbar">
+      <p className="bct-aw-wordmark">ticketmaster</p>
+      <div className="bct-aw-datetime">
+        <p className="bct-aw-time">{event?.time}</p>
+        <p className="bct-aw-date">{event?.date}</p>
+      </div>
+    </div>
+
+    <div className="bct-aw-banner">
+      <span className="bct-aw-banner-mark">t</span>
+    </div>
+
+    <div className="bct-aw-content">
+      {onRefresh && (
+        <button
+          className={`bct-refresh-btn ${refreshing ? 'bct-refresh-btn--spinning' : ''}`}
+          onClick={(e) => { e.stopPropagation(); onRefresh() }}
+          disabled={refreshing}
+          aria-label="Regenerate barcode"
+        >
+          <TbRefresh size={15} />
+        </button>
+      )}
+
+      {event?.stadium && <p className="bct-aw-label">{event.stadium}</p>}
+      <p className="bct-aw-event-name">{event?.name}</p>
+
+      <div className="bct-aw-fields">
+        <div className="bct-aw-field">
+          <span className="bct-aw-label">Section</span>
+          <span className="bct-aw-value">{ticket.section}</span>
+        </div>
+        <div className="bct-aw-field">
+          <span className="bct-aw-label">Row</span>
+          <span className="bct-aw-value">{ticket.row}</span>
+        </div>
+        <div className="bct-aw-field">
+          <span className="bct-aw-label">Seat</span>
+          <span className="bct-aw-value">{ticket.seat}</span>
+        </div>
+      </div>
+
+      {ticket.label && (
+        <div className="bct-aw-field bct-aw-field--entry">
+          <span className="bct-aw-label">Entry Info</span>
+          <span className="bct-aw-value">{ticket.label}</span>
+        </div>
+      )}
+
+      <ContactlessIcon size={24} className="bct-aw-nfc" />
+    </div>
+  </div>
+)
+
 // ── Deterministic xorshift32 PRNG ───────────────────────────────────────────
 // Seeded by the ticket + a generation counter, so the same ticket always draws
 // the same barcode until it's explicitly regenerated (generation++), and a
@@ -41,7 +117,7 @@ const AUTO_HIDE_MS = 25000
 // barcode sits behind a privacy cover until "View" is tapped (auto re-covers
 // after inactivity), and a refresh control regenerates the code behind a
 // confirmation, since the old barcode stops scanning the moment it changes.
-const TicketBarcode = ({ ticket, event, index = 0 }) => {
+const TicketBarcode = ({ ticket, event, index = 0, onViewDetails }) => {
   const [generation, setGeneration] = useState(0)
   const [revealed, setRevealed] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
@@ -87,31 +163,9 @@ const TicketBarcode = ({ ticket, event, index = 0 }) => {
     return (
       <div className="bct-stub bct-stub--sent">
         <span className="bct-sent-ribbon">SENT</span>
+        <span className="bct-aw-top-notch" />
 
-        <div className="bct-stub-top">
-          <div className="bct-stub-info">
-            {ticket.label && <p className="bct-label">{ticket.label}</p>}
-            <p className="bct-event-name">{event?.name}</p>
-            <p className="bct-event-meta">
-              {event?.day} &bull; {event?.date} &bull; {event?.stadium}
-            </p>
-          </div>
-        </div>
-
-        <div className="bct-fields">
-          <div className="bct-field">
-            <span className="bct-field-label">SECTION</span>
-            <span className="bct-field-value">{ticket.section}</span>
-          </div>
-          <div className="bct-field">
-            <span className="bct-field-label">ROW</span>
-            <span className="bct-field-value">{ticket.row}</span>
-          </div>
-          <div className="bct-field">
-            <span className="bct-field-label">SEAT</span>
-            <span className="bct-field-value">{ticket.seat}</span>
-          </div>
-        </div>
+        <AppleWalletCard event={event} ticket={ticket} muted onTap={() => onViewDetails?.(ticket)} />
 
         <div className="bct-tear">
           <span className="bct-notch bct-notch--left" />
@@ -133,39 +187,14 @@ const TicketBarcode = ({ ticket, event, index = 0 }) => {
 
   return (
     <div className="bct-stub">
-      {/* ── Seat details (top half of the stub) ── */}
-      <div className="bct-stub-top">
-        <div className="bct-stub-info">
-          {ticket.label && <p className="bct-label">{ticket.label}</p>}
-          <p className="bct-event-name">{event?.name}</p>
-          <p className="bct-event-meta">
-            {event?.day} &bull; {event?.date} &bull; {event?.stadium}
-          </p>
-        </div>
-        <button
-          className={`bct-refresh-btn ${refreshing ? 'bct-refresh-btn--spinning' : ''}`}
-          onClick={() => setConfirmOpen(true)}
-          disabled={refreshing}
-          aria-label="Regenerate barcode"
-        >
-          <TbRefresh size={15} />
-        </button>
-      </div>
-
-      <div className="bct-fields">
-        <div className="bct-field">
-          <span className="bct-field-label">SECTION</span>
-          <span className="bct-field-value">{ticket.section}</span>
-        </div>
-        <div className="bct-field">
-          <span className="bct-field-label">ROW</span>
-          <span className="bct-field-value">{ticket.row}</span>
-        </div>
-        <div className="bct-field">
-          <span className="bct-field-label">SEAT</span>
-          <span className="bct-field-value">{ticket.seat}</span>
-        </div>
-      </div>
+      <span className="bct-aw-top-notch" />
+      <AppleWalletCard
+        event={event}
+        ticket={ticket}
+        onTap={() => onViewDetails?.(ticket)}
+        onRefresh={() => setConfirmOpen(true)}
+        refreshing={refreshing}
+      />
 
       {/* ── Perforated tear line with punched notches ── */}
       <div className="bct-tear">

@@ -31,7 +31,10 @@ const Transfer = ({ event, onClose }) => {
     }
   }, [])
 
-  const tickets = event?.tickets || []
+  // Only unsent tickets are eligible to transfer — once a ticket's been
+  // sent it's already gone to its recipient, so it drops off this list
+  // rather than being offered again.
+  const tickets = (event?.tickets || []).filter(t => !t?.sent)
   const sectionLabel = tickets.length > 0
     ? `Sec ${tickets[0].section}, Row ${tickets[0].row}`
     : ''

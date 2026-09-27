@@ -4,11 +4,43 @@ import { createPortal } from 'react-dom'
 import { IoArrowBack } from 'react-icons/io5'
 import { BsThreeDotsVertical, BsUpcScan } from 'react-icons/bs'
 import { LuTickets } from 'react-icons/lu'
+import { MdDragIndicator } from 'react-icons/md'
 import { TbArrowUpRight, TbRefresh } from 'react-icons/tb'
-import { fetchAdminEvents, isLoggedIn } from '../api'
+import { fetchAdminEvents, isLoggedIn, getCountry, getVisibleTickets } from '../api'
+import {
+  DndContext, PointerSensor, TouchSensor, useSensor, useSensors, closestCenter
+} from '@dnd-kit/core'
+import {
+  SortableContext, useSortable, verticalListSortingStrategy, arrayMove
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import Transfer from './Transfer'
+import TransferAuth from './TransferAuth'
 import MapEmbed from './MapEmbed'
 import TicketBarcodeViewer from './TicketBarcodeViewer'
+import TicketDetailsPage from './TicketDetailsPage'
+import Sell_Ticket from './Sell_Ticket'
+
+// Manual event order (drag-to-rearrange) is remembered per tab, since
+// "upcoming" and "past" are independent lists a user might want ordered
+// differently.
+const ORDER_STORAGE_KEY = 'me-event-order'
+
+const loadOrder = () => {
+  try { return JSON.parse(localStorage.getItem(ORDER_STORAGE_KEY)) || { upcoming: [], past: [] } }
+  catch { return { upcoming: [], past: [] } }
+}
+
+// Applies a saved id order to a list, dropping ids that no longer exist and
+// appending any events not yet in the saved order (new events) at the end,
+// in their existing (date-sorted) order.
+const applyOrder = (list, orderIds) => {
+  const byId = new Map(list.map(e => [e.id, e]))
+  const ordered = orderIds.map(id => byId.get(id)).filter(Boolean)
+  const seen = new Set(ordered.map(e => e.id))
+  const rest = list.filter(e => !seen.has(e.id))
+  return [...ordered, ...rest]
+}
 
 // Parse "JUN 28, 2026" or "JUN 28" (year optional) reliably across all browsers.
 // If the year is missing, assume current year; if that date has already passed
@@ -59,6 +91,13 @@ const geocodeAll = async (events, onResult) => {
 }
 
 
+// ── Native-style iOS activity indicator — 8 blades fading in sequence ──────────
+const IosSpinner = () => (
+  <div className="ios-spinner">
+    {Array.from({ length: 8 }, (_, i) => <i key={i} />)}
+  </div>
+)
+
 // ── Event card with dynamic HR width matching last text line ──────────────────
 const EventCard = ({ event, isPast, onClick }) => {
   const titleRef = useRef(null)
@@ -80,10 +119,33 @@ const EventCard = ({ event, isPast, onClick }) => {
     return () => ro.disconnect()
   }, [event.name])
 
+  const {
+    setNodeRef, attributes, listeners, transform, transition, isDragging
+  } = useSortable({ id: event.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 2 : undefined,
+    opacity: isDragging ? 0.6 : undefined,
+  }
+
   return (
-    <div className="ticket-card-wrap" onClick={onClick}>
+    <div ref={setNodeRef} style={style} className="ticket-card-wrap" onClick={onClick}>
       <div className="ticket-card-img-wrap">
-        <img src={event.IMG} alt={event.name} />
+        <img
+          src={event.IMG}
+          alt={event.name}
+          onError={(e) => {
+            e.target.style.display = 'none';
+            if (!e.target.nextElementSibling?.classList.contains('ticket-card-img-placeholder')) {
+              const placeholder = document.createElement('div');
+              placeholder.className = 'ticket-card-img-placeholder';
+              placeholder.textContent = '🎫';
+              e.target.parentNode.appendChild(placeholder);
+            }
+          }}
+        />
         {isPast && <span className="past-event-badge">PAST EVENT</span>}
       </div>
       <div className="card-items">
@@ -98,6 +160,15 @@ const EventCard = ({ event, isPast, onClick }) => {
           <p>{event.stadium} - {event.city}, {event.state}</p>
         </div>
       </div>
+      <button
+        className="ticket-card-drag-handle"
+        aria-label="Drag to reorder"
+        onClick={(e) => e.stopPropagation()}
+        {...attributes}
+        {...listeners}
+      >
+        <MdDragIndicator size={20} />
+      </button>
     </div>
   )
 }
@@ -109,14 +180,31 @@ const Event = () => {
   const [selectedEvent, setSelected]  = useState(null)
   const [activeTab, setActiveTab]     = useState('tickets')
   const [activeView, setActiveView]   = useState('upcoming')
+  const [order, setOrder]             = useState(loadOrder)
   const [showTransfer, setShowTransfer] = useState(false)
+  const [transferLoading, setTransferLoading] = useState(false)
+  const [authenticating, setAuthenticating] = useState(false)
+  const transferLoadTimerRef = useRef(null)
   const [showBarcodes, setShowBarcodes] = useState(false)
+  const [showBarcodesFromDetails, setShowBarcodesFromDetails] = useState(false)
   const [skelLoading, setSkelLoading] = useState(false)
   const [vtLoading, setVtLoading]     = useState(false)
   const [scrolled, setScrolled]       = useState(false)
   const [moreOptsVisible, setMoreOptsVisible] = useState(false)
+  const [OpenSell, SetOpenSell] = useState(false)
   const popupRef    = useRef(null)
   const moreOptsRef = useRef(null)
+
+  // Transfer only stays disabled once every ticket on the order is sent —
+  // with any unsent ticket left, it should be live (default blue).
+  const allTicketsSent = !!selectedEvent?.tickets?.length && selectedEvent.tickets.every(t => t.sent)
+
+  // Small movement threshold before a press counts as a drag, so tapping a
+  // card to open it still works with the handle right next to a click target.
+  const dragSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } })
+  )
 
   // ── Load events ───────────────────────────────────────────────────
   useEffect(() => {
@@ -141,6 +229,8 @@ const Event = () => {
     }
   }, [])
 
+  useEffect(() => { localStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify(order)) }, [order])
+
   // ── Scroll detection: sticky header + MORE OPTIONS reveal ────────
   useEffect(() => {
     if (!display) { setScrolled(false); setMoreOptsVisible(false); return }
@@ -160,7 +250,11 @@ const Event = () => {
 
   // ── Open ticket detail with brief skeleton ────────────────────────
   const handleEventClick = (event) => {
-    setSelected(event)
+    // Held tickets are filtered out right here, once, at the point an event
+    // becomes "selectedEvent" — every downstream view (this page, Transfer,
+    // TicketDetailsPage, TicketBarcodeViewer) reads selectedEvent.tickets or
+    // receives selectedEvent as a prop, so they all inherit the filtered list.
+    setSelected({ ...event, tickets: getVisibleTickets(event) })
     setActiveTab('tickets')
     setScrolled(false)
     setVtLoading(false)
@@ -169,9 +263,24 @@ const Event = () => {
     setTimeout(() => setSkelLoading(false), 520)
   }
 
-  const closePopup = () => { setDisplay(false); setShowTransfer(false); setShowBarcodes(false); setMoreOptsVisible(false) }
+  const closePopup = () => {
+    clearTimeout(transferLoadTimerRef.current)
+    setDisplay(false); setShowTransfer(false); setTransferLoading(false); setAuthenticating(false); setShowBarcodes(false); setShowBarcodesFromDetails(false); setMoreOptsVisible(false)
+  }
 
-  // ── View Tickets tap — briefly "loads" then opens the barcode viewer ──
+  // ── Transfer tap — brief in-page spinner, then the "Authentication" screen,
+  // then the ticket-select sheet ──
+  const handleStartTransfer = () => {
+    setTransferLoading(true)
+    transferLoadTimerRef.current = setTimeout(() => {
+      setTransferLoading(false)
+      setAuthenticating(true)
+    }, 5000)
+  }
+  const handleCancelAuth = () => setAuthenticating(false)
+  const handleAuthDone = () => { setAuthenticating(false); setShowTransfer(true) }
+
+  // ── View Tickets tap — briefly "loads" then opens Ticket Details ──
   const handleViewTickets = () => {
     if (vtLoading) return
     setVtLoading(true)
@@ -202,7 +311,21 @@ const Event = () => {
     .sort((a, b) => toTimestamp(a.date) - toTimestamp(b.date))
   const past = Events.filter(e => isPast(e.date))
     .sort((a, b) => toTimestamp(b.date) - toTimestamp(a.date))
-  const visible = activeView === 'upcoming' ? upcoming : past
+  const visible = applyOrder(activeView === 'upcoming' ? upcoming : past, order[activeView])
+
+  // ── Drag handle release: persist the dropped card's new position ──
+  const handleDragEnd = (e) => {
+    const { active, over } = e
+    if (!over || active.id === over.id) return
+    const ids = visible.map(ev => ev.id)
+    const from = ids.indexOf(active.id)
+    const to = ids.indexOf(over.id)
+    if (from === -1 || to === -1) return
+    setOrder(prev => ({ ...prev, [activeView]: arrayMove(ids, from, to) }))
+  }
+  const OpenSellBtn = () => {
+    SetOpenSell(true)
+  }
 
   return (
     <div className="event-page">
@@ -210,7 +333,7 @@ const Event = () => {
 
         {/* ── Page header ── */}
         <div className="me-header">
-          <span className="me-title">My Events 🇺🇸</span>
+          <span className="me-title">My Events {getCountry() === 'UK' ? '🇬🇧' : getCountry() === 'CA' ? '🇨🇦' : '🇺🇸'}</span>
           <button className="me-help-btn">Help</button>
         </div>
 
@@ -249,16 +372,20 @@ const Event = () => {
             </div>
           </div>
         ) : (
-          <div className="tickets-cards">
-            {visible.map((event, key) => (
-              <EventCard
-                key={key}
-                event={event}
-                isPast={activeView === 'past'}
-                onClick={() => handleEventClick(event)}
-              />
-            ))}
-          </div>
+          <DndContext sensors={dragSensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={visible.map(e => e.id)} strategy={verticalListSortingStrategy}>
+              <div className="tickets-cards">
+                {visible.map((event) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    isPast={activeView === 'past'}
+                    onClick={() => handleEventClick(event)}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         )}
       </div>
 
@@ -356,6 +483,12 @@ const Event = () => {
               </div>
 
               <div className="tp-content">
+                {transferLoading && (
+                  <div className="tp-transfer-loading">
+                    <IosSpinner />
+                  </div>
+                )}
+
                 <div className="tp-order-row">
                   <div>
                     <p className="tp-order-num">Order #{selectedEvent.orderNum}</p>
@@ -371,7 +504,8 @@ const Event = () => {
                 )}
 
                 {selectedEvent.tickets.map((ticket, idx) => (
-                  <div key={idx} className="tp-ticket-card">
+                  <div key={idx} className={`tp-ticket-card${ticket.sent ? ' tp-ticket-card--sent' : ''}`}>
+                    {ticket.sent && <span className="tp-sent-ribbon">SENT</span>}
                     {ticket.label && <p className="tp-ticket-label">{ticket.label}</p>}
                     <div className="tp-ticket-details">
                       <div className="tp-ticket-field tp-field-left">
@@ -387,6 +521,12 @@ const Event = () => {
                         <p className="tp-field-value">{ticket.seat}</p>
                       </div>
                     </div>
+                    {ticket.sent && (
+                      <p className="tp-sent-note">
+                        <BsUpcScan size={12} />
+                        Transferred{ticket.sentAt ? ` \u00b7 ${new Date(ticket.sentAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}` : ''} &mdash; barcode no longer active on this device
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -455,17 +595,30 @@ const Event = () => {
 
           <div className="tp-bottom-bar">
             <div className="tp-bottom-actions">
-              <button className="tp-action-btn" onClick={() => setShowTransfer(true)}>
-                <TbArrowUpRight size={21} strokeWidth={1.8} />
-                <span>Transfer</span>
+              {/* Grey out only once every ticket on the order has been sent —
+                  there's nothing left to transfer at that point. As long as
+                  at least one ticket is still unsent, the button stays live
+                  (default blue) and opens Transfer with just the remaining,
+                  unsent tickets to choose from. */}
+              <button
+                className={`tp-action-btn${allTicketsSent ? ' tp-action-btn--disabled' : ''}`}
+                disabled={allTicketsSent}
+                onClick={handleStartTransfer}
+              >
+                <TbArrowUpRight size={21} strokeWidth={1.8} style={allTicketsSent ? {color:'lightgray'} : undefined} />
+                <span style={allTicketsSent ? {color:'lightgray'} : undefined}>Transfer</span>
               </button>
               <hr className="hr-bottom-bar"/>
-              <button className="tp-action-btn">
-                <TbRefresh size={21} strokeWidth={1.8} style={{color:'lightgray'}}/>
-                <span style={{color:'lightgray'}}>Sell</span>
+              <button className="tp-action-btn" onClick={OpenSellBtn}>
+                <TbRefresh size={21} strokeWidth={1.8} style={{color:'#026CDF'}}/>
+                <span style={{color:'black'}}>Sell</span>
               </button>
             </div>
           </div>
+
+          {authenticating && (
+            <TransferAuth onCancel={handleCancelAuth} onDone={handleAuthDone} />
+          )}
 
           {showTransfer && (
             <Transfer event={selectedEvent} onClose={() => setShowTransfer(false)} />
@@ -474,9 +627,27 @@ const Event = () => {
         document.getElementById('popup-container')
       )}
 
-      {/* ── Barcode viewer ── */}
+      {/* ── Ticket details (opened from "View Tickets") ── */}
       {showBarcodes && selectedEvent && createPortal(
-        <TicketBarcodeViewer event={selectedEvent} onClose={() => setShowBarcodes(false)} />,
+        <TicketDetailsPage
+          event={selectedEvent}
+          tickets={selectedEvent.tickets}
+          onClose={() => setShowBarcodes(false)}
+          onViewBarcode={() => setShowBarcodesFromDetails(true)}
+        />,
+        document.getElementById('popup-container')
+      )}
+
+      {/* ── Barcode viewer (reached from "View Barcode" inside Ticket Details) ── */}
+      {showBarcodesFromDetails && selectedEvent && createPortal(
+        <TicketBarcodeViewer event={selectedEvent} onClose={() => setShowBarcodesFromDetails(false)} />,
+        document.getElementById('popup-container')
+      )}
+
+      {/* Sell sheet — portaled like Transfer above it, otherwise it mounts
+          underneath the fullscreen .ticketpopup and looks like a dead button */}
+      {OpenSell && selectedEvent && createPortal(
+        <Sell_Ticket close={() => SetOpenSell(false)} event={selectedEvent} />,
         document.getElementById('popup-container')
       )}
     </div>

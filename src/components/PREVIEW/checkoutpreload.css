@@ -1,0 +1,1584 @@
+.CheckoutPreview {
+    background-color: white;
+    height: 100vh;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    font-family: 'Poppins', sans-serif;
+}
+/* payment content expanding/collapsing above the viewport used to make the
+   browser's scroll anchoring force-jump the page (sometimes straight to the
+   bottom when toggling a method) — opting out keeps scroll position stable */
+.CheckoutPreview {
+    overflow-anchor: none;
+}
+.CheckoutPreview > div:nth-child(1) > img {
+    width: 100%;
+}
+.checkout-firstnav {
+    background-color: white;
+    box-shadow: 1px 2px 8px rgb(0,0,0,.2);
+    height: 3rem;
+    width: 90%;
+    margin: -1.2rem auto 0 auto;
+    position: relative;
+}
+.checkout-secnav, .checout-first-nav, .check-sec-nav, .check-third-nav, .check-fourth-nav, .check-fifth-nav, .insurance, .showpayment {
+    width: 90%;
+    background-color: white;
+    box-shadow: 1px 2px 8px rgb(0,0,0,.2);
+    margin: 1rem auto 0;
+    padding: 20px;
+}
+.check-third-nav {
+    padding: 0 20px 20px 20px;
+}
+@keyframes fade-bg {
+    from {
+        background-color: #ECECEC;
+    } to {
+        background-color: #D3D3D3;
+    }
+}
+.checkout-secnav p {
+    animation: fade-bg 1s ease 0.5s infinite alternate forwards;
+}
+.checkout-secnavone > p:nth-child(1) {
+    height: 2.5rem;
+    width: 10rem;
+}
+.checkout-secnavone > p:nth-child(2) {
+    height: 5.5rem;
+    margin: 1.5rem 0 0;
+    width: 100%;
+}
+.checkout-secnavone > div, .checkoutthirdnav > div, .checkout-fithnav > div {
+    display: flex;
+    justify-content: space-between;
+    margin: 1.5rem 0;
+}
+.checkout-secnavone > div p, .checkoutthirdnav > div p, .checkout-fithnav > div p {
+    height: 1.3rem;
+}
+.checkout-secnavone > div p:nth-child(1), .checkoutthirdnav > div p:nth-child(1) {
+    width: 1rem;
+}
+.checkout-secnavone > div p:nth-child(2), .checkoutthirdnav > div p:nth-child(2) {
+    width: 4.5rem;
+    transform: translate(-6rem, 0);
+}
+.checkout-secnavone > div p:nth-child(3), .checkoutthirdnav > div p:nth-child(3) {
+    width: 5rem;
+}
+.checkout-secnavone > p:nth-child(4), .checkoutthirdnav > p:nth-child(2) {
+    height: 5.5rem;
+    width: 90%;
+    margin: 0 0 0 auto;
+}
+.checkoutthirdnav > div {
+    margin-top: 0rem;
+}
+.checkoutfourthnav p:nth-child(1), .checkout-fithnav > div p:nth-child(1){
+    height: 2rem;
+    width: 40%;
+}
+.checkoutfourthnav p:nth-child(2) {
+    height: 4rem;
+    width: 90%;
+    margin: 1.5rem 0 0 auto;
+}
+.checkoutfourthnav p:nth-child(3) {
+    height: 6.5rem;
+    width: 90%;
+    margin: 1.5rem 0 0 auto;
+}
+.checkout-fithnav > div p:nth-child(2) {
+    width: 15%;
+    height: 2rem;
+}
+.checkout-fithnav > p:nth-child(2) {
+    height: 5rem;
+    width: 90%;
+    margin: 0 0 0 auto;
+}
+.checkout-sixthnav {
+    display: grid;
+    gap: 1.2rem;
+}
+.checkout-sixthnav > div:nth-child(1) p {
+    height: 2.2rem;
+    width: 25%;
+}
+.checkout-sixthnav > div:nth-child(1),.checkout-sixthnav > div:nth-child(3), .checkout-sixthnav > div:nth-child(4) {
+    display: flex;
+    justify-content: space-between;
+}
+.checkout-sixthnav > div:nth-child(2) p {
+    height: .8rem;
+    width: 20%;
+}
+.checkout-sixthnav > div:nth-child(3) p:nth-child(1){
+    width: 50%;
+}
+.checkout-sixthnav > div:nth-child(3) p:nth-child(2), .checkout-sixthnav > div:nth-child(4) p:nth-child(2){
+    width: 18%;
+}
+.checkout-sixthnav > div:nth-child(3) p, .checkout-sixthnav > div:nth-child(4) p, .checkout-sixthnav > div:nth-child(5) p {
+    height: 1.6rem;
+}
+.checkout-sixthnav > div:nth-child(4) p:nth-child(1) {
+    width: 35%;
+}
+.checkout-sixthnav > div:nth-child(5) p{
+    width: 20%;
+}
+.checkout-sixthnav > p:nth-child(6) {
+    height: 2.3rem;
+    width: 100%;
+}
+.checkout-sixthnav {
+    width: 100%;
+}
+.checout-first-nav > p:nth-child(1) {
+    font-size: 20px;
+    font-weight: 600;
+    width: 90%;
+    line-height: 23px;
+}
+.checout-first-nav > p:nth-child(2) {
+    font-size: 14px;
+    font-weight: 450;
+    margin: 8px 0 2px;
+    letter-spacing: 0.025em;
+}
+.checout-first-nav > p:nth-child(3) {
+    font-size: 14px;
+    font-weight: 300;
+    color: rgb(0,0,0);
+}
+.checout-first-nav > div:nth-child(4) {
+    border-top: 1.5px solid rgb(211, 211, 211, .6);
+    margin: 20px 0;
+}
+.checout-first-nav > div:nth-child(5)  {
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 1s ease-in-out;
+    user-select: none;
+}
+.checout-first-nav > div:nth-child(5) p {
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    font-size: 18px;
+}
+.checout-first-nav > div:nth-child(6) {
+    transition: all 2s ease-in-out;
+}
+.checout-first-nav > div:nth-child(6) p:nth-child(1) {
+    font-weight: 400;
+    font-size: 15px;
+    margin: 12px 0 2px;
+}
+.checout-first-nav > div:nth-child(6) p:nth-child(2) {
+    font-size: 15px;
+    font-weight: 100;
+    color: rgb(0,0,0,.75);
+    margin: -1px 0 12px 0;
+}
+.checout-first-nav >  div:nth-child(6) > div:nth-child(3) {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+.checout-first-nav > div:nth-child(6) > div:nth-child(3) p:nth-child(2) {
+    margin: 0 2px 0 6px;
+    color: rgb(0,0,0,.8);
+    font-weight: 400;
+}
+.checout-first-nav > div:nth-child(6) > div:nth-child(3) p:nth-child(3) {
+    color: rgb(0,0,0,.7);
+    font-weight: 100;
+}
+.checout-first-nav > div:nth-child(6) > div:nth-child(3) p {
+    font-size: 14.5px;
+}
+.check-sec-nav > p:nth-child(1) {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+.check-sec-nav > p:nth-child(2) {
+    font-size: 15px;
+    margin: 10px 0;
+    -webkit-text-stroke: 0.03em;
+    letter-spacing: 0.03em;
+}
+.check-sec-nav > div:nth-child(3), .check-sec-nav > div:nth-child(4) div{
+    display: grid;
+    transition: all 1s ease-in-out;
+}
+.check-sec-nav > div:nth-child(3) label, .check-sec-nav > div:nth-child(4) label {
+    font-weight: 100;
+    font-size: 13px;
+    color: rgb(0,0,0,.7);
+    margin: 0 0 3px 0;
+    -webkit-text-stroke: 0.009em;
+}
+.check-sec-nav > div:nth-child(3) select, .check-sec-nav > div:nth-child(4) select {
+    background-color: white;
+    border: 1px solid rgb(0,0,0,.4);
+    height: 2.8rem;
+    border-radius: 2px;
+    padding: 0 20px;
+    font-size: 15px;
+    font-family: 'Poppins', sans-serif;
+    margin-bottom: 1.4rem;
+    outline: none;
+    color: black;
+    appearance: none;
+}
+.check-sec-nav > div:nth-child(4) select {
+    margin-bottom: 1.15rem;
+}
+.check-sec-nav > div:nth-child(3) select:hover, .check-sec-nav > div:nth-child(4) select:hover {
+    border: 1px solid #064ce0;
+}
+.check-sec-nav > p:nth-child(5) {
+    font-weight: 500;
+    margin-bottom: .5rem;
+    font-size: 16px;
+}
+.check-sec-nav > div:nth-child(6) {
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    font-size: 15px;
+}
+.check-sec-nav > p:nth-child(7) {
+    font-size: 14.5px;
+    letter-spacing: 0.01em;
+    margin-top: 10px;
+    color: rgb(0,0,0,.65);
+    line-height: 22px;
+}
+.check-third-nav > p:nth-child(1) {
+    background-color: #064ce0;
+    color: white;
+    font-weight: 500;
+    padding: 10px 25px;
+    font-size: 22px;
+    margin: 0 -20px;
+    letter-spacing: 0.034em;
+    -webkit-text-stroke: 0.02em;
+}
+.check-third-nav > div:nth-child(2) {
+    display: flex;
+    margin: 1.25rem 0 1rem 0;
+    border: 1px solid #064ce0;
+    align-items: center;
+    padding: 17px 15px;
+    gap: 25px;
+    font-size: 15px;
+    letter-spacing: 0.03em;
+    border-radius: 3px;
+}
+.check-third-nav > div:nth-child(3) {
+    display: flex;
+    gap: 10px;
+    font-weight: 500;
+    align-items: center;
+    letter-spacing: 0.02em;
+    -webkit-text-stroke: 0.01em;
+    font-size: 15px;
+    margin: 1.05rem 0 4px;
+}
+.check-third-nav > div:nth-child(4), .check-fourth-nav > div:nth-child(2) > p:nth-child(2), .souvenir-parent > p:nth-child(2)  {
+    color: rgb(0,0,0,.55);
+    font-size: 15px;
+    line-height: 22px;
+}
+.check-third-nav > div:nth-child(4) p span:nth-child(2), .check-fourth-nav > div:nth-child(2) > p:nth-child(2) span:nth-child(2), .souvenir-parent .souvenir-read-less {
+    color: #064ce0;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 15px;
+    letter-spacing: 0.03em;
+}
+.check-third-nav > div:nth-child(5) > p:nth-child(1) {
+    background-color: #AA31FF;
+    width: fit-content;
+    color: white;
+    font-size: 12.4px;
+    padding: 1px 8px;
+    font-weight: 600;
+    border-radius: 5px;
+    margin: 1rem 0 5px;
+}
+.check-third-nav > div:nth-child(5) > div:nth-child(2) {
+    margin-bottom: 16px;
+}
+.check-third-nav > div:nth-child(5) > div:nth-child(2), .check-third-nav > div:nth-child(5) > div:nth-child(3) {
+    display: flex;
+    letter-spacing: 0.02em;
+}
+.check-third-nav > div:nth-child(5) > div:nth-child(2) > div:nth-child(1) > p:nth-child(1), .check-third-nav > div:nth-child(5) > div:nth-child(3) > div:nth-child(1)  > p:nth-child(1) {
+    font-size: 13px;
+    margin-bottom: 3px;
+}
+.check-third-nav > div:nth-child(5) > div:nth-child(2) > div:nth-child(1) > p:nth-child(2), .check-third-nav > div:nth-child(5) > div:nth-child(3) > div:nth-child(1) > p:nth-child(2) {
+    width: 90%;
+    line-height: 18px;
+    -webkit-text-stroke: 0.01em;
+    font-weight: 500;
+    font-size: 13px;
+}
+.check-third-nav > div:nth-child(5) > div:nth-child(2) > div p:nth-child(3), .check-third-nav > div:nth-child(5) > div:nth-child(3) > div:nth-child(1) > p:nth-child(3), .vip-figures  {
+    font-size: 13.5px;
+    margin: 3px 0 0;
+    font-family: 'Hanken Grotesk', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 450;
+}
+.vip-figures {
+    letter-spacing: 0.06em;
+    font-weight: 350 !important;
+} 
+.check-third-nav > div:nth-child(5) > div:nth-child(2) > div:nth-child(2), .check-third-nav > div:nth-child(5) > div:nth-child(3) > div:nth-child(2), .vip-setprice {
+    display: flex;
+    box-shadow: 1px 2px 8px rgb(0,0,0,.2);
+    border: .1px solid rgb(0,0,0,.2);
+    height: fit-content;
+    align-items: center;
+    border-radius: 30px;
+    padding: 2px 2px 2px 10px;
+    color: rgb(0,0,0,.5);
+    gap: 10px;
+}
+.check-third-nav > div:nth-child(5) > div:nth-child(2) > div:nth-child(2) div, .check-third-nav > div:nth-child(5) > div:nth-child(3) > div:nth-child(2) > div:nth-child(2) > div, .vip-setprice {
+    display: flex;
+    align-items: center;
+    color: rgb(0,0,0,.3);
+}
+.check-third-nav > div:nth-child(5) > div:nth-child(2) > div:nth-child(2) div:nth-child(3), .check-third-nav > div:nth-child(5) > div:nth-child(3) > div:nth-child(2) div:nth-child(3), .vip-setprice div:nth-child(3) {
+    background-color: #064ce0;
+    color: rgb(255, 255, 255, .8);
+    border-radius: 50%;
+    padding: 10px;
+    display: grid;
+    place-items: center;
+}
+.check-third-nav > div:nth-child(5) > div:nth-child(3) > div:nth-child(2) div:nth-child(1), .vip-setprice div:nth-child(1) {
+    display: grid;
+    color: rgb(0,0,0,.3);
+}
+
+.check-third-nav > div:nth-child(5) > div:nth-child(2) > div:nth-child(2) p:nth-child(2), .check-third-nav > div:nth-child(5) > div:nth-child(3) > div:nth-child(2) > p:nth-child(2), .vip-setprice > p:nth-child(2) {
+    background-color: rgb(128,128,128, .15);
+    color: rgb(0,0,0,.85);
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    width: 2rem !important;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 2px;
+}
+.check-fourth-nav > p:nth-child(1) {
+    font-size: 23px;
+    letter-spacing: 0.025em;
+    font-weight: 500;
+}
+.check-fourth-nav > div:nth-child(2) > div:nth-child(1) {
+    display: flex;
+    gap: 12px;
+    align-items: start;
+    margin: 9px 0 0;
+    width: 90%;
+}
+.check-fourth-nav > div:nth-child(2) > div:nth-child(1) img {
+    height: 1.05rem;
+    transform: translateY(4px);
+}
+.check-fourth-nav > div:nth-child(2) > div:nth-child(1) > p:nth-child(2), .check-fourth-nav > div:nth-child(3) > div:nth-child(1) > p:nth-child(1), .check-fourth-nav .vip-title-row > p:nth-child(1) {
+    font-weight: 500;
+    line-height: 22px;
+    -webkit-text-stroke: 0.01em;
+    letter-spacing: 0.02em;
+    font-size: 14.85px;
+}
+.check-fourth-nav > div:nth-child(2) > p:nth-child(2) {
+    width: 95%;
+    margin: 5px 0 0;
+    font-size: 15px;
+    line-height: 23px;
+}
+.check-fourth-nav > div:nth-child(2) > p:nth-child(2) > span:nth-child(2), .souvenir-parent > p:nth-child(2) > span:nth-child(2) {
+    font-size: 14px;
+}
+.souvenir-parent > p:nth-child(2) {
+    width: 90%;
+    letter-spacing: 0.02em;
+    margin-top: 6px !important;
+}
+.check-fourth-nav > div:nth-child(3), .souvenir-parent > p:nth-child(2) {
+    margin: 15px 0 0;
+}
+.check-fourth-nav > div:nth-child(3) > div:nth-child(1)> p:nth-child(1), .check-fourth-nav .vip-title-row > p:nth-child(1) {
+    font-size: 13.5px;
+}
+.check-fourth-nav > div:nth-child(4) {
+    border-top: .5px solid rgb(0,0,0,.35);
+    margin: 16px 0 1.2rem;
+    width: 100%;
+}
+.vip-figures-setprice {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: flex-start;
+}
+.vip-setprice {
+    align-self: center;
+}
+.vip-title-row .vip-setprice {
+    transform: translateY(15px);
+}
+.vip-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.souvenir-parent .vip-title-row {
+  margin-top: 5px;
+  min-height: 49px; 
+}
+.souvenir-parent .vip-title-row .vip-setprice {
+  transform: translateY(15px); 
+}
+.vip-figures-setprice div p:nth-child(1) {
+    margin: 5px 0 1px;
+    -webkit-text-stroke: 0.005em;
+}
+.vip-figures-setprice div p:nth-child(2) {
+    font-size: 13px;
+    width: 85%;
+    color: rgb(0,0,0,.65);
+}
+.souvenir-parent > div:nth-child(1){
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    -webkit-text-stroke: 0.01em;
+    font-size: 16.5px;
+}
+.souvenir-figures {
+    margin: -5px 0 0 !important;
+}
+.souvenir-parent .souvenir-paragraph{
+    width: 95% !important;
+}
+.check-fifth-nav p:nth-child(2) {
+    font-weight: 500;
+    font-size: 15px;
+    margin: 5px 0 3.5px;
+}
+.check-fifth-nav p:nth-child(3) {
+    color: rgb(0,0,0,.55);
+    font-size: 15.3px;
+    line-height: 22.5px;
+} 
+.check-fifth-nav .findHotelClicked {
+    display: flex;
+    align-items: center;
+    font-size: 12.7px;
+    gap: 13px;
+    color: #077B46;
+    white-space: nowrap;
+    margin-top: 15px;
+}
+.check-fifth-nav .findHotelunClicked {
+    border: 1px solid #064ce0;
+    display: grid;
+    place-items: center;
+    padding: 8px;
+    border-radius: 4px;
+    color: #064ce0;
+    font-weight: 500;
+    font-size: 15px;
+    margin-top: 15px;
+}
+.check-sixth-nav {
+    width: 100%;
+    background-color: white;
+    position: sticky;
+    bottom: 0;
+    box-shadow: -1px -1px 2px rgb(0,0,0,.1);
+    margin-top: 20px;
+    padding: 20px 23px;
+}
+.check-sixth-nav > div:nth-child(1) {
+    height: .25rem;
+    width: 2rem;
+    background-color: black;
+}
+.check-sixth-nav > div:nth-child(2) > div:nth-child(1) {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+} 
+.check-sixth-nav > div:nth-child(2) > div:nth-child(1) p:nth-child(1) {
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 7px;
+    -webkit-text-stroke: 0.02em;
+}
+.check-sixth-nav > div:nth-child(2) > div:nth-child(1) p:nth-child(1) span {
+    font-weight: 100;
+    font-size: 11.5px;
+    color: rgb(0,0,0,.36);
+    letter-spacing: 0.03em;
+}
+.check-sixth-nav > div:nth-child(2) > div:nth-child(1) p:nth-child(2) {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 500;
+    -webkit-text-stroke: 0.02em;
+    font-family: "Ubuntu", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+.check-sixth-nav > div:nth-child(2) .sixth-hr {
+    margin: 1.2rem -20px 2.2rem;
+    border: .65px solid rgb(0,0,0,.22);
+    width: auto;
+}
+.extra-sixth > div{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+.extra-sixth > p:nth-child(1) {
+    font-weight: 500;
+    font-size: 17.5px;
+    margin-bottom: 2px;
+}
+.extra-sixth > div:nth-child(2) > p:nth-child(1) {
+    color: rgb(0,0,0,.6);
+    font-size: 15.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: "Ubuntu", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+.extra-sixth > div:nth-child(2) p:nth-child(2) {
+    color: rgb(0,0,0,.85);
+    letter-spacing: 0.035em;
+    font-weight: 700;
+    font-family: 'Hanken Grotesk', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+} 
+.extra-sixth > div:nth-child(2) > p:nth-child(1) > p span {
+    font-family: 'Hanken Grotesk', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+.icon-badge {
+    position: relative;      /* anchor for the ::before */
+    z-index: 0;              /* stacking context: keeps #f04a4a behind the svg */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;            /* how much red shows around the icon */
+}
+
+.icon-badge::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #f04a4a;
+    transform: rotate(15deg);   /* deg, not % */
+}
+.please-agree-before-continue {
+    display: flex;
+    align-items: center;
+    padding: 0 13px;
+    height: 4.8rem;
+    gap: 30px;
+    border: 1px solid #f04a4a;
+    border-radius: 4px;
+    margin-top: 1rem;
+}
+.please-agree-before-continue p, .input-errors p {
+    font-size: 15px;
+    color: rgb(0,0,0,.85);
+    line-height: 23px;
+}
+.read-agreement > div:nth-child(1) {
+    border-radius: 1px;
+    height: 1.5rem;
+    aspect-ratio: 1/1;
+    border: 1.3px solid rgb(0,0,0,.5);
+}
+.read-agreement {
+    display: flex;
+    gap: 20px;
+    margin: 1.5rem 0 0;
+}
+.read-agreement p {
+    font-weight: 500;
+    font-size: 14.5px;
+    line-height: 23px;
+    word-spacing: 0.02em;
+}
+.read-agreement p span {
+    color: #064ce0;
+    text-decoration: underline;
+}
+.payment-button {
+    width: 100%;
+    outline: none;
+    appearance: none;
+    padding: 12px 0;
+    font-weight: 700;
+    font-size: 17.5px;
+    background-color: #077B46;
+    color: white;
+    border-radius: 5px;
+    letter-spacing: 0.02em;
+    font-family: 'Hanken Grotesk', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    margin-top: 1.5rem;
+    border: none;
+    cursor: pointer;
+}
+.sales-final {
+    margin: 1.5rem 0 1rem;
+    color: rgb(0,0,0,.55);
+}
+.extra-ticket-quote::after, .our-promise > div:nth-child(1)::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;       /* poke out below the box */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 6px solid white;
+  filter: drop-shadow(0px 1px 1px rgb(0,0,0,.35)); /* matches your box-shadow */
+} .our-promise > div:nth-child(1)::after {
+    height: 1rem;
+    width: 1rem;
+    bottom: -16px;
+    transform: translateX(1.8rem);
+}
+.city-quote::after {
+    transform: translateX(-4rem);
+}
+.insurance img {
+    width: 23rem;
+    margin-top: 1rem;
+    user-select: none;
+}
+.insurance > .selection-required {
+    border: 1.5px solid #f04a4a;
+    border-radius: 4px;
+    width: fit-content;
+    padding: 0px 10px;
+    font-size: 14px;
+    color: #f04a4a;
+}
+.insurance > p:nth-child(2) {
+    font-size: 21px;
+    font-weight: 600;
+    margin: 1rem 0 0;
+} 
+.insurance > div:nth-child(4) {
+    height: .7rem;
+    width: 100%;
+    background-color: #064ce0;
+    margin: 2rem 0 1rem;
+}
+.insurance > p:nth-child(5) {
+    font-size: 14.7px;
+    font-weight: 100;
+    color: rgb(0,0,0,.9);
+}
+.insurance > p:nth-child(5) span:nth-child(1), .insurance > p:nth-child(5) span:nth-child(4) {
+    -webkit-text-stroke: 0.02em;
+    color: black;
+}
+.insurance > p:nth-child(5) span:nth-child(2), .insurance > p:nth-child(6) span {
+    font-style: italic;
+    font-family:sans-serif;
+    color: rgb(0,0,0,.72);
+} 
+.insurance > p:nth-child(5) span:nth-child(4) {
+    font-family: 'Hanken Grotesk', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 350;
+    letter-spacing: 0.02em;
+}
+.insurance > p:nth-child(6) {
+    margin-top: 1.5rem;
+    font-size: 14.7px;
+    color: rgb(0,0,0,.85);
+    letter-spacing: 0.02em;
+}
+.insurance .protected-unclicked, .unprotected-unclicked {
+    border-radius: 4px 0 4px 4px;
+    padding: 15px;
+    position: relative;
+    display: flex;
+    align-items: start;
+    gap: 15px;
+    cursor: pointer;
+}
+.insurance .protected-unclicked {
+    border: 1px solid #064ce0;
+    margin-top: 2rem;
+}
+.unprotected-unclicked:hover, .unprotected-unclicked:active {
+    border: 1px solid #064ce0;
+}
+.insurance .protected-unclicked > p:nth-child(1) {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #064ce0;
+    color: white;
+    font-size: 14px;
+    padding: 0 10px;
+    border-radius: 4px 4px 0 0;
+    transform: translate(1px, -21px);
+}
+.insurance .protected-unclicked > div:nth-child(2), .unprotected-unclicked > div:nth-child(1) {
+    border: 1px solid gray;
+    width: 1.5rem;
+    height: 1.5rem;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    transform: translateY(2px);
+}
+.insurance .protected-unclicked > div:nth-child(3) > p:nth-child(1) {
+    font-size: 15px;
+    -webkit-text-stroke: 0.015em;
+}
+.insurance .protected-unclicked > div:nth-child(3) > p:nth-child(2), .unprotected-unclicked p {
+    font-weight: 100;
+    font-size: 15px;
+    color: rgb(0,0,0,.65);
+}
+.insurance .protected-clicked {
+    display: flex;
+    align-items: start;
+    margin-top: 1.8rem;
+    gap: 10px;
+    padding: 0 30px;
+}
+.insurance .protected-clicked p {
+    font-size: 14px;
+    color: #077B46;
+    letter-spacing: 0.015em;
+}
+.insurance .protected-clicked p span {
+    font-weight: 500;
+}
+.unprotected-unclicked {
+    margin-top: 1.5rem;
+}
+.unprotected-unclicked p {
+    font-size: 14.3px;
+    -webkit-text-stroke: 0.01em;
+}
+.unprotected-clicked > div:nth-child(1){ 
+    background-color: white;
+    border: 6px solid black;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+}
+.unprotected-clicked {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 30px;
+    margin-top: 1.2rem;
+}
+.unprotected-clicked p {
+    color: #f04a4a;
+    font-weight: 500;
+    font-size: 13px;
+}
+.fave-fan {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 1.2rem;
+}
+.fave-fan p {
+    font-size: 14px;
+    font-weight: 100;
+    transform: translateY(2px);
+}
+.fave-fan p span {
+    font-weight: 400;
+    -webkit-text-stroke: 0.01em;
+}
+.our-promise {
+    position: relative;
+}
+.our-promise > div:nth-child(1) {
+    width: 15rem;
+    font-size: 12px;
+    background-color: white;
+    box-shadow: 0px 0px 2.5px rgb(0,0,0,.55);
+    padding: 8px;
+    border-radius: 3px;
+    border: 1px solid rgb(0,0,0,.3);
+    transform: translateY(5px);
+    position: absolute;
+    top: -15rem;
+}
+.our-promise > div:nth-child(1) p:nth-child(1) {
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    -webkit-text-stroke: 0.02em;
+    letter-spacing: 0.02em;
+}
+.our-promise > div:nth-child(1) p:nth-child(2) {
+    color: rgb(0,0,0,.8);
+    font-weight: 100;
+    width: 95%;
+    margin-top: 5px;
+} 
+.our-promise .free-look-period {
+    border: .7px solid rgb(0,0,0,.3);
+    width: fit-content;
+    padding: 3px 10px;
+    display: flex;
+    margin-top: 1rem;
+    align-items: center;
+    gap: 10px;
+} 
+.free-plan-inbetween-hr {
+    border-top: 1px solid rgb(0,0,0,.15);
+    margin: 1.5rem 0;
+}
+.plan-pricing-paragraph {
+    font-size: 15px;
+    font-weight: 100;
+    line-height: 20px;
+    word-spacing: 0.03em;
+    letter-spacing: 0.03em;
+}
+.plan-pricing-paragraph span:nth-child(1) {
+    color: #064ce0;
+    cursor: pointer;
+    text-decoration: underline;
+}
+/* Fan */
+    .fan {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      transform: scale(0.735);
+      background:transparent;
+    }
+
+    .ring {
+      position: absolute;
+      left: 23.5px;
+      top: 23.8px;
+      width: 52px;
+      height: 52px;
+      border: 3px solid #fff;
+      border-radius: 50%;
+      box-sizing: border-box;
+    }
+
+    .blade {
+      position: absolute;
+      left: calc(50% - 2px);
+      top: calc(50% - 40px);
+      width: 3px;
+      height: 10px;
+      background: #fff;
+      transform-origin: 50% 39px;          /* fan center:
+  blade sits at r 25-40, kissing the ring */
+      /* transform is driven inline from the shared wall-clock (see Fans) */
+      transform: rotate(var(--a));
+    }
+
+    /* Blade fades from full to nothing over --dur seconds after --delay;
+       with fill-mode forwards it never comes back within the cycle.
+       The whole fan remounts (key={cycle}) at 00:00 to start a new lap. */
+    @keyframes shrink {
+      from { transform: rotate(var(--a)) scaleX(1); }
+      to   { transform: rotate(var(--a)) scaleX(0); }
+    }
+    .fans-div {
+        position: absolute;
+        z-index: 999;
+        right: -5px;
+        top: 5rem;
+        display: flex;
+        align-items: center;
+    }
+     .fans-div p {
+        font-weight: 600;
+        font-size: 23px;
+        color: white;
+        transform: translateX(5px);
+     }
+
+/* Header mock — overlays the page like .fans-div */
+.checkout-header-mock {
+    position: relative;
+    box-sizing: border-box;
+    top: 0;
+    height: 12.8rem;
+    left: 0;
+    width: 100%;
+    aspect-ratio: 1290 / 480;        /* reference proportions, scales to any width */
+    background: #0d0d0d;             /* near-black band */
+    overflow: hidden;                /* clips the hatch wedge */
+}
+ .top-bar {
+    height: .5rem;                     /* blue strip, ~2.5% of height */
+    background: #064ce0;             /* project blue */
+    z-index: 99;
+    position: relative;
+}
+.checkout-header-mock .wordmark {
+    position: absolute;
+    left: 4%;
+    top: 10%;
+    margin: 0;
+    color: #fff;
+    font-weight: 600;
+    font-size: 23px;
+    transform: skewX(-8deg);        
+    transform-origin: left bottom;
+    font-family: 'Montserrat', sans-serif
+}
+.checkout-header-mock .wordmark sup { font-size: 0.35em; margin: 0 3px; color: darkgray; }
+
+/* hatch: 39 vertical bars, sheared into parallel diagonals */
+.checkout-header-mock .hatch {
+    position: absolute;
+    top: 1px;
+    width: 19.64rem;    
+    right: -2.6675rem;
+    display: flex;
+    justify-content: space-between;
+}
+.checkout-header-mock .hatch span {
+    width: 2px;
+    /* height set inline per span: 5px → 80px arithmetic progression */
+    background: rgb(255, 255, 255, .7);
+    transform: skewX(-50deg);        /* parallel "/" diagonals */
+}
+
+/* CHECKOUT: blue block offset behind and to the right of the text */
+.checkout-header-mock .checkout-tag {
+    position: absolute;
+    left: 4%;
+    top: 56%;
+    width: 35%;
+}
+.checkout-header-mock .checkout-tag p {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    font-size: 24.4px;
+    transform: translate(0, -22%);   /* text rides the block's upper-left */
+}
+.checkout-header-mock .checkout-tag::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #064ce0;            /* sharp corners per the reference */
+    transform: translate(28px, 14px); /* the offset blue rectangle */
+    height: 1.1rem;
+    width: 9.2rem;
+}
+.payment-required {
+    color: #f04a4a;
+    border: 1px solid #f04a4a;
+    width: fit-content;
+    font-size: 12.5px;
+    -webkit-text-stroke: 0.02em;
+    padding: 1px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+}
+.payment-pay-with {
+    margin: 1.2rem 0;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+.payment-paypal-preferred {
+    display: flex;
+    margin: 0 1rem;
+    align-items: center;
+}
+.payment-paypal-p {
+    font-weight: 700;
+    font-size: 20px;
+}
+.payment-preferred-partner {
+    line-height: 10px;
+    font-size: 10px;
+    margin: 0 5px;
+    font-weight: 500;
+}
+.payment-list-radio {
+    border: 1.5px solid black;
+    width: 1.5rem;
+    height: 1.5rem;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    cursor: pointer;
+}
+.payment-list-radio.active {
+    border-width: 6.3px;
+}
+.creditcard-top-section {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin: 1.8rem 0 0;
+}
+.credit-card-p > p:nth-child(1) {
+    font-size: 14px;
+    -webkit-text-stroke: 0.02em;
+    letter-spacing: 0.02em;
+}
+.credit-card-p > p:nth-child(2) {
+    font-size: 14px;
+    color: rgb(0,0,0, .9);
+    line-height: 18px;
+    letter-spacing: 0.015em;
+}
+.credit-card-p {
+    margin: 0 -5px;
+}
+.credit-card-p > p:nth-child(2) > span:nth-child(3) {
+    text-decoration: underline;
+    color: #064ce0;
+}
+.credit-card-icons-img {
+    margin-top: 1rem;
+    margin-left: -5px;
+}
+.credit-card-submit-form {
+    padding-left: 40px;
+    margin-top: 1rem;
+}
+.credit-card-submit-form label, .gift-card-form label {
+    font-size: 12px;
+    color: rgb(0,0,0,.6);
+}
+.credit-card-submit-form input, .credit-card-submit-form select, .gift-card-form input {
+    width: 100%;
+    height: 2.7rem;
+    border: 1.2px solid rgb(0,0,0,.5);
+    border-radius: 3px;
+    padding: 0 15px;
+    font-family: 'Poppins', sans-serif;
+    color: black;
+    background-color: white;
+    appearance: none;
+    outline: none;
+    font-size: 14.5px;
+    font-family: 'Poppins', sans-serif !important;
+    font-weight: 300 !important;
+    -webkit-text-stroke: 0.01em !important;
+    letter-spacing: 0.01em;
+    margin-bottom: 15px;
+}
+.credit-card-submit-form input:focus, .credit-card-submit-form select:focus, .gift-card-form input:focus {
+    border: 1.2px solid #064ce0;
+}
+/* Add !important temporarily to confirm it's a specificity issue */
+.credit-card-submit-form input::placeholder, .gift-card-form input::placeholder {
+    color: rgb(0,0,0,.6) !important;
+}
+.expiry-security-code {
+    display: flex;
+    gap: 15px;
+}
+.save-card {
+    margin: .5rem 0 1.2rem;
+    display: flex;
+    gap: 15px;
+    font-size: 14px;
+    font-weight: 300;
+    -webkit-text-stroke: 0.002em;
+    align-items: center;
+    user-select: none;
+    letter-spacing: 0.02em;
+}
+.cardsaved {
+    border: 2px solid #064ce0;
+    border-radius: 3px;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: grid;
+    place-items: center;
+    color: transparent;
+    font-size: 17px;
+    box-sizing: border-box;
+    padding-top: 2.5px;
+    transition: all 200ms ease;
+    cursor: pointer;
+}
+
+/* Outside clicked → black */
+.cardsaved.active {
+    background-color: black;
+    color: white;
+    border: none;
+}
+
+/* Just clicked → blue */
+.cardsaved.active.selected {
+    background-color: #064ce0;
+    color: white;
+}
+.fullname {
+    display: flex;
+    gap: 15px;
+}
+.country-select {
+    position: relative;
+}
+.select-country-children {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: rgb(0,0,0,.8);
+}
+.mobile-number-input {
+    position: relative;
+}
+.mobile-number-prefix {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    background: rgb(128,128,128,.07);
+    padding: 0 10px 0 20px;
+    height: 2.3rem;
+    width: 5.8rem;
+    gap: 1.5rem;
+    color: rgb(0,0,0,.8);
+}
+.mobile-number-prefix p {
+    font-size: 12px;
+}
+.phone-codes-dropdown {
+    position: absolute;
+    top: 2.4rem;
+    left: 0;
+    width: 14rem;
+    max-height: 15rem;
+    overflow-y: auto;
+    background-color: white;
+    border: 1px solid rgb(0,0,0,.2);
+    border-radius: 3px;
+    box-shadow: 1px 2px 8px rgb(0,0,0,.15);
+    z-index: 10;
+}
+.phone-code-option {
+    padding: 7px 12px;
+    font-size: 12.5px;
+    color: rgb(0,0,0,.8);
+    cursor: pointer;
+}
+.phone-code-option:hover {
+    background-color: rgb(6,76,224,.06);
+}
+input[name='mobile-number'] {
+    padding: 0 0 0 6.5rem;
+}
+.credit-card-button-parent {
+    display: grid;
+    gap: 10px;
+}
+.credit-card-button-parent button {
+    appearance: none;
+    outline: none;
+    height: 2.7rem;
+    border: none;
+    width: 100%;
+    letter-spacing: 0.015em;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+}
+.credit-card-button-parent button:nth-child(1) {
+    color: #064ce0;
+    background-color: white;
+    border: 1.5px solid #064ce0;
+    border-radius: 3px;
+}
+.credit-card-button-parent button:nth-child(2) {
+    background-color: #064ce0;
+    color: white;
+    border-radius: 3px;
+}
+.payment-hr {
+    border-top: 1px solid rgb(0,0,0,.1);
+    margin: 1.5rem 0;
+}
+.paypal-info {
+    display: flex;
+    gap: 1.2rem;
+    font-weight: 300;
+    font-size: 15px;
+    border: 1px solid #064ce0;
+    width: 90%;
+    margin: 1.1rem 0 0 auto;
+    box-sizing: border-box;
+    padding: 15px;
+    border-radius: 4px;
+}
+.paypay-method-agreement {
+    width: 80%;
+    margin-right: auto;
+    margin-left: auto;
+    font-size: 13px;
+    margin-top: .8rem;
+}
+.applepay-info {
+    padding: 11px 15px;
+    margin-bottom: 2.2rem;
+}
+.klarna-more {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    font-weight: 300;
+    -webkit-text-stroke: 0.02em;
+    letter-spacing: 0.03em;
+    margin: 0 auto;
+    width: 80%;
+}
+.klarna-more p b {
+    -webkit-text-stroke: 0.05em;
+    letter-spacing: 0.07em;
+}
+.klarna-info {
+    margin-bottom: 1rem;
+}
+.gift-card-top-section {
+    display: flex;
+    align-items: flex-start;
+    gap: 17px;
+}
+.gift-card-top-section-full {
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+}
+.gift-card-middle-text > p:nth-child(2) {
+    color: black;
+}
+.gift-card-middle-text > p {
+    line-height: 20px;
+}
+.gift-card-form button {
+    outline: none;
+    appearance: none;
+    border: none;
+    background: #064ce0;
+    color: white;
+    height: 2.7rem;
+    font-size: 12.5px;
+    width: 9rem;
+    font-weight: 500;
+    -webkit-text-stroke: 0.02em;
+    letter-spacing: 0.03em;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+.gift-card-security-code > div, .gift-card-promo-code > div {
+    display: flex;
+    position: relative;
+    gap: 15px;
+}
+.gift-card-form {
+    margin: 1rem 0 0;
+}
+.input-errors {
+    display: flex;
+    gap: 16px;
+    margin: -3px 0 -1.5rem -7px;
+}
+.input-errors p {
+    font-size: 13px;
+    line-height: 16px;
+    transform: translateY(-5px);
+}
+.card-number-error {
+    margin-bottom: 0rem;
+}
+.mobile-number-error {
+    margin-bottom: .8rem;
+}
+.cvv-message-display {
+    position: absolute;
+    z-index: 99;
+    line-height: 20px;
+    background-color: white;
+    padding: 10px 15px;
+    border: 1px solid rgba(0,0,0,.4);
+    width: 15.5rem;
+    border-radius: 5px;
+    right: 1rem;
+    font-size: 13px;
+    color: rgba(0,0,0,.65);
+    transform: translate(1.2rem, -3.7rem);
+    top: 0;
+
+    /* ✅ Replace box-shadow with this */
+    filter: drop-shadow(0px 1px 3px rgba(0,0,0,.3));
+}
+/* Triangle pointing down */
+.cvv-message-display::after {
+    content: "";
+    position: absolute;
+    bottom: -6px; /* pokes out below the box */
+    right: 15px;  /* align with your question mark icon */
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid white; /* matches background */
+}
+
+/* Triangle border outline */
+.cvv-message-display::before {
+    content: "";
+    position: absolute;
+    bottom: -8px; /* sits behind ::after */
+    right: 14px;
+    width: 0;
+    height: 0;
+    border-left: 9px solid transparent;
+    border-right: 9px solid transparent;
+    border-top: 10px solid rgba(0,0,0,.1); /* matches border color */
+}
+.gift-security-message::after {
+    right: 64px;
+}
+.gift-security-message::before {
+    right: 62.2px;
+}
+.gift-security-message {
+    transform: translate(-2.8rem, -5.15rem);
+    width: 12rem;
+}
+.input-error {
+    border: 1.5px solid #f04a4a !important;
+}
+/* pinned TOTAL bar: geometry comes from CSS vars mirroring the footer's own
+   box, so the handle + TOTAL sit exactly where they dock — never reparented */
+.payment-proceed-footer.total-pinned > div:nth-child(2) > div:nth-child(1),
+.checkout-footer.total-pinned > div:nth-child(2) > div:nth-child(1) {
+    position: fixed;
+    bottom: 0;
+    left: var(--footer-left, 0px);
+    width: var(--footer-width, 100%);
+    background-color: white;
+    box-shadow: -1px -1px 2px rgb(0,0,0,.1);
+    z-index: 40;
+    padding: 20px 23px 20px;
+}
+.payment-proceed-footer.total-pinned > div:nth-child(1),
+.checkout-footer.total-pinned > div:nth-child(1) {
+    position: fixed;
+    left: calc(var(--footer-left, 0px) + 23px);
+    bottom: 55px;
+    z-index: 41;
+}
+.checkout-footer.total-pinned {
+    padding-bottom: 4.2rem; /* keep Proceed-to-Payment clear of the pinned bar */
+}
+.payment-proceed-footer.total-pinned > div:nth-child(2) .payment-hr {
+    position: fixed;
+    bottom: 0px;
+    left: calc(var(--footer-left, 0px) + 23px);
+    width: calc(var(--footer-width, 100%) - 46px);
+    margin: 0;
+    border: none;
+    z-index: 40;
+}
+.credit-card-added {
+    border: 1px solid #064ce0;
+    border-left-width: 3.5px;
+    margin: 10px 0 0;
+}
+.credit-card-added {
+    padding: 12px 15px;
+    display: grid;
+    gap: 2px;
+    font-size: 14px;
+    letter-spacing: 0.015em;
+}
+.credit-card-added p:nth-child(1) {
+    font-weight: 500;
+}
+.credit-card-added p:nth-child(3) {
+    margin: 1rem 0 0;
+    color: #064ce0;
+    text-decoration: underline;
+}
+.credit-card-added-container button {
+    width: 10rem;
+    outline: none;
+    appearance: none;
+    height: 2.7rem;
+    border: 1px solid #064ce0;
+    background-color: white;
+    color: #064ce0;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 4px;
+    font-weight: 500;
+    margin-top: 1rem;
+}
+.iscomplete {
+    border: 1px solid black;
+    width: fit-content;
+    padding: 2.9px 5px 1.9px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: .5px solid rgb(0,0,0,.5);
+    border-left: .8px solid rgb(0,0,0,.4);
+}
+.sticky_header {
+    background-color: #131313;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 22px;
+    letter-spacing: 0.02em;
+    font-weight: 600;
+    font-size: 18px;
+}
+.sticky_header_parent {
+     position: fixed;
+     top: 0;
+    width: 100%;
+    transition: all 500ms ease;
+     z-index: 999;
+}
+.sticky_header  > p:nth-child(1) {
+    transform: rotate(10deg);
+    font-weight: 700;
+    font-size: 28px;
+    font-family: sans-serif;
+}
+.paypal-payment-button, .applepay-payment-button, .klarna-button-call, .venmo-payment-is-active, .payment-cashapp {
+    height: fit-content;
+    display: grid;
+    place-items: center;
+    background-color: #febb32;
+    padding: 2px 0;
+}
+.applepay-payment-button {
+    display: grid;
+    place-items: center;
+}
+.applepay-payment-button, .klarna-button-call, .venmo-payment-is-active, .payment-cashapp {
+    background-color: #0f0f0f;
+    padding: 0;
+}
+.klarna-button-call {
+    background-color: #fe9cc5;
+}
+.venmo-payment-is-active {
+    background-color: #006Ad8;
+    padding: 4px;
+}
+.payment-cashapp {
+    background-color: #0edf13;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    padding: 5px 0;
+}
+.unavailable .payment-list-radio {
+    background-color: rgb(128,128,128,.15) !important;
+    border: 1.5px solid rgb(128,128,128,.5) !important;
+}
+.unavailable .credit-card-p p {
+    color: rgb(128,128,128,.8) !important;
+}
+.unavailable img {
+      filter: grayscale(100%) opacity(50%);
+}
+.unavailable {
+    pointer-events: none;
+}
+
+/* ── Ticketmaster Transitions ─────────────────────────────────────────────── */
+
+/* 1. Skeleton → content: each nav card fades in when it replaces skeleton */
+@keyframes card-reveal {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0);   }
+}
+.checout-first-nav,
+.check-sec-nav,
+.check-third-nav,
+.check-fourth-nav,
+.check-fifth-nav,
+.insurance,
+.showpayment,
+.check-sixth-nav,
+.payment-proceed-footer {
+    animation: card-reveal 220ms ease-out both;
+}
+
+/* 2. Payment screen fade + scale */
+@keyframes payment-enter {
+    from { opacity: 0; transform: scale(0.98); }
+    to   { opacity: 1; transform: scale(1);    }
+}
+.showpayment {
+    animation: payment-enter 300ms ease-out both;
+}
+
+/* 3. TIMESUP — handled in Alert/Alert.css */
+
+/* 4. First-load spinner fades out over 5s */
+@keyframes first-load-exit {
+    0%   { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { opacity: 0; pointer-events: none; }
+}
+.first_loading {
+    animation: first-load-exit 5s ease forwards;
+}

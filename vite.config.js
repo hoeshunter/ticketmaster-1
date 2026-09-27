@@ -7,10 +7,16 @@ export default defineConfig({
   base: '/',
   server: {
     host: true,
-    hmr: {
-      host: '192.168.100.36',
-    },
     proxy: {
+      // Must come before /api — these admin resell routes live on port 3002
+      '/api/admin/resell': {
+        target: 'http://localhost:3002',
+        changeOrigin: true,
+      },
+      '/api/resell': {
+        target: 'http://localhost:3002',
+        changeOrigin: true,
+      },
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true
@@ -28,8 +34,32 @@ export default defineConfig({
   },
   preview: {
     host: true,
-    port: 5173,
+    port: 5175,
     strictPort: true,
+    allowedHosts: [
+      'ticketmasterapp.up.railway.app',
+      'verifiedfanpresale.com',
+      'www.verifiedfanpresale.com',
+      'https://verifiedfanpresale.com'
+    ],
+    proxy: {
+      '/api/admin/resell': {
+        target: 'http://localhost:3002',
+        changeOrigin: true,
+      },
+      '/api/resell': {
+        target: 'http://localhost:3002',
+        changeOrigin: true,
+      },
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true
+      },
+      '/uploads': {
+        target: 'http://localhost:3001',
+        changeOrigin: true
+      }
+    },
   },
   build: {
     rollupOptions: {

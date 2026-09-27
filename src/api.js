@@ -22,6 +22,12 @@ const request = async (path, options = {}) => {
   const { token } = getAdminInfo();
 
   const res = await fetch(`${API_BASE}${path}`, {
+    // Some mobile browsers (and any proxy/tunnel in between) are more eager
+    // to reuse a cached GET response than desktop Chrome is — without this,
+    // a phone that already loaded /events once can keep showing a
+    // since-held event until the cache expires on its own. Every request
+    // here is dynamic, so never let the HTTP cache serve a stale copy.
+    cache: 'no-store',
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -152,11 +158,40 @@ export const setFeeAmount = (amount) => {
   return value;
 };
 
+// ── Country (admin-configured) ─────────────────────────────────────────────
+// Controls which flag shows in the "My Events" header and which banner image
+// is used as the fee-page fallback hero. Stored locally; default: US.
+
+const COUNTRY_KEY = 'tm_country';
+const DEFAULT_COUNTRY = 'US';
+const VALID_COUNTRIES = ['US', 'UK', 'CA'];
+
+export const getCountry = () => {
+  const raw = localStorage.getItem(COUNTRY_KEY);
+  return VALID_COUNTRIES.includes(raw) ? raw : DEFAULT_COUNTRY;
+};
+
+export const setCountry = (country) => {
+  const value = VALID_COUNTRIES.includes(country) ? country : 'US';
+  localStorage.setItem(COUNTRY_KEY, value);
+  window.dispatchEvent(new Event('countryUpdated'));
+  return value;
+};
+
+// ── Held events ───────────────────────────────────────────────────────────────
+// Admins can put a whole event "on hold" from the dashboard (e.g. it's being
+// disputed, reserved, or not ready to show yet). A held event stays in the
+// database untouched — the backend's /events endpoint just excludes it from
+// the public list, so it stops showing up for customers everywhere until
+// released. getVisibleTickets is kept as a defensive filter for any
+// individual ticket that was flagged `held` under the old per-ticket scheme.
+export const getVisibleTickets = (event) => (event?.tickets || []).filter(t => !t?.held);
+
 // ── Email ──────────────────────────────────────────────────────────────────────
 
-export const sendEmail = async ({ to, firstName, lastName, subject, html, ics, event, tickets, accessCode }) => {
+export const sendEmail = async ({ to, firstName, lastName, subject, html, ics, event, tickets, senderName }) => {
   return await request('/send-email', {
     method: 'POST',
-    body: JSON.stringify({ to, firstName, lastName, subject, html, ics, event, tickets, accessCode })
+    body: JSON.stringify({ to, firstName, lastName, subject, html, ics, event, tickets, senderName })
   });
 };
